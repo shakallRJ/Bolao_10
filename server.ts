@@ -1238,18 +1238,26 @@ app.post('/api/pagbank/create-payment', authenticate, async (req: any, res) => {
       logEntry += textError + "\n";
       console.error(`PagBank Non-JSON Response (${pbRes.status}):`, textError);
       
-      // Save to file
+      // Save to Supabase
       try {
-        fs.appendFileSync('pagbank-homologation.log', logEntry);
+        const { data: setting } = await supabase.from('settings').select('value').eq('key', 'pagbank_logs').maybeSingle();
+        let logs = setting?.value || '';
+        logs = logEntry + logs;
+        if (logs.length > 50000) logs = logs.substring(0, 50000);
+        await supabase.from('settings').upsert({ key: 'pagbank_logs', value: logs }, { onConflict: 'key' });
       } catch (e) {
         console.error('Failed to write log:', e);
       }
       throw new Error(`Erro na API do PagBank (${pbRes.status}): ${textError.substring(0, 100)}`);
     }
 
-    // Save to file
+    // Save to Supabase
     try {
-      fs.appendFileSync('pagbank-homologation.log', logEntry);
+      const { data: setting } = await supabase.from('settings').select('value').eq('key', 'pagbank_logs').maybeSingle();
+      let logs = setting?.value || '';
+      logs = logEntry + logs;
+      if (logs.length > 50000) logs = logs.substring(0, 50000);
+      await supabase.from('settings').upsert({ key: 'pagbank_logs', value: logs }, { onConflict: 'key' });
     } catch (e) {
       console.error('Failed to write log:', e);
     }
@@ -1683,13 +1691,20 @@ app.post('/api/wallet/deposit/attach-proof', authenticate, upload.single('proof'
 });
 
 // Admin endpoint to download PagBank homologation logs
-app.get('/api/admin/pagbank-logs', authenticate, isAdmin, (req, res) => {
-  const logPath = path.join(process.cwd(), 'pagbank-homologation.log');
-  
-  if (fs.existsSync(logPath)) {
-    res.download(logPath, 'pagbank-homologation.log');
-  } else {
-    res.status(404).json({ error: 'Nenhum log encontrado. Realize um depósito PIX/Cartão primeiro.' });
+app.get('/api/admin/pagbank-logs', authenticate, isAdmin, async (req, res) => {
+  try {
+    const { data: setting } = await supabase.from('settings').select('value').eq('key', 'pagbank_logs').maybeSingle();
+    
+    if (setting?.value) {
+      res.setHeader('Content-disposition', 'attachment; filename=pagbank-homologation.log');
+      res.setHeader('Content-type', 'text/plain');
+      res.send(setting.value);
+    } else {
+      res.status(404).json({ error: 'Nenhum log encontrado. Realize um depósito PIX/Cartão primeiro.' });
+    }
+  } catch (err) {
+    console.error('Error fetching logs:', err);
+    res.status(500).json({ error: 'Erro ao buscar os logs.' });
   }
 });
 
