@@ -1206,9 +1206,16 @@ app.post('/api/pagbank/create-payment', authenticate, async (req: any, res) => {
     const isSandbox = PAGBANK_API_HOST.includes('sandbox');
     const apiUrl = `${PAGBANK_API_HOST}/orders`;
     
+    // Create log string
+    const now = new Date().toISOString();
+    let logEntry = `\n\n--- [${now}] PAGBANK REQUEST ---\n`;
+    logEntry += `URL: ${apiUrl}\n`;
+    logEntry += `Method: POST\n`;
+    logEntry += `Headers: ${JSON.stringify({ ...headers, Authorization: `Bearer ${maskedToken}` })}\n`;
+    logEntry += `Body:\n${JSON.stringify(orderData, null, 2)}\n`;
+
     console.log(`[PagBank ${isSandbox ? 'SANDBOX' : 'PRODUCTION'}] Enviando requisição para: ${apiUrl}`);
     console.log(`Auth Masked: Bearer ${maskedToken}`);
-    
     console.log(`[PAGBANK_HOMOLOGATION_REQUEST] ${JSON.stringify(orderData, null, 2)}`);
     
     const pbRes = await fetch(apiUrl, {
@@ -1222,11 +1229,29 @@ app.post('/api/pagbank/create-payment', authenticate, async (req: any, res) => {
 
     if (contentType && contentType.includes('application/json')) {
       pbData = await pbRes.json();
+      logEntry += `\n--- [${now}] PAGBANK RESPONSE (Status: ${pbRes.status}) ---\n`;
+      logEntry += JSON.stringify(pbData, null, 2) + "\n";
       console.log(`[PAGBANK_HOMOLOGATION_RESPONSE] (Status: ${pbRes.status}) ${JSON.stringify(pbData, null, 2)}`);
     } else {
       const textError = await pbRes.text();
+      logEntry += `\n--- [${now}] PAGBANK ERROR RESPONSE (Status: ${pbRes.status}) ---\n`;
+      logEntry += textError + "\n";
       console.error(`PagBank Non-JSON Response (${pbRes.status}):`, textError);
+      
+      // Save to file
+      try {
+        require('fs').appendFileSync('pagbank-homologation.log', logEntry);
+      } catch (e) {
+        console.error('Failed to write log:', e);
+      }
       throw new Error(`Erro na API do PagBank (${pbRes.status}): ${textError.substring(0, 100)}`);
+    }
+
+    // Save to file
+    try {
+      require('fs').appendFileSync('pagbank-homologation.log', logEntry);
+    } catch (e) {
+      console.error('Failed to write log:', e);
     }
 
     if (!pbRes.ok) {
@@ -1654,6 +1679,19 @@ app.post('/api/wallet/deposit/attach-proof', authenticate, upload.single('proof'
   } catch (err: any) {
     console.error('Attach proof error:', err);
     res.status(500).json({ error: err.message || 'Erro ao anexar comprovante' });
+  }
+});
+
+// Admin endpoint to download PagBank homologation logs
+app.get('/api/admin/pagbank-logs', authenticate, isAdmin, (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const logPath = path.join(process.cwd(), 'pagbank-homologation.log');
+  
+  if (fs.existsSync(logPath)) {
+    res.download(logPath, 'pagbank-homologation.log');
+  } else {
+    res.status(404).json({ error: 'Nenhum log encontrado. Realize um depósito PIX/Cartão primeiro.' });
   }
 });
 
