@@ -1240,7 +1240,7 @@ app.post('/api/pagbank/create-payment', authenticate, async (req: any, res) => {
       
       // Save to file
       try {
-        require('fs').appendFileSync('pagbank-homologation.log', logEntry);
+        fs.appendFileSync('pagbank-homologation.log', logEntry);
       } catch (e) {
         console.error('Failed to write log:', e);
       }
@@ -1249,7 +1249,7 @@ app.post('/api/pagbank/create-payment', authenticate, async (req: any, res) => {
 
     // Save to file
     try {
-      require('fs').appendFileSync('pagbank-homologation.log', logEntry);
+      fs.appendFileSync('pagbank-homologation.log', logEntry);
     } catch (e) {
       console.error('Failed to write log:', e);
     }
@@ -1684,8 +1684,6 @@ app.post('/api/wallet/deposit/attach-proof', authenticate, upload.single('proof'
 
 // Admin endpoint to download PagBank homologation logs
 app.get('/api/admin/pagbank-logs', authenticate, isAdmin, (req, res) => {
-  const fs = require('fs');
-  const path = require('path');
   const logPath = path.join(process.cwd(), 'pagbank-homologation.log');
   
   if (fs.existsSync(logPath)) {

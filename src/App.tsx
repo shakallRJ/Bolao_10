@@ -2798,6 +2798,32 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDownloadPagBankLogs = async () => {
+    try {
+      const res = await fetch('/api/admin/pagbank-logs', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData.error || 'Erro ao baixar o log. Talvez ele ainda não exista.');
+        return;
+      }
+      
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = 'pagbank-homologation.log';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Error downloading log', e);
+      alert('Erro ao baixar o log');
+    }
+  };
+
   const fetchRoundHistory = async () => {
     const res = await fetch('/api/rounds');
     const data = await res.json();
@@ -3567,14 +3593,13 @@ const AdminDashboard = () => {
                   Validação de Depósitos
                 </h3>
                 <div className="flex items-center gap-3">
-                  <a 
-                    href="/api/admin/pagbank-logs" 
-                    download
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors font-semibold text-sm"
+                  <button 
+                    onClick={handleDownloadPagBankLogs}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors font-semibold text-sm cursor-pointer border-none outline-none"
                   >
                     <Download className="w-4 h-4" />
                     Baixar Log PagBank
-                  </a>
+                  </button>
                   <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">
                     {pendingDeposits.length} Pendentes
                   </span>
