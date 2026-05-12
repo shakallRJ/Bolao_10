@@ -1155,7 +1155,7 @@ app.post('/api/pagbank/create-payment', authenticate, async (req: any, res) => {
     const orderData: any = {
       reference_id: `DEP-${deposit.id}`,
       customer: {
-        name: req.user.name,
+        name: (req.user.name || '').replace(/[!@#$%¨*()\"”\\|{}[\]<>;]/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 50) || 'Usuario Sem Nome',
         email: req.user.email,
         tax_id: '12345678909',
         phones: [{ country: '55', area: '21', number: '999999999', type: 'MOBILE' }]
