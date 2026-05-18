@@ -5775,7 +5775,7 @@ export default function App() {
     <div className="min-h-screen flex flex-col">
       <Toaster position="top-right" richColors />
       <Navbar onNavigate={setPage} currentPage={page} />
-      <PromoPopup onNavigate={setPage} />
+      {/* <PromoPopup onNavigate={setPage} /> */}
       <main className="flex-grow">
         <AnimatePresence mode="wait">
           <motion.div
