@@ -579,8 +579,16 @@ app.get('/api/rounds/:id', async (req, res) => {
 });
 
 // Utility to generate a deterministic lucky number if the table is missing
-function getDeterministicLuckyNumber(predictionId: number): string {
-  const seed = predictionId * 1234.567;
+function getDeterministicLuckyNumber(predictionId: number | string): string {
+  let seed = 0;
+  if (typeof predictionId === 'string') {
+    for (let i = 0; i < predictionId.length; i++) {
+        seed = ((seed << 5) - seed) + predictionId.charCodeAt(i);
+        seed |= 0; 
+    }
+  } else {
+    seed = predictionId * 1234.567;
+  }
   const num = (Math.abs(Math.sin(seed) * 899999) + 100000);
   return Math.floor(num).toString();
 }
@@ -2361,35 +2369,54 @@ app.get('/api/me/lucky-numbers', authenticate, async (req: any, res) => {
     const { data, error } = await supabase
       .from('lucky_numbers')
       .select('*')
-      .eq('user_id', req.user.id)
-      .order('created_at', { ascending: false });
+      .eq('user_id', req.user.id);
 
-    if (error) {
-      if (error.code === 'PGRST205') {
-        console.warn('Lucky numbers table missing, returning fallback from predictions');
-        const { data: preds, error: predErr } = await supabase
-          .from('predictions')
-          .select('id, created_at')
-          .eq('user_id', req.user.id)
-          .order('created_at', { ascending: false });
+    let luckyList = data || [];
 
-        if (predErr) throw predErr;
+    if (error && error.code === 'PGRST205') {
+      console.warn('Lucky numbers table missing, returning fallback from predictions');
+      const { data: preds, error: predErr } = await supabase
+        .from('predictions')
+        .select('id, created_at')
+        .eq('user_id', req.user.id);
 
+      if (!predErr && preds) {
         const CAMPAIGN_START_DATE = new Date('2026-04-23T20:00:00Z');
-        const fallbacks = preds?.filter((p: any) => new Date(p.created_at) >= CAMPAIGN_START_DATE).map((p: any) => ({
+        luckyList = preds.filter((p: any) => new Date(p.created_at) >= CAMPAIGN_START_DATE).map((p: any) => ({
           id: `fallback-${p.id}`,
           user_id: req.user.id,
           prediction_id: p.id,
           number: getDeterministicLuckyNumber(p.id),
           created_at: p.created_at
         }));
-
-        return res.json(fallbacks || []);
       }
+    } else if (error) {
       console.error('Fetch my lucky numbers error detail:', JSON.stringify(error));
       throw error;
     }
-    res.json(data || []);
+
+    // Fetch Copa Predictions
+    const { data: copaPreds, error: copaErr } = await supabase
+      .from('copa_predictions')
+      .select('id, created_at')
+      .eq('user_id', req.user.id);
+
+    if (!copaErr && copaPreds) {
+      const copaLucky = copaPreds.map((p: any) => ({
+        id: `copa-${p.id}`,
+        user_id: req.user.id,
+        prediction_id: p.id,
+        number: getDeterministicLuckyNumber(p.id),
+        created_at: p.created_at,
+        source: 'Copa do Mundo'
+      }));
+      luckyList = [...luckyList, ...copaLucky];
+    }
+
+    // Sort descending by created_at
+    luckyList.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    res.json(luckyList);
   } catch (err: any) {
     console.error('Fetch my lucky numbers error:', err.message || err);
     res.status(500).json({ error: 'Erro ao buscar números da sorte' });
@@ -2398,51 +2425,70 @@ app.get('/api/me/lucky-numbers', authenticate, async (req: any, res) => {
 
 app.get('/api/admin/lucky-numbers', authenticate, isAdmin, async (req: any, res) => {
   try {
+    let allLuckyList: any[] = [];
+    
     // Try to get from table first
-    const { data, error } = await supabase
+    const { data: traditionalData, error: traditionalErr } = await supabase
       .from('lucky_numbers')
-      .select('*, users!lucky_numbers_user_id_fkey(name, email, nickname)')
-      .order('created_at', { ascending: false });
+      .select('*, users!lucky_numbers_user_id_fkey(name, email, nickname)');
 
-    if (!error) {
-      const formatted = data?.map((ln: any) => ({
+    if (!traditionalErr && traditionalData) {
+      allLuckyList = traditionalData.map((ln: any) => ({
         ...ln,
         user_name: ln.users?.name || 'N/A',
         user_nickname: ln.users?.nickname || 'N/A',
         user_email: ln.users?.email || 'N/A'
       }));
-      return res.json(formatted || []);
+    } else if (traditionalErr && traditionalErr.code === 'PGRST205') {
+      console.warn('Lucky numbers table missing, generating from predictions');
+      const { data: allPredictions, error: allPredError } = await supabase
+        .from('predictions')
+        .select('*, users!predictions_user_id_fkey(name, email, nickname)');
+
+      if (!allPredError && allPredictions) {
+        const CAMPAIGN_START_DATE = new Date('2026-04-23T20:00:00Z');
+        allLuckyList = allPredictions.filter((p: any) => new Date(p.created_at) >= CAMPAIGN_START_DATE).map((p: any) => ({
+          id: `fallback-${p.id}`,
+          user_id: p.user_id,
+          prediction_id: p.id,
+          number: getDeterministicLuckyNumber(p.id),
+          created_at: p.created_at,
+          users: p.users,
+          user_name: p.users?.name || 'N/A',
+          user_nickname: p.users?.nickname || 'N/A',
+          user_email: p.users?.email || 'N/A'
+        }));
+      }
+    } else if (traditionalErr) {
+      console.error('Fetch admin lucky numbers error detail:', JSON.stringify(traditionalErr));
+      throw traditionalErr;
     }
 
-    if (error.code !== 'PGRST205') {
-      console.error('Fetch admin lucky numbers error detail:', JSON.stringify(error));
-      throw error;
+    // Fetch Copa Predictions
+    const { data: copaPreds, error: copaErr } = await supabase
+      .from('copa_predictions')
+      .select('*, users(name, nickname, email)');
+
+    if (!copaErr && copaPreds) {
+      const copaLucky = copaPreds.map((p: any) => ({
+        id: `copa-${p.id}`,
+        user_id: p.user_id,
+        prediction_id: p.id,
+        number: getDeterministicLuckyNumber(p.id),
+        created_at: p.created_at,
+        source: 'Copa do Mundo',
+        users: p.users,
+        user_name: p.users?.name || 'N/A',
+        user_nickname: p.users?.nickname || 'N/A',
+        user_email: p.users?.email || 'N/A'
+      }));
+      allLuckyList = [...allLuckyList, ...copaLucky];
     }
 
-    // Fallback: fetch all predictions and generate deterministic numbers
-    console.warn('Lucky numbers table missing, generating from predictions');
-    const { data: allPredictions, error: allPredError } = await supabase
-      .from('predictions')
-      .select('*, users!predictions_user_id_fkey(name, email, nickname)')
-      .order('created_at', { ascending: false });
+    // Sort descending by created_at
+    allLuckyList.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-    if (allPredError) throw allPredError;
-
-    const CAMPAIGN_START_DATE = new Date('2026-04-23T20:00:00Z');
-
-    const fallbackFormatted = allPredictions?.filter((p: any) => new Date(p.created_at) >= CAMPAIGN_START_DATE).map((p: any) => ({
-      id: `fallback-${p.id}`,
-      user_id: p.user_id,
-      prediction_id: p.id,
-      number: getDeterministicLuckyNumber(p.id),
-      created_at: p.created_at,
-      users: p.users,
-      user_name: p.users?.name || 'N/A',
-      user_nickname: p.users?.nickname || 'N/A',
-      user_email: p.users?.email || 'N/A'
-    }));
-
-    res.json(fallbackFormatted || []);
+    return res.json(allLuckyList);
   } catch (err: any) {
     console.error('Fetch all lucky numbers error:', err.message || err);
     res.status(500).json({ error: 'Erro ao buscar todos os números da sorte' });
@@ -3144,6 +3190,343 @@ app.get('/api/admin/referrals', authenticate, isAdmin, async (req: any, res) => 
     res.status(500).json({ error: 'Erro ao buscar indicações' });
   }
 });
+
+// --- COPA 2026 API ROUTES ---
+
+app.get('/api/copa/matches', authenticate, async (req, res) => {
+  try {
+    const { data: matches, error } = await supabase
+      .from('copa_matches')
+      .select('*')
+      .order('match_date', { ascending: true });
+    
+    if (error) throw error;
+    res.json(matches || []);
+  } catch (err: any) {
+    res.status(500).json({ error: 'Erro ao buscar jogos da Copa' });
+  }
+});
+
+app.post('/api/admin/copa/matches', authenticate, isAdmin, async (req, res) => {
+  try {
+    const { matches } = req.body;
+    const { error } = await supabase.from('copa_matches').upsert(matches);
+    if (error) {
+      console.error('Error upserting matches:', error);
+      throw error;
+    }
+    res.json({ success: true });
+  } catch (err: any) {
+    console.error('API Error /api/admin/copa/matches:', err);
+    res.status(500).json({ error: err.message || 'Erro ao salvar jogos' });
+  }
+});
+
+// Get all prediction cards for the current user
+app.get('/api/copa/my-predictions', authenticate, async (req: any, res) => {
+  try {
+    // Get user's cartelas
+    const { data: predictions, error } = await supabase
+      .from('copa_predictions')
+      .select('*, copa_prediction_items(*)')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    res.json(predictions || []);
+  } catch (err: any) {
+    res.status(500).json({ error: 'Erro ao buscar suas cartelas da Copa' });
+  }
+});
+
+app.get('/api/copa/transparency', authenticate, async (req: any, res) => {
+  try {
+    const { count } = await supabase
+      .from('copa_predictions')
+      .select('*', { count: 'exact', head: true });
+    
+    const { data: userPreds } = await supabase
+      .from('copa_predictions')
+      .select('id')
+      .eq('user_id', req.user.id)
+      .limit(1);
+
+    const hasCartela = userPreds && userPreds.length > 0;
+
+    let cartelas = [];
+    if (hasCartela) {
+       const { data: allCartelas } = await supabase
+         .from('copa_predictions')
+         .select('id, created_at, users(name, nickname), copa_prediction_items(match_id, home_score, away_score)')
+         .order('created_at', { ascending: false });
+       cartelas = allCartelas || [];
+    }
+
+    res.json({
+      totalCartelas: count || 0,
+      hasCartela,
+      cartelas
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Erro ao carregar transparência' });
+  }
+});
+
+// Update or create a prediction cartela
+app.post('/api/copa/predictions', authenticate, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    const { predictionId, items } = req.body; // items is an array of { match_id, home_score, away_score }
+    
+    // Validation: prevent updating finished/started matches
+    const { data: bMatches } = await supabase.from('copa_matches').select('id, status');
+    const lockedMatchIds = (bMatches || []).filter(m => m.status !== 'pending').map(m => m.id);
+
+    // 1. Ensure cartela exists or create one
+    let isNewCartela = false;
+    let targetPredId = predictionId;
+    if (!targetPredId) {
+      isNewCartela = true;
+      // It's a new cartela, we must charge R$ 10,00 from the user's wallet
+      const CARTELA_PRICE = 10;
+      
+      const { data: wallet, error: walletErr } = await supabase
+        .from('wallets')
+        .select('id, balance')
+        .eq('user_id', userId)
+        .single();
+        
+      if (walletErr || !wallet) {
+        return res.status(400).json({ error: 'Carteira não encontrada.' });
+      }
+      
+      if (wallet.balance < CARTELA_PRICE) {
+        return res.status(400).json({ error: 'Saldo insuficiente. Recarregue sua carteira (R$ 10,00) para criar uma nova cartela da Copa.' });
+      }
+      
+      // Deduct balance
+      const newBalance = wallet.balance - CARTELA_PRICE;
+      const { error: updateWalletErr } = await supabase
+        .from('wallets')
+        .update({ balance: newBalance })
+        .eq('id', wallet.id);
+        
+      if (updateWalletErr) {
+        return res.status(500).json({ error: 'Erro ao atualizar saldo da carteira.' });
+      }
+      
+      // Record transaction
+      await supabase.from('wallet_transactions').insert({
+        wallet_id: wallet.id,
+        amount: -CARTELA_PRICE,
+        type: 'bet_deduction',
+        balance_after: newBalance,
+        description: `Pagamento de cartela da Copa 2026`
+      });
+
+      // Create a new cartela (approved since it's paid immediately)
+      const { data: newPred, error: createErr } = await supabase
+        .from('copa_predictions')
+        .insert({ user_id: userId, status: 'approved' }) 
+        .select('id').single();
+      
+      if (createErr || !newPred) throw createErr || new Error('Não foi possível criar a cartela');
+      targetPredId = newPred.id;
+    }
+
+    // 2. Filter items to avoid locked matches
+    const validItems = items.filter((item: any) => !lockedMatchIds.includes(item.match_id));
+
+    // 3. Upsert items
+    for (const item of validItems) {
+      await supabase.from('copa_prediction_items').upsert({
+        copa_prediction_id: targetPredId,
+        match_id: item.match_id,
+        home_score: item.home_score,
+        away_score: item.away_score
+      }, { onConflict: 'copa_prediction_id,match_id' });
+    }
+
+    const responsePayload: any = { success: true, predictionId: targetPredId };
+    if (isNewCartela) {
+      responsePayload.luckyNumber = getDeterministicLuckyNumber(targetPredId);
+    }
+    res.json(responsePayload);
+  } catch (err: any) {
+    res.status(500).json({ error: 'Erro ao salvar palpites', detail: err.message });
+  }
+});
+
+app.get('/api/copa/ranking', authenticate, async (req, res) => {
+  try {
+    // We can pull the ranking from settings or calculate on the fly
+    // Since calculating on the fly is heavy, we'll keep the ranking in settings or a dedicated materialized view.
+    // Let's keep it in settings for now as caching mechanism.
+    const { data: setting } = await supabase.from('settings').select('value').eq('key', 'copa_ranking').maybeSingle();
+    const data = setting?.value ? JSON.parse(setting.value) : [];
+    res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: 'Erro ao buscar ranking' });
+  }
+});
+
+app.post('/api/admin/copa/recalculate', authenticate, isAdmin, async (req: any, res) => {
+  try {
+    // 1. Get matches
+    const { data: finishedMatches } = await supabase.from('copa_matches').select('*').eq('status', 'finished');
+    if (!finishedMatches) return res.json({ success: true, ranking: [] });
+    
+    // 2. Get all predictions users
+    const { data: allUsers } = await supabase.from('users').select('id, name, nickname');
+    
+    // 3. Score all predictions and summarize by user or by cartela?
+    // Ranking is usually by User (their best cartela) or by Cartela?
+    // The requirement says "um usuário consiga ter vários palpites assim como o tradicional", 
+    // In traditional, each ticket (prediction) competes. So let's rank the *tickets* (Cartelas) 
+    const { data: allPredictions } = await supabase
+      .from('copa_predictions')
+      .select('*, users(name, nickname), copa_prediction_items(*)');
+
+    let ranking = [];
+    
+    for (const pred of (allPredictions || [])) {
+      let totalPoints = 0;
+      let exactHits = 0;
+      let totalHits = 0;
+      
+      for (const item of (pred.copa_prediction_items || [])) {
+         const match = finishedMatches.find((m: any) => m.id === item.match_id);
+         if (!match) continue;
+         
+         const pts = calcCopaPoints(item.home_score, item.away_score, match.home_score, match.away_score);
+         
+         // Update the item points
+         await supabase.from('copa_prediction_items').update({ points: pts }).eq('id', item.id);
+         
+         totalPoints += pts;
+         if (pts > 0) totalHits++;
+         if (pts === 10) exactHits++;
+      }
+      
+      // Update cartela total
+      await supabase.from('copa_predictions').update({ 
+        total_points: totalPoints, 
+        exact_hits: exactHits, 
+        total_hits: totalHits 
+      }).eq('id', pred.id);
+      
+      ranking.push({
+        predictionId: pred.id,
+        userId: pred.user_id,
+        nickname: pred.users?.nickname || pred.users?.name,
+        totalPoints,
+        totalHits,
+        exactHits,
+        trend: 'same'
+      });
+    }
+    
+    // Sort ranking by cartela value
+    ranking.sort((a, b) => b.totalPoints - a.totalPoints || b.exactHits - a.exactHits || b.totalHits - a.totalHits);
+    
+    // Add position
+    ranking.forEach((r, i) => r.position = i + 1);
+    
+    // Save to cache
+    await supabase.from('settings').upsert({ key: 'copa_ranking', value: JSON.stringify(ranking) }, { onConflict: 'key' });
+    res.json({ success: true, ranking });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ error: err.message || 'Erro ao recalcular ranking' });
+  }
+});
+
+app.post('/api/admin/copa/finish', authenticate, isAdmin, async (req: any, res) => {
+  try {
+    const { distributePrizes } = req.body;
+    
+    // Check if there are any predictions to reward
+    const { data: allPredictions } = await supabase.from('copa_predictions').select('*, users(name, nickname)');
+    if (!allPredictions || allPredictions.length === 0) {
+       return res.status(400).json({ error: 'Nenhum palpite registrado.' });
+    }
+
+    // Get the current ranking
+    const { data: setting } = await supabase.from('settings').select('*').eq('key', 'copa_ranking').single();
+    if (!setting) return res.status(400).json({ error: 'Ranking não computado. Recalcule primeiro.' });
+    
+    const ranking = JSON.parse(setting.value || '[]');
+    if (!ranking || ranking.length === 0) return res.status(400).json({ error: 'Ranking vazio.' });
+
+    const totalCollected = allPredictions.length * 10;
+    const firstPrize = totalCollected * 0.50;
+    const secondPrize = totalCollected * 0.20;
+    const thirdPrize = totalCollected * 0.10;
+    const adminFee = totalCollected * 0.20;
+
+    let totalPaid = 0;
+
+    if (distributePrizes) {
+       const pos1 = ranking.filter((r: any) => r.position === 1);
+       const pos2 = ranking.filter((r: any) => r.position === 2);
+       const pos3 = ranking.filter((r: any) => r.position === 3);
+
+       const payout = async (winners: any[], totalPrizeForPos: number, desc: string) => {
+          if (!winners || winners.length === 0 || totalPrizeForPos <= 0) return;
+          const split = Number((totalPrizeForPos / winners.length).toFixed(2));
+          
+          for (const w of winners) {
+             const { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', w.userId).single();
+             if (wallet) {
+                await supabase.from('wallets').update({ 
+                  balance: wallet.balance + split, 
+                  updated_at: new Date().toISOString() 
+                }).eq('id', wallet.id);
+
+                await supabase.from('wallet_transactions').insert([{
+                  wallet_id: wallet.id,
+                  amount: split,
+                  type: 'prize_credit',
+                  description: desc,
+                  status: 'completed',
+                  reference_id: w.predictionId
+                }]);
+             }
+             totalPaid += split;
+          }
+       };
+
+       await payout(pos1, firstPrize, 'Prêmio Bolão da Copa (1º Colocado)');
+       await payout(pos2, secondPrize, 'Prêmio Bolão da Copa (2º Colocado)');
+       await payout(pos3, thirdPrize, 'Prêmio Bolão da Copa (3º Colocado)');
+       
+       // Record that tournament is finished
+       await supabase.from('settings').upsert({ key: 'copa_finished', value: 'true' }, { onConflict: 'key' });
+    }
+
+    res.json({ success: true, message: 'Prêmios distribuídos com sucesso!', totalPaid, totalCollected });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao finalizar campeonato' });
+  }
+});
+
+function calcCopaPoints(pHome: number, pAway: number, mHome: number, mAway: number) {
+  if (pHome === mHome && pAway === mAway) return 10;
+  
+  const pWinner = pHome > pAway ? 'home' : (pAway > pHome ? 'away' : 'draw');
+  const mWinner = mHome > mAway ? 'home' : (mAway > mHome ? 'away' : 'draw');
+  
+  if (pWinner === mWinner) {
+    if (pHome === mHome || pAway === mAway) return 7; // Winner + partial
+    if (pWinner === 'draw') return 3; // Draw without exact score
+    return 5; // Valid Winner only
+  }
+  
+  if (pHome === mHome || pAway === mAway) return 2; // Lost but guessed one score exactly
+  
+  return 0; // Completely wrong
+}
 
 // Handle 404 for API routes to prevent falling through to SPA fallback
 app.all('/api/*', (req, res) => {

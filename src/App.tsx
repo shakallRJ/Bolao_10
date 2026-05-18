@@ -60,6 +60,7 @@ import { DepositModal } from './components/DepositModal';
 import { PagBankCheckout } from './components/PagBankCheckout';
 import { PromoPopup } from './components/PromoPopup';
 import { Toaster, toast } from 'sonner';
+import { CopaDashboard } from './pages/CopaDashboard';
 
 // --- HELPERS ---
 
@@ -5614,7 +5615,11 @@ const PrivacyPage = () => {
 };
 
 export default function App() {
-  const [page, setPage] = useState('landing');
+  const [page, setPage] = useState(() => {
+    const p = window.location.pathname.replace(/^\/+/, '');
+    if (p === 'copa2026') return 'copa2026';
+    return p || 'landing';
+  });
   const { isAuthenticated, isAdmin, token } = useAuth();
 
   // Push Notifications Setup
@@ -5684,14 +5689,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated && page === 'landing') setPage('dashboard');
-  }, [isAuthenticated]);
+    if (isAuthenticated && (page === 'landing' || page === '')) setPage('dashboard');
+  }, [isAuthenticated, page]);
 
   const renderPage = () => {
     switch (page) {
       case 'landing': return <LandingPage onNavigate={setPage} />;
       case 'login': return <LoginPage onNavigate={setPage} />;
       case 'dashboard': return <Dashboard onNavigate={setPage} />;
+      case 'copa2026': return <CopaDashboard onNavigate={setPage} />;
       case 'wallet': return <WalletPage onNavigate={setPage} />;
       case 'referral': return <ReferralPage />;
       case 'profile': return <ProfilePage onNavigate={setPage} />;

@@ -1,2 +1,4 @@
+import dotenv from 'dotenv';
+dotenv.config();
 
-console.log('Env keys:', Object.keys(process.env).filter(k => k.includes('DB') || k.includes('URL') || k.includes('KEY') || k.includes('SECRET')));
+console.log(Object.keys(process.env).filter(k => k.includes('DB') || k.includes('DATA')));
