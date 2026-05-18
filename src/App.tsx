@@ -4555,7 +4555,17 @@ const TransparencyPage = () => {
 
   useEffect(() => {
     fetchData();
-  }, [selectedRoundId, token, rounds, isAdmin]);
+    
+    // Auto refresh every 30 seconds if round is active
+    let interval: any;
+    if (round?.status === 'in_progress' || round?.status === 'closed') {
+      interval = setInterval(fetchData, 30000);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [selectedRoundId, token, rounds, isAdmin, round?.status]);
 
   const handleDeletePrediction = async (id: number) => {
     if (!confirm('Tem certeza que deseja EXCLUIR este palpite? Esta ação é irreversível.')) return;
@@ -4710,48 +4720,97 @@ const TransparencyPage = () => {
             </div>
           )}
 
+          {/* Ranking Info */}
+          <div className="mb-6 flex flex-wrap gap-4 items-center">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
+              <span className="text-xs font-bold text-gray-600">Líder(es)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-slate-400"></div>
+              <span className="text-xs font-bold text-gray-600">Ainda na Disputa</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-red-500"></div>
+              <span className="text-xs font-bold text-gray-600">Sem Chances</span>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {predictions.map((p) => (
-              <div key={p.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                <div className="flex justify-between items-center mb-4">
-                  <div className="flex flex-col">
-                    <h4 className="font-bold text-primary leading-tight">{p.user_name}</h4>
-                    <span className="text-[10px] text-gray-400">@{p.user_nickname}</span>
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
-                    {round?.status === 'finished' ? (
-                      <span className="bg-secondary text-white px-3 py-1 rounded-full text-xs font-bold">
-                        {p.score !== null && p.score !== undefined ? `${p.score} Pontos` : '0 Pontos'}
-                      </span>
-                    ) : (
-                      <span className="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">
-                        Em andamento
-                      </span>
-                    )}
-                    {isAdmin && (
-                      <button
-                        onClick={() => handleDeletePrediction(p.id)}
-                        disabled={deletingId === p.id}
-                        className="text-[10px] text-red-500 hover:text-red-700 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                        {deletingId === p.id ? 'Excluindo...' : 'Excluir'}
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <div className="grid grid-cols-5 gap-2">
-                  {(p.items || []).map((item: any, i: number) => (
-                    <div key={i} className="flex flex-col items-center">
-                      <span className="text-[10px] text-gray-400 mb-1">J{i+1}</span>
-                      <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-xs font-bold text-primary border border-gray-100">
-                        {item.guess}
+            {(() => {
+              const sorted = [...predictions].sort((a, b) => (b.score || 0) - (a.score || 0));
+              const maxScore = sorted[0]?.score || 0;
+              const totalGames = round?.games?.length || 10;
+              const finishedGames = round?.games?.filter((g: any) => g.result).length || 0;
+              const remainingGames = totalGames - finishedGames;
+
+              return sorted.map((p, index) => {
+                const scoreVal = p.score || 0;
+                let badgeColor = 'bg-gray-100 text-gray-500';
+                
+                if (round?.status !== 'open') {
+                  if (scoreVal === maxScore && maxScore > 0) {
+                    badgeColor = 'bg-yellow-500 text-white shadow-lg shadow-yellow-200 ring-2 ring-yellow-200';
+                  } else if (scoreVal + remainingGames >= maxScore) {
+                    badgeColor = 'bg-slate-400 text-white';
+                  } else {
+                    badgeColor = 'bg-red-500 text-white';
+                  }
+                }
+
+                return (
+                  <div key={p.id} className={`bg-white p-6 rounded-3xl border border-gray-100 shadow-sm transition-all hover:shadow-md ${scoreVal === maxScore && maxScore > 0 ? 'ring-2 ring-yellow-400 ring-offset-2' : ''}`}>
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary bg-opacity-10 flex items-center justify-center font-bold text-primary text-xs shrink-0">
+                          {index + 1}º
+                        </div>
+                        <div className="flex flex-col">
+                          <h4 className="font-bold text-primary leading-tight text-sm truncate max-w-[120px]">{p.user_name}</h4>
+                          <span className="text-[10px] text-gray-400 italic">@{p.user_nickname}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className={`${badgeColor} px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5`}>
+                          {scoreVal === maxScore && maxScore > 0 && <Trophy className="w-3 h-3" />}
+                          {scoreVal} Pontos
+                        </span>
+                        {isAdmin && (
+                          <button
+                            onClick={() => handleDeletePrediction(p.id)}
+                            disabled={deletingId === p.id}
+                            className="text-[9px] text-red-500 hover:text-red-700 font-bold uppercase tracking-widest flex items-center gap-1 transition-colors mt-1"
+                          >
+                            <Trash2 className="w-2.5 h-2.5" />
+                            {deletingId === p.id ? '...' : 'Excluir'}
+                          </button>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+                    <div className="grid grid-cols-5 gap-2 bg-gray-50/50 p-3 rounded-2xl border border-gray-100/50">
+                      {(p.items || []).map((item: any, i: number) => {
+                        const game = round?.games?.[i];
+                        const isCorrect = game?.result && game.result === item.guess;
+                        const isIncorrect = game?.result && game.result !== item.guess;
+
+                        return (
+                          <div key={i} className="flex flex-col items-center">
+                            <span className="text-[9px] font-bold text-gray-300 mb-1">J{i+1}</span>
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black border transition-all
+                              ${isCorrect ? 'bg-green-500 text-white border-green-400 shadow-sm' : 
+                                isIncorrect ? 'bg-red-50 text-red-300 border-red-100' : 
+                                'bg-white text-primary border-gray-200'}`}
+                            >
+                              {item.guess}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              });
+            })()}
             {predictions.length === 0 && (
               <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-200">
                 <ShieldCheck className="w-12 h-12 text-gray-300 mx-auto mb-4" />
