@@ -2605,6 +2605,7 @@ const AdminDashboard = () => {
   const { token } = useAuth();
   const [pendingDeposits, setPendingDeposits] = useState<any[]>([]);
   const [pendingWithdrawals, setPendingWithdrawals] = useState<any[]>([]);
+  const [withdrawalHistory, setWithdrawalHistory] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [userWallets, setUserWallets] = useState<any[]>([]);
   const [financials, setFinancials] = useState<any[]>([]);
@@ -2656,6 +2657,16 @@ const AdminDashboard = () => {
     if (res.ok) {
       const data = await res.json();
       setPendingWithdrawals(data);
+    }
+  };
+
+  const fetchWithdrawalHistory = async () => {
+    const res = await fetch('/api/admin/withdrawal-history', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setWithdrawalHistory(data);
     }
   };
 
@@ -2864,7 +2875,10 @@ const AdminDashboard = () => {
   useEffect(() => { 
     setLoading(true);
     const promises = [];
-    if (activeTab === 'withdrawals') promises.push(fetchPendingWithdrawals());
+    if (activeTab === 'withdrawals') {
+      promises.push(fetchPendingWithdrawals());
+      promises.push(fetchWithdrawalHistory());
+    }
     if (activeTab === 'users' || activeTab === 'messages') promises.push(fetchUsers());
     if (activeTab === 'notifications') promises.push(fetchNotifications());
     if (activeTab === 'messages') promises.push(fetchSentNotifications());
@@ -2920,6 +2934,7 @@ const AdminDashboard = () => {
       if (res.ok) {
         toast.success(`Saque ${action === 'approve' ? 'aprovado' : 'rejeitado'} com sucesso!`);
         fetchPendingWithdrawals();
+        fetchWithdrawalHistory();
       } else {
         const data = await res.json();
         toast.error(data.error || 'Erro ao processar saque');
@@ -3090,6 +3105,54 @@ const AdminDashboard = () => {
                     </td>
                   </tr>
                 )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'withdrawals' && withdrawalHistory && withdrawalHistory.length > 0 && (
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mt-8">
+          <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+            <h3 className="font-bold text-primary">Histórico de Saques</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                  <th className="px-6 py-4">Usuário</th>
+                  <th className="px-6 py-4">Data Solicitação</th>
+                  <th className="px-6 py-4">Valor</th>
+                  <th className="px-6 py-4">Chave PIX</th>
+                  <th className="px-6 py-4">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {withdrawalHistory.map((w) => (
+                  <tr key={w.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <p className="font-bold text-primary">{w.user_name} ({w.user_nickname})</p>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {new Date(w.created_at).toLocaleString('pt-BR')}
+                    </td>
+                    <td className="px-6 py-4 font-bold text-gray-900">
+                      R$ {Math.abs(w.amount).toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 font-mono text-sm text-gray-600">
+                      {w.pix_key || '-'}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        w.status === 'Aprovado' ? 'bg-green-100 text-green-700' :
+                        w.status === 'Rejeitado' ? 'bg-red-100 text-red-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {w.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

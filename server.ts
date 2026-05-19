@@ -2731,6 +2731,52 @@ app.get('/api/admin/pending-withdrawals', authenticate, isAdmin, async (req, res
   }
 });
 
+app.get('/api/admin/withdrawal-history', authenticate, isAdmin, async (req, res) => {
+  try {
+    const { data: withdrawals } = await supabase
+      .from('wallet_transactions')
+      .select(`
+        *,
+        wallets (
+          user_id,
+          users (name, email, nickname, phone)
+        )
+      `)
+      .eq('type', 'withdrawal')
+      .not('reference_id', 'like', 'pending_%')
+      .order('created_at', { ascending: false })
+      .limit(50); // Get the last 50 processed withdrawals
+
+    const formatted = withdrawals?.map((w: any) => {
+      let status = 'Desconhecido';
+      let pix_key = '';
+      if (w.reference_id?.startsWith('completed_')) {
+        status = 'Aprovado';
+        pix_key = w.reference_id.replace('completed_', '');
+      } else if (w.reference_id?.startsWith('rejected_')) {
+        status = 'Rejeitado';
+        pix_key = w.reference_id.replace('rejected_', '');
+      }
+      return {
+        id: w.id,
+        user_name: w.wallets?.users?.name,
+        user_email: w.wallets?.users?.email,
+        user_nickname: w.wallets?.users?.nickname,
+        user_phone: w.wallets?.users?.phone,
+        amount: Math.abs(w.amount),
+        created_at: w.created_at,
+        pix_key,
+        status
+      };
+    }) || [];
+
+    res.json(formatted);
+  } catch (err) {
+    console.error('Fetch withdrawal history error:', err);
+    res.status(500).json({ error: 'Erro ao buscar histórico de saques' });
+  }
+});
+
 app.post('/api/admin/withdrawals/:id/approve', authenticate, isAdmin, async (req: any, res) => {
   try {
     // 1. Get transaction
