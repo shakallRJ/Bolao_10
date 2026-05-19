@@ -4720,6 +4720,38 @@ const TransparencyPage = () => {
             </div>
           )}
 
+          {/* Lista de Jogos da Rodada */}
+          {round && round.games && round.games.length > 0 && (
+            <div className="mb-8 bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-white uppercase bg-[#002B5B]">
+                    <tr>
+                      <th className="px-6 py-3 font-bold border-r border-[#001f42]">#</th>
+                      <th className="px-6 py-3 font-bold border-r border-[#001f42]">Confronto</th>
+                      <th className="px-6 py-3 font-bold">Resultado</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {round.games.map((g: any, i: number) => (
+                      <tr key={g.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-3 whitespace-nowrap text-gray-500">
+                          Jogo {i + 1}
+                        </td>
+                        <td className="px-6 py-3 uppercase text-gray-700">
+                          {g.home_team} <span className="text-gray-400 font-normal mx-1">vs</span> {g.away_team}
+                        </td>
+                        <td className="px-6 py-3 font-bold text-gray-900">
+                          {g.result || '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {/* Ranking Info */}
           <div className="mb-6 flex flex-wrap gap-4 items-center">
             <div className="flex items-center gap-2">
