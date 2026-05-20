@@ -209,6 +209,11 @@ const isAdmin = (req: any, res: any, next: any) => {
   next();
 };
 
+const hasAdminAccess = (req: any, res: any, next: any) => {
+  if (req.user?.role !== 'admin' && req.user?.role !== 'auditor') return res.status(403).json({ error: 'Forbidden' });
+  next();
+};
+
 // --- API ROUTES ---
 // Last sync trigger: 2026-04-16 v12-homologation-logs
 
@@ -428,6 +433,7 @@ app.get('/api/rounds', async (req, res) => {
     const { data: rounds, error } = await supabase
       .from('rounds')
       .select('*')
+      .neq('status', 'draft')
       .order('number', { ascending: false });
     if (error) throw error;
 
@@ -1699,7 +1705,7 @@ app.post('/api/wallet/deposit/attach-proof', authenticate, upload.single('proof'
 });
 
 // Admin endpoint to download PagBank homologation logs
-app.get('/api/admin/pagbank-logs', authenticate, isAdmin, async (req, res) => {
+app.get('/api/admin/pagbank-logs', authenticate, hasAdminAccess, async (req, res) => {
   try {
     const { data: setting } = await supabase.from('settings').select('value').eq('key', 'pagbank_logs').maybeSingle();
     
@@ -1717,7 +1723,7 @@ app.get('/api/admin/pagbank-logs', authenticate, isAdmin, async (req, res) => {
 });
 
 // Admin endpoint to get pending deposits
-app.get('/api/admin/deposits', authenticate, isAdmin, async (req: any, res) => {
+app.get('/api/admin/deposits', authenticate, hasAdminAccess, async (req: any, res) => {
   try {
     const { data, error } = await supabase
       .from('deposits')
@@ -2088,7 +2094,7 @@ app.post('/api/admin/send-notification', authenticate, isAdmin, async (req: any,
   }
 });
 
-app.get('/api/admin/notifications', authenticate, isAdmin, async (req, res) => {
+app.get('/api/admin/notifications', authenticate, hasAdminAccess, async (req, res) => {
   try {
     const { data: setting } = await supabase.from('settings').select('value').eq('key', 'admin_notifications').maybeSingle();
     let notifications = [];
@@ -2172,7 +2178,7 @@ app.get('/api/rounds/:id/check-prediction', authenticate, async (req: any, res) 
 });
 
 // Admin: User Wallets Detailed
-app.get('/api/admin/user-wallets', authenticate, isAdmin, async (req, res) => {
+app.get('/api/admin/user-wallets', authenticate, hasAdminAccess, async (req, res) => {
   try {
     const { data: users, error: usersErr } = await supabase.from('users').select('id, name, email, nickname');
     if (usersErr) throw usersErr;
@@ -2338,7 +2344,7 @@ app.post('/api/admin/wallets/withdraw', authenticate, isAdmin, async (req: any, 
   }
 });
 
-app.get('/api/admin/deposits/all', authenticate, isAdmin, async (req, res) => {
+app.get('/api/admin/deposits/all', authenticate, hasAdminAccess, async (req, res) => {
   try {
     const { data: deposits, error } = await supabase
       .from('deposits')
@@ -2423,7 +2429,7 @@ app.get('/api/me/lucky-numbers', authenticate, async (req: any, res) => {
   }
 });
 
-app.get('/api/admin/lucky-numbers', authenticate, isAdmin, async (req: any, res) => {
+app.get('/api/admin/lucky-numbers', authenticate, hasAdminAccess, async (req: any, res) => {
   try {
     let allLuckyList: any[] = [];
     
@@ -2496,7 +2502,7 @@ app.get('/api/admin/lucky-numbers', authenticate, isAdmin, async (req: any, res)
 });
 
 // Admin: User Management
-app.get('/api/admin/users', authenticate, isAdmin, async (req, res) => {
+app.get('/api/admin/users', authenticate, hasAdminAccess, async (req, res) => {
   try {
     const { data: users, error } = await supabase
       .from('users')
@@ -2541,7 +2547,7 @@ app.delete('/api/admin/users/:id', authenticate, isAdmin, async (req, res) => {
 });
 
 // Admin: Financial Details (Jackpot, Prizes, Withdrawals)
-app.get('/api/admin/financial-details', authenticate, isAdmin, async (req, res) => {
+app.get('/api/admin/financial-details', authenticate, hasAdminAccess, async (req, res) => {
   try {
     const { data: jackpot } = await supabase.from('settings').select('value').eq('key', 'jackpot_pool').maybeSingle();
     const { data: prizes } = await supabase.from('settings').select('value').eq('key', 'prizes_history').maybeSingle();
@@ -2604,7 +2610,7 @@ app.post('/api/admin/jackpot/inject', authenticate, isAdmin, async (req, res) =>
 });
 
 // Admin: Financial Summary
-app.get('/api/admin/notifications', authenticate, isAdmin, async (req, res) => {
+app.get('/api/admin/notifications', authenticate, hasAdminAccess, async (req, res) => {
   try {
     const { data, error } = await supabase.from('settings').select('value').eq('key', 'admin_notifications').maybeSingle();
     if (error) throw error;
@@ -2614,7 +2620,7 @@ app.get('/api/admin/notifications', authenticate, isAdmin, async (req, res) => {
   }
 });
 
-app.get('/api/admin/financial-summary', authenticate, isAdmin, async (req, res) => {
+app.get('/api/admin/financial-summary', authenticate, hasAdminAccess, async (req, res) => {
   try {
     const { data: rounds } = await supabase
       .from('rounds')
@@ -2653,8 +2659,54 @@ app.get('/api/admin/financial-summary', authenticate, isAdmin, async (req, res) 
 });
 
 // Admin Routes
+app.get('/api/admin/rounds', authenticate, hasAdminAccess, async (req, res) => {
+  try {
+    const { data: rounds, error } = await supabase
+      .from('rounds')
+      .select('*')
+      .order('number', { ascending: false });
+    if (error) throw error;
+
+    const { data: historySetting } = await supabase.from('settings').select('value').eq('key', 'jackpot_history').maybeSingle();
+    let jackpotHistory: any[] = [];
+    if (historySetting?.value) {
+      try {
+        jackpotHistory = JSON.parse(historySetting.value);
+      } catch (e) {}
+    }
+
+    const roundsWithJackpot = rounds?.map(round => {
+      const roundJackpot = jackpotHistory.find(jh => jh.round_id == round.id);
+      return {
+        ...round,
+        jackpot_winners_names: roundJackpot ? roundJackpot.winners_names : null,
+        jackpot_prize_paid: roundJackpot ? roundJackpot.prize_paid : 0
+      };
+    }) || [];
+
+    res.json(roundsWithJackpot);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar rodadas (admin)' });
+  }
+});
+
+app.post('/api/admin/rounds/:id/activate', authenticate, isAdmin, async (req, res) => {
+  try {
+    const { error: updateErr } = await supabase
+      .from('rounds')
+      .update({ status: 'open' })
+      .eq('id', req.params.id)
+      .eq('status', 'draft');
+
+    if (updateErr) throw updateErr;
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao ativar rodada' });
+  }
+});
+
 app.post('/api/admin/rounds', authenticate, isAdmin, async (req, res) => {
-  const { number, startTime, games, entryValue } = req.body;
+  const { number, startTime, games, entryValue, isActive } = req.body;
   
   try {
     const { data: round, error: roundErr } = await supabase
@@ -2663,7 +2715,7 @@ app.post('/api/admin/rounds', authenticate, isAdmin, async (req, res) => {
         number, 
         start_time: startTime, 
         entry_value: entryValue || 10, 
-        status: 'open' 
+        status: isActive ? 'open' : 'draft' 
       }])
       .select()
       .single();
@@ -2699,7 +2751,7 @@ app.post('/api/admin/rounds', authenticate, isAdmin, async (req, res) => {
   }
 });
 
-app.get('/api/admin/pending-withdrawals', authenticate, isAdmin, async (req, res) => {
+app.get('/api/admin/pending-withdrawals', authenticate, hasAdminAccess, async (req, res) => {
   try {
     const { data: withdrawals } = await supabase
       .from('wallet_transactions')
@@ -2731,7 +2783,7 @@ app.get('/api/admin/pending-withdrawals', authenticate, isAdmin, async (req, res
   }
 });
 
-app.get('/api/admin/withdrawal-history', authenticate, isAdmin, async (req, res) => {
+app.get('/api/admin/withdrawal-history', authenticate, hasAdminAccess, async (req, res) => {
   try {
     const { data: withdrawals } = await supabase
       .from('wallet_transactions')
@@ -2871,7 +2923,7 @@ app.post('/api/admin/withdrawals/:id/reject', authenticate, isAdmin, async (req:
   }
 });
 
-app.get('/api/admin/pending-predictions', authenticate, isAdmin, async (req, res) => {
+app.get('/api/admin/pending-predictions', authenticate, hasAdminAccess, async (req, res) => {
   try {
     const { data: predictions } = await supabase
       .from('predictions')
@@ -3222,7 +3274,7 @@ app.get('/api/user/referral-info', authenticate, async (req: any, res) => {
   }
 });
 
-app.get('/api/admin/referrals', authenticate, isAdmin, async (req: any, res) => {
+app.get('/api/admin/referrals', authenticate, hasAdminAccess, async (req: any, res) => {
   try {
     const { data, error } = await supabase
       .from('referrals')

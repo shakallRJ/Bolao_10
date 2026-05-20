@@ -8,7 +8,7 @@ interface User {
   phone?: string;
   referral_code?: string;
   phone_validated?: boolean;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'auditor';
 }
 
 interface AuthContextType {
@@ -18,6 +18,8 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isAuditor: boolean;
+  hasAdminAccess: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -62,7 +64,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       login, 
       logout, 
       isAuthenticated: !!token,
-      isAdmin: user?.role === 'admin'
+      isAdmin: user?.role === 'admin',
+      isAuditor: user?.role === 'auditor',
+      hasAdminAccess: user?.role === 'admin' || user?.role === 'auditor'
     }}>
       {children}
     </AuthContext.Provider>

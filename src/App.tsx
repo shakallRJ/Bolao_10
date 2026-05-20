@@ -313,18 +313,21 @@ const NotificationsDropdown = () => {
 };
 
 const Navbar = ({ onNavigate, currentPage }: { onNavigate: (page: string) => void, currentPage: string }) => {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isAdmin, hasAdminAccess, isAuditor } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Consider isAuditor as admin for menu hiding purposes (so they don't see normal user menus)
+  const hideFromAdmin = isAdmin || isAuditor;
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, show: !!user },
-    { id: 'predictions', label: 'Fazer Palpite', icon: Trophy, show: !!user && !isAdmin },
-    { id: 'wallet', label: 'Minha Carteira', icon: Wallet, show: !!user && !isAdmin },
-    { id: 'referral', label: 'Indique e Ganhe', icon: Users, show: !!user && !isAdmin },
+    { id: 'predictions', label: 'Fazer Palpite', icon: Trophy, show: !!user && !hideFromAdmin },
+    { id: 'wallet', label: 'Minha Carteira', icon: Wallet, show: !!user && !hideFromAdmin },
+    { id: 'referral', label: 'Indique e Ganhe', icon: Users, show: !!user && !hideFromAdmin },
     { id: 'transparency', label: 'Transparência', icon: ShieldCheck, show: !!user },
     { id: 'ranking', label: 'Ranking', icon: BarChart2, show: !!user },
-    { id: 'admin', label: 'Admin', icon: ShieldCheck, show: isAdmin },
-    { id: 'admin-rounds', label: 'Gerenciar Rodadas', icon: ListOrdered, show: isAdmin },
+    { id: 'admin', label: 'Admin', icon: ShieldCheck, show: hasAdminAccess },
+    { id: 'admin-rounds', label: 'Gerenciar Rodadas', icon: ListOrdered, show: hasAdminAccess },
   ];
 
   return (
@@ -2602,7 +2605,7 @@ const ReferralPage = () => {
 };
 
 const AdminDashboard = () => {
-  const { token } = useAuth();
+  const { token, isAdmin } = useAuth();
   const [pendingDeposits, setPendingDeposits] = useState<any[]>([]);
   const [pendingWithdrawals, setPendingWithdrawals] = useState<any[]>([]);
   const [withdrawalHistory, setWithdrawalHistory] = useState<any[]>([]);
@@ -2617,6 +2620,7 @@ const AdminDashboard = () => {
   const [adminNotifications, setAdminNotifications] = useState<any[]>([]);
   const [sentNotifications, setSentNotifications] = useState<any[]>([]);
   const [referrals, setReferrals] = useState<any[]>([]);
+  const [referralFilter, setReferralFilter] = useState('');
   const [allLuckyNumbers, setAllLuckyNumbers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewingProof, setViewingProof] = useState<string | null>(null);
@@ -2837,7 +2841,9 @@ const AdminDashboard = () => {
   };
 
   const fetchRoundHistory = async () => {
-    const res = await fetch('/api/rounds');
+    const res = await fetch('/api/admin/rounds', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
     const data = await res.json();
     setRoundHistory(data);
   };
@@ -3079,22 +3085,24 @@ const AdminDashboard = () => {
                       {w.pix_key || '-'}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleValidateWithdrawal(w.id, 'approve')}
-                          className="bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-colors flex items-center"
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Aprovar
-                        </button>
-                        <button
-                          onClick={() => handleValidateWithdrawal(w.id, 'reject')}
-                          className="bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors flex items-center"
-                        >
-                          <XCircle className="w-4 h-4 mr-1" />
-                          Rejeitar
-                        </button>
-                      </div>
+                      {isAdmin && (
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleValidateWithdrawal(w.id, 'approve')}
+                            className="bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-colors flex items-center"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Aprovar
+                          </button>
+                          <button
+                            onClick={() => handleValidateWithdrawal(w.id, 'reject')}
+                            className="bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors flex items-center"
+                          >
+                            <XCircle className="w-4 h-4 mr-1" />
+                            Rejeitar
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -3196,12 +3204,14 @@ const AdminDashboard = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex space-x-2">
-                        <button 
-                          onClick={() => setEditingUser(u)}
-                          className="text-blue-600 hover:underline text-xs font-bold"
-                        >
-                          Editar
-                        </button>
+                        {isAdmin && (
+                          <button 
+                            onClick={() => setEditingUser(u)}
+                            className="text-blue-600 hover:underline text-xs font-bold"
+                          >
+                            Editar
+                          </button>
+                        )}
                         <a 
                           href={`mailto:${u.email}`}
                           className="text-green-600 hover:underline text-xs font-bold"
@@ -3218,12 +3228,14 @@ const AdminDashboard = () => {
                             WhatsApp
                           </a>
                         )}
-                        <button 
-                          onClick={() => handleDeleteUser(u.id)}
-                          className="text-red-600 hover:underline text-xs font-bold"
-                        >
-                          Excluir
-                        </button>
+                        {isAdmin && (
+                          <button 
+                            onClick={() => handleDeleteUser(u.id)}
+                            className="text-red-600 hover:underline text-xs font-bold"
+                          >
+                            Excluir
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -3236,7 +3248,16 @@ const AdminDashboard = () => {
 
       {activeTab === 'referrals' && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <h3 className="text-xl font-bold text-primary mb-6">Monitoramento de Indicações</h3>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <h3 className="text-xl font-bold text-primary">Monitoramento de Indicações</h3>
+            <input
+              type="text"
+              placeholder="Filtrar por indicador..."
+              value={referralFilter}
+              onChange={(e) => setReferralFilter(e.target.value)}
+              className="px-4 py-2 bg-gray-100 border-none rounded-xl text-sm w-full md:w-64 focus:ring-2 focus:ring-secondary outline-none"
+            />
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
@@ -3248,22 +3269,28 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {referrals.map((ref: any) => (
+                {referrals.filter(ref => {
+                  if (!referralFilter) return true;
+                  const search = referralFilter.toLowerCase();
+                  const referrerName = ref.referrer?.name || ref.referrer?.nickname || '';
+                  const referrerEmail = ref.referrer?.email || '';
+                  return referrerName.toLowerCase().includes(search) || referrerEmail.toLowerCase().includes(search);
+                }).map((ref: any) => (
                   <tr key={ref.id}>
                     <td className="py-4">
-                      <div className="font-bold text-gray-900">{ref.referrer_name}</div>
-                      <div className="text-xs text-gray-500">{ref.referrer_email}</div>
+                      <div className="font-bold text-gray-900">{ref.referrer?.nickname || ref.referrer?.name || 'Desconhecido'}</div>
+                      <div className="text-xs text-gray-500">{ref.referrer?.email || '-'}</div>
                     </td>
                     <td className="py-4">
-                      <div className="font-bold text-gray-900">{ref.referred_name}</div>
-                      <div className="text-xs text-gray-500">{ref.referred_email}</div>
+                      <div className="font-bold text-gray-900">{ref.referred?.nickname || ref.referred?.name || 'Desconhecido'}</div>
+                      <div className="text-xs text-gray-500">{ref.referred?.email || '-'}</div>
                     </td>
                     <td className="py-4 text-sm text-gray-600">
                       {new Date(ref.created_at).toLocaleDateString('pt-BR')}
                     </td>
                     <td className="py-4 text-center">
                       {ref.bonus_paid ? (
-                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">Pago (R$ {ref.bonus_amount.toFixed(2)})</span>
+                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">Pago (R$ {Number(ref.bonus_amount).toFixed(2)})</span>
                       ) : (
                         <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">Pendente</span>
                       )}
@@ -3452,88 +3479,90 @@ const AdminDashboard = () => {
 
       {activeTab === 'messages' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1">
-            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm sticky top-8">
-              <h3 className="text-xl font-bold text-primary mb-6">Enviar Notificação</h3>
-              <form onSubmit={handleSendNotification} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Título</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={notificationForm.title}
-                    onChange={(e) => setNotificationForm({...notificationForm, title: e.target.value})}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200"
-                    placeholder="Ex: Nova Rodada Aberta!"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Mensagem</label>
-                  <textarea 
-                    required 
-                    rows={4}
-                    value={notificationForm.message}
-                    onChange={(e) => setNotificationForm({...notificationForm, message: e.target.value})}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 resize-none"
-                    placeholder="Digite o conteúdo da mensagem..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo de Alerta</label>
-                  <select 
-                    value={notificationForm.type}
-                    onChange={(e) => setNotificationForm({...notificationForm, type: e.target.value})}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200"
-                  >
-                    <option value="info">ℹ️ Informação (Azul)</option>
-                    <option value="success">✅ Sucesso (Verde)</option>
-                    <option value="warning">⚠️ Aviso (Amarelo)</option>
-                    <option value="error">❌ Erro / Crítico (Vermelho)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Destinatário</label>
-                  <select 
-                    value={notificationForm.target_type}
-                    onChange={(e) => setNotificationForm({...notificationForm, target_type: e.target.value})}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200"
-                  >
-                    <option value="all">Todos os Usuários</option>
-                    <option value="individual">Usuário Específico</option>
-                  </select>
-                </div>
-                {notificationForm.target_type === 'individual' && (
+          {isAdmin && (
+            <div className="lg:col-span-1">
+              <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm sticky top-8">
+                <h3 className="text-xl font-bold text-primary mb-6">Enviar Notificação</h3>
+                <form onSubmit={handleSendNotification} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Selecionar Usuário</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Título</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={notificationForm.title}
+                      onChange={(e) => setNotificationForm({...notificationForm, title: e.target.value})}
+                      className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                      placeholder="Ex: Nova Rodada Aberta!"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Mensagem</label>
+                    <textarea 
+                      required 
+                      rows={4}
+                      value={notificationForm.message}
+                      onChange={(e) => setNotificationForm({...notificationForm, message: e.target.value})}
+                      className="w-full px-4 py-2 rounded-xl border border-gray-200 resize-none"
+                      placeholder="Digite o conteúdo da mensagem..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo de Alerta</label>
                     <select 
-                      required
-                      value={notificationForm.user_id}
-                      onChange={(e) => setNotificationForm({...notificationForm, user_id: e.target.value})}
+                      value={notificationForm.type}
+                      onChange={(e) => setNotificationForm({...notificationForm, type: e.target.value})}
                       className="w-full px-4 py-2 rounded-xl border border-gray-200"
                     >
-                      <option value="">Selecione um usuário...</option>
-                      {users.map(u => (
-                        <option key={u.id} value={u.id}>{u.name} (@{u.nickname})</option>
-                      ))}
+                      <option value="info">ℹ️ Informação (Azul)</option>
+                      <option value="success">✅ Sucesso (Verde)</option>
+                      <option value="warning">⚠️ Aviso (Amarelo)</option>
+                      <option value="error">❌ Erro / Crítico (Vermelho)</option>
                     </select>
                   </div>
-                )}
-                <button 
-                  type="submit" 
-                  disabled={sendingNotification}
-                  className="w-full bg-primary text-white py-3 rounded-xl font-bold mt-4 hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center"
-                >
-                  {sendingNotification ? 'Enviando...' : (
-                    <>
-                      <Send className="w-4 h-4 mr-2" /> Enviar Agora
-                    </>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Destinatário</label>
+                    <select 
+                      value={notificationForm.target_type}
+                      onChange={(e) => setNotificationForm({...notificationForm, target_type: e.target.value})}
+                      className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                    >
+                      <option value="all">Todos os Usuários</option>
+                      <option value="individual">Usuário Específico</option>
+                    </select>
+                  </div>
+                  {notificationForm.target_type === 'individual' && (
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Selecionar Usuário</label>
+                      <select 
+                        required
+                        value={notificationForm.user_id}
+                        onChange={(e) => setNotificationForm({...notificationForm, user_id: e.target.value})}
+                        className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                      >
+                        <option value="">Selecione um usuário...</option>
+                        {users.map(u => (
+                          <option key={u.id} value={u.id}>{u.name} (@{u.nickname})</option>
+                        ))}
+                      </select>
+                    </div>
                   )}
-                </button>
-              </form>
+                  <button 
+                    type="submit" 
+                    disabled={sendingNotification}
+                    className="w-full bg-primary text-white py-3 rounded-xl font-bold mt-4 hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center"
+                  >
+                    {sendingNotification ? 'Enviando...' : (
+                      <>
+                        <Send className="w-4 h-4 mr-2" /> Enviar Agora
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
             </div>
-          </div>
+          )}
           
-          <div className="lg:col-span-2">
+          <div className={isAdmin ? "lg:col-span-2" : "lg:col-span-3"}>
             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
               <div className="p-6 border-b border-gray-100 bg-gray-50">
                 <h3 className="font-bold text-primary">Histórico de Mensagens Enviadas</h3>
@@ -3559,13 +3588,15 @@ const AdminDashboard = () => {
                           <span className="text-xs text-gray-400">
                             {formatDate(n.created_at, 'dd/MM/yyyy HH:mm')}
                           </span>
-                          <button 
-                            onClick={() => handleDeleteNotification(n.id)}
-                            className="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                            title="Excluir mensagem"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {isAdmin && (
+                            <button 
+                              onClick={() => handleDeleteNotification(n.id)}
+                              className="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                              title="Excluir mensagem"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 mb-3">{n.message}</p>
@@ -3711,22 +3742,24 @@ const AdminDashboard = () => {
                             )}
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              <button 
-                                onClick={() => handleValidateDeposit(d.id, 'approved')}
-                                className="p-2 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-colors"
-                                title="Aprovar"
-                              >
-                                <CheckCircle className="w-5 h-5" />
-                              </button>
-                              <button 
-                                onClick={() => handleValidateDeposit(d.id, 'rejected')}
-                                className="p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
-                                title="Rejeitar"
-                              >
-                                <XCircle className="w-5 h-5" />
-                              </button>
-                            </div>
+                            {isAdmin && (
+                              <div className="flex items-center gap-2">
+                                <button 
+                                  onClick={() => handleValidateDeposit(d.id, 'approved')}
+                                  className="p-2 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-colors"
+                                  title="Aprovar"
+                                >
+                                  <CheckCircle className="w-5 h-5" />
+                                </button>
+                                <button 
+                                  onClick={() => handleValidateDeposit(d.id, 'rejected')}
+                                  className="p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
+                                  title="Rejeitar"
+                                >
+                                  <XCircle className="w-5 h-5" />
+                                </button>
+                              </div>
+                            )}
                           </td>
                         </tr>
                       ))
@@ -3972,12 +4005,14 @@ const AdminDashboard = () => {
                   <Gift className="w-5 h-5 text-purple-500" />
                   Injetar Patrocínio no Bônus (Jackpot)
                 </h3>
-                <button 
-                  onClick={() => setShowJackpotForm(!showJackpotForm)}
-                  className="text-xs bg-purple-600 text-white px-4 py-1.5 rounded-full hover:bg-purple-700 transition-colors font-bold shadow-sm"
-                >
-                  {showJackpotForm ? 'Cancelar' : '+ Injetar Bônus'}
-                </button>
+                {isAdmin && (
+                  <button 
+                    onClick={() => setShowJackpotForm(!showJackpotForm)}
+                    className="text-xs bg-purple-600 text-white px-4 py-1.5 rounded-full hover:bg-purple-700 transition-colors font-bold shadow-sm"
+                  >
+                    {showJackpotForm ? 'Cancelar' : '+ Injetar Bônus'}
+                  </button>
+                )}
               </div>
               
               {showJackpotForm && (
@@ -4057,12 +4092,14 @@ const AdminDashboard = () => {
             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
               <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                 <h3 className="font-bold text-primary">Saques Administrativos</h3>
-                <button 
-                  onClick={() => setShowWithdrawalForm(!showWithdrawalForm)}
-                  className="text-xs bg-primary text-white px-3 py-1 rounded-full hover:bg-secondary transition-colors"
-                >
-                  {showWithdrawalForm ? 'Cancelar' : '+ Novo Saque'}
-                </button>
+                {isAdmin && (
+                  <button 
+                    onClick={() => setShowWithdrawalForm(!showWithdrawalForm)}
+                    className="text-xs bg-primary text-white px-3 py-1 rounded-full hover:bg-secondary transition-colors"
+                  >
+                    {showWithdrawalForm ? 'Cancelar' : '+ Novo Saque'}
+                  </button>
+                )}
               </div>
               
               {showWithdrawalForm && (
@@ -4266,6 +4303,7 @@ const AdminDashboard = () => {
                 >
                   <option value="user">User</option>
                   <option value="admin">Admin</option>
+                  <option value="auditor">Auditor</option>
                 </select>
               </div>
               <div>
@@ -4920,7 +4958,7 @@ const TransparencyPage = () => {
 };
 
 const AdminRoundsPage = () => {
-  const { token } = useAuth();
+  const { token, isAdmin } = useAuth();
   const [rounds, setRounds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -4932,13 +4970,16 @@ const AdminRoundsPage = () => {
     number: '',
     startTime: '',
     entryValue: '10',
+    isActive: false,
     games: Array(10).fill({ home: '', away: '' })
   });
 
   const fetchRounds = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/rounds');
+      const res = await fetch('/api/admin/rounds', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
       setRounds(data);
     } catch (err) {
@@ -4971,6 +5012,7 @@ const AdminRoundsPage = () => {
           number: '',
           startTime: '',
           entryValue: '10',
+          isActive: false,
           games: Array(10).fill({ home: '', away: '' })
         });
         fetchRounds();
@@ -5003,6 +5045,30 @@ const AdminRoundsPage = () => {
       } else {
         const data = await res.json();
         alert(data.error || 'Erro ao salvar resultados');
+      }
+    } catch (err) {
+      alert('Erro na conexão');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleActivateRound = async (roundId: number) => {
+    if (!confirm('Deseja ativar esta rodada? Ela ficará visível e aberta para todos os usuários.')) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/admin/rounds/${roundId}/activate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        alert('Rodada ativada com sucesso!');
+        setEditingRound(null);
+        fetchRounds();
+      } else {
+        alert('Erro ao ativar rodada');
       }
     } catch (err) {
       alert('Erro na conexão');
@@ -5048,13 +5114,15 @@ const AdminRoundsPage = () => {
           <h1 className="text-3xl font-bold text-primary">Gerenciar Rodadas</h1>
           <p className="text-gray-500">Crie, edite e finalize as rodadas do bolão.</p>
         </div>
-        <button 
-          onClick={() => setShowCreateForm(!showCreateForm)}
-          className="bg-primary text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition-all flex items-center"
-        >
-          {showCreateForm ? <X className="w-5 h-5 mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
-          {showCreateForm ? 'Cancelar' : 'Nova Rodada'}
-        </button>
+        {isAdmin && (
+          <button 
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="bg-primary text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition-all flex items-center"
+          >
+            {showCreateForm ? <X className="w-5 h-5 mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
+            {showCreateForm ? 'Cancelar' : 'Nova Rodada'}
+          </button>
+        )}
       </div>
 
       {showCreateForm && (
@@ -5096,6 +5164,21 @@ const AdminRoundsPage = () => {
                   onChange={(e) => setNewRound({...newRound, entryValue: e.target.value})}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-secondary outline-none"
                 />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Visibilidade da Rodada</label>
+                <div className="flex items-center gap-3 bg-gray-50 p-3 h-[50px] rounded-xl border border-gray-200 mt-[1px]">
+                  <input
+                    type="checkbox"
+                    id="isActive"
+                    checked={newRound.isActive}
+                    onChange={(e) => setNewRound({...newRound, isActive: e.target.checked})}
+                    className="w-5 h-5 rounded text-primary focus:ring-primary"
+                  />
+                  <label htmlFor="isActive" className="text-sm font-bold text-gray-700 cursor-pointer select-none">
+                    Ativar para Usuários
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -5155,33 +5238,38 @@ const AdminRoundsPage = () => {
                 <div>
                   <h3 className="font-bold text-primary text-lg">Rodada {round.number}</h3>
                   <p className="text-sm text-gray-500">
-                    {round.status === 'open' ? 'Aberta para palpites' : round.status === 'closed' ? 'Em andamento' : 'Finalizada'}
+                    {round.status === 'open' ? 'Aberta para palpites' : round.status === 'closed' ? 'Em andamento' : round.status === 'draft' ? 'Rascunho' : 'Finalizada'}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <button 
-                  onClick={async () => {
-                    if (editingRound?.id === round.id) {
-                      setEditingRound(null);
-                      return;
-                    }
-                    const res = await fetch(`/api/rounds/${round.id}`);
-                    const data = await res.json();
-                    setEditingRound(data);
-                    const initialResults: any = {};
-                    data.games.forEach((g: any) => {
-                      if (g.result) initialResults[g.id] = g.result;
-                    });
-                    setPartialResults(initialResults);
-                  }}
-                  className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all"
-                >
-                  {editingRound?.id === round.id ? 'Fechar' : 'Gerenciar Resultados'}
-                </button>
+                {isAdmin && (
+                  <button 
+                    onClick={async () => {
+                      if (editingRound?.id === round.id) {
+                        setEditingRound(null);
+                        return;
+                      }
+                      const res = await fetch(`/api/rounds/${round.id}`);
+                      const data = await res.json();
+                      setEditingRound(data);
+                      const initialResults: any = {};
+                      data.games.forEach((g: any) => {
+                        if (g.result) initialResults[g.id] = g.result;
+                      });
+                      setPartialResults(initialResults);
+                    }}
+                    className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all"
+                  >
+                    {editingRound?.id === round.id ? 'Fechar' : 'Gerenciar Resultados'}
+                  </button>
+                )}
                 {round.status === 'open' && (
                   <span className="bg-green-100 text-green-600 px-3 py-1 rounded-lg text-xs font-bold uppercase">Ativa</span>
+                )}
+                {round.status === 'draft' && (
+                  <span className="bg-yellow-100 text-yellow-600 px-3 py-1 rounded-lg text-xs font-bold uppercase">Rascunho</span>
                 )}
               </div>
             </div>
@@ -5220,9 +5308,10 @@ const AdminRoundsPage = () => {
                   </div>
 
                   <div className="flex flex-col justify-between">
-                    <div>
-                      <h4 className="font-bold text-primary mb-4">Ações da Rodada</h4>
-                      <div className="space-y-4">
+                    {isAdmin && (
+                      <div>
+                        <h4 className="font-bold text-primary mb-4">Ações da Rodada</h4>
+                        <div className="space-y-4">
                         <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl">
                           <p className="text-sm text-blue-800 font-medium mb-2">Resultados Parciais</p>
                           <p className="text-xs text-blue-600 mb-4">Salve os resultados dos jogos que já terminaram para atualizar o ranking parcial em tempo real.</p>
@@ -5234,6 +5323,20 @@ const AdminRoundsPage = () => {
                             Salvar Parciais e Atualizar Ranking
                           </button>
                         </div>
+
+                        {round.status === 'draft' && (
+                          <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-2xl">
+                            <p className="text-sm text-yellow-800 font-medium mb-2">Ativar Rodada</p>
+                            <p className="text-xs text-yellow-600 mb-4">Torna a rodada visível para todos os usuários e permite a realização de palpites.</p>
+                            <button 
+                              onClick={() => handleActivateRound(round.id)}
+                              disabled={submitting}
+                              className="w-full bg-yellow-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-yellow-700 transition-all disabled:opacity-50"
+                            >
+                              Ativar Rodada
+                            </button>
+                          </div>
+                        )}
 
                         {round.status !== 'finished' && (
                           <div className="p-4 bg-red-50 border border-red-100 rounded-2xl">
@@ -5261,6 +5364,7 @@ const AdminRoundsPage = () => {
                         )}
                       </div>
                     </div>
+                  )}
 
                     <button 
                       onClick={() => setEditingRound(null)}
@@ -5774,7 +5878,7 @@ export default function App() {
     if (p === 'copa2026') return 'copa2026';
     return p || 'landing';
   });
-  const { isAuthenticated, isAdmin, token } = useAuth();
+  const { isAuthenticated, isAdmin, hasAdminAccess, token } = useAuth();
 
   // Push Notifications Setup
   useEffect(() => {
@@ -5856,8 +5960,8 @@ export default function App() {
       case 'referral': return <ReferralPage />;
       case 'profile': return <ProfilePage onNavigate={setPage} />;
       case 'predictions': return <PredictionsPage onNavigate={setPage} />;
-      case 'admin': return isAdmin ? <AdminDashboard /> : <Dashboard onNavigate={setPage} />;
-      case 'admin-rounds': return isAdmin ? <AdminRoundsPage /> : <Dashboard onNavigate={setPage} />;
+      case 'admin': return hasAdminAccess ? <AdminDashboard /> : <Dashboard onNavigate={setPage} />;
+      case 'admin-rounds': return hasAdminAccess ? <AdminRoundsPage /> : <Dashboard onNavigate={setPage} />;
       case 'transparency': return <TransparencyPage />;
       case 'ranking': return <RankingPage />;
       case 'terms': return <TermsPage />;
