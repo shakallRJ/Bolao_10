@@ -495,6 +495,7 @@ app.get('/api/rounds/current', async (req, res) => {
     const { data: round, error: roundErr } = await supabase
       .from('rounds')
       .select('*')
+      .neq('status', 'draft')
       .or('status.neq.finished,status.is.null')
       .order('number', { ascending: false })
       .limit(1)
