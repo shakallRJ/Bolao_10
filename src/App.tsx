@@ -512,6 +512,13 @@ const LoginPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   const [referralCodeInput, setReferralCodeInput] = useState(localStorage.getItem('referredBy') || '');
   const { login } = useAuth();
 
+  // Recovery State
+  const [recoveryStep, setRecoveryStep] = useState<'none' | 'request' | 'verify' | 'reset'>('none');
+  const [recoveryCode, setRecoveryCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
     if (value.length > 11) value = value.slice(0, 11);
@@ -556,27 +563,114 @@ const LoginPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
     }
   };
 
-  const handleForgotPassword = async () => {
+  const handleRequestCode = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!email) {
-      setError('Por favor, insira seu e-mail para solicitar a recuperação.');
+      setError('Por favor, digite seu e-mail cadastrado.');
       return;
     }
     setError('');
     setSuccess('');
+    setIsLoading(true);
+
     try {
       const res = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
+      const data = await res.json();
       if (res.ok) {
-        setSuccess('Solicitação enviada ao administrador. Por favor, aguarde o contato.');
+        if (data.mailSent) {
+          setSuccess('Um código de segurança com 6 dígitos foi enviado ao seu e-mail cadastrado com sucesso!');
+        } else {
+          let alertMsg = 'Código de segurança gerado com sucesso!';
+          if (data.isAuthError) {
+            alertMsg += ' ⚠️ (Aviso: Ocorreu um erro de autenticação SMTP no servidor da Hostinger. Verifique as credenciais SMTP_USER e SMTP_PASS nas variáveis de ambiente do seu painel).';
+          } else {
+            alertMsg += ' ⚠️ (Aviso: Servidor de e-mail SMTP não respondeu e foi usado o modo de contingência).';
+          }
+          if (data.developmentCode) {
+            alertMsg += `\n\nComo estamos em modo de homologação/teste, você pode prosseguir usando este código: [ ${data.developmentCode} ]`;
+          }
+          setSuccess(alertMsg);
+        }
+        setRecoveryStep('verify');
       } else {
-        const data = await res.json();
-        setError(data.error || 'Erro ao processar solicitação');
+        setError(data.error || 'Erro ao processar solicitação.');
       }
     } catch (err) {
-      setError('Erro ao conectar com o servidor');
+      setError('Erro ao conectar com o servidor.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!recoveryCode || recoveryCode.length < 6) {
+      setError('Digite o código de 6 dígitos recebido.');
+      return;
+    }
+    setError('');
+    setSuccess('');
+    setIsLoading(true);
+
+    try {
+      const res = await fetch('/api/auth/verify-reset-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code: recoveryCode }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSuccess('Código verificado! Crie sua nova de senha de acesso.');
+        setRecoveryStep('reset');
+      } else {
+        setError(data.error || 'Código incorreto ou expirado.');
+      }
+    } catch (err) {
+      setError('Erro ao verificar código de segurança.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 6) {
+      setError('A nova senha deve ter no mínimo 6 caracteres.');
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      setError('As senhas não coincidem.');
+      return;
+    }
+    setError('');
+    setSuccess('');
+    setIsLoading(true);
+
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code: recoveryCode, password: newPassword }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSuccess('Senha alterada com sucesso! Você já pode entrar com a sua nova senha.');
+        setRecoveryStep('none');
+        setPassword('');
+        setNewPassword('');
+        setConfirmNewPassword('');
+        setRecoveryCode('');
+      } else {
+        setError(data.error || 'Erro ao redefinir sua senha.');
+      }
+    } catch (err) {
+      setError('Erro ao concluir redefinição de senha.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -587,128 +681,272 @@ const LoginPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
         animate={{ opacity: 1, scale: 1 }}
         className="bg-[#12182B] p-8 rounded-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] w-full max-w-md border border-[#2A3441]"
       >
-        <h2 className="text-3xl font-black text-white italic uppercase mb-2">
-          {isRegister ? 'Criar Conta' : 'Bem-vindo'}
-        </h2>
-        <p className="text-gray-400 mb-8 font-bold">
-          {isRegister ? 'JUNTE-SE AO BOLÃO MAIS AGRESSIVO.' : 'ACESSE SUA CONTA PARA PALPITAR.'}
-        </p>
-
-        {error && (
-          <div className="mb-6 p-4 bg-[#FF6B00]/10 border border-[#FF6B00]/30 text-[#FF6B00] rounded-xl text-sm flex items-center font-bold uppercase tracking-wide">
-            <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" /> <span className="flex-1">{error}</span>
-          </div>
-        )}
-
-        {success && (
-          <div className="mb-6 p-4 bg-[#32CD32]/10 border border-[#32CD32]/30 text-[#32CD32] rounded-xl text-sm flex items-center font-bold uppercase tracking-wide">
-            <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0" /> <span className="flex-1">{success}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {isRegister && (
-            <>
-              <div>
-                <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Nome Completo</label>
-                <input 
-                  type="text" 
-                  required 
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600"
-                  placeholder="Seu nome"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Nickname (Apelido)</label>
-                <input 
-                  type="text" 
-                  required 
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600"
-                  placeholder="Ex: artilheiro10"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Telefone (WhatsApp)</label>
-                <input 
-                  type="tel" 
-                  required 
-                  value={phone}
-                  onChange={handlePhoneChange}
-                  className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600"
-                  placeholder="(00) 00000-0000"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Código de Indicação (Opcional)</label>
-                <input 
-                  type="text" 
-                  value={referralCodeInput}
-                  onChange={(e) => setReferralCodeInput(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all uppercase placeholder-gray-600"
-                  placeholder="Ex: 50969B51"
-                />
-              </div>
-            </>
-          )}
+        {recoveryStep !== 'none' ? (
           <div>
-            <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">E-mail</label>
-            <input 
-              type="email" 
-              required 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600"
-              placeholder="seu@email.com"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Senha</label>
-            <div className="relative">
-              <input 
-                type={showPassword ? "text" : "password"} 
-                required 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all pr-12 placeholder-gray-600"
-                placeholder="••••••••"
-              />
-              <button 
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-          
-          {!isRegister && (
-            <div className="text-right">
-              <button 
-                type="button"
-                onClick={handleForgotPassword}
-                className="text-xs text-[#32CD32] hover:underline font-bold uppercase tracking-wider"
-              >
-                Esqueci minha senha
-              </button>
-            </div>
-          )}
+            <h2 className="text-3xl font-black text-white italic uppercase mb-2">
+              {recoveryStep === 'request' && 'Recuperar Senha'}
+              {recoveryStep === 'verify' && 'Verificar Código'}
+              {recoveryStep === 'reset' && 'Nova Senha'}
+            </h2>
+            <p className="text-gray-400 mb-8 font-bold text-xs uppercase tracking-wider">
+              {recoveryStep === 'request' && 'DIGITE SEU E-MAIL PARA ENVIARMOS UM CÓDIGO.'}
+              {recoveryStep === 'verify' && `INSERIR O CÓDIGO DE 6 DÍGITOS ENVIADO PARA ${email}.`}
+              {recoveryStep === 'reset' && 'ESCOLHA UMA SENHA FORTE COM MAIS DE 6 CARACTERES.'}
+            </p>
 
-          <button 
-            type="submit"
-            className="w-full bg-[#32CD32] text-black py-4 rounded-xl font-black uppercase italic tracking-wider hover:scale-105 transition-all mt-4 shadow-[0_0_15px_rgba(50,205,50,0.4)]"
-          >
-            {isRegister ? 'Criar Conta' : 'Entrar na Plataforma'}
-          </button>
-        </form>
+            {error && (
+              <div className="mb-6 p-4 bg-[#FF6B00]/10 border border-[#FF6B00]/30 text-[#FF6B00] rounded-xl text-sm flex items-center font-bold uppercase tracking-wide">
+                <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" /> <span className="flex-1">{error}</span>
+              </div>
+            )}
+
+            {success && (
+              <div className="mb-6 p-4 bg-[#32CD32]/10 border border-[#32CD32]/30 text-[#32CD32] rounded-xl text-sm flex items-center font-bold uppercase tracking-wide">
+                <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0" /> <span className="flex-1">{success}</span>
+              </div>
+            )}
+
+            {recoveryStep === 'request' && (
+              <form onSubmit={handleRequestCode} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">E-mail Cadastrado</label>
+                  <input 
+                    type="email" 
+                    required 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600"
+                    placeholder="seu@email.com"
+                  />
+                </div>
+                <button 
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-[#32CD32] text-black py-4 rounded-xl font-black uppercase italic tracking-wider hover:scale-105 transition-all mt-4 shadow-[0_0_15px_rgba(50,205,50,0.4)] disabled:opacity-50"
+                >
+                  {isLoading ? 'Enviando...' : 'Enviar Código por E-mail'}
+                </button>
+                <div className="text-center mt-6">
+                  <button 
+                    type="button" 
+                    onClick={() => { setRecoveryStep('none'); setError(''); setSuccess(''); }}
+                    className="text-xs text-gray-400 hover:text-white font-extrabold uppercase tracking-widest"
+                  >
+                    Voltar para o Login
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {recoveryStep === 'verify' && (
+              <form onSubmit={handleVerifyCode} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Código de Segurança</label>
+                  <input 
+                    type="text" 
+                    required 
+                    maxLength={6}
+                    value={recoveryCode}
+                    onChange={(e) => setRecoveryCode(e.target.value.replace(/\D/g, ''))}
+                    className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600 text-center tracking-[0.5em] text-xl font-bold font-mono"
+                    placeholder="000000"
+                  />
+                </div>
+                <button 
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-[#32CD32] text-black py-4 rounded-xl font-black uppercase italic tracking-wider hover:scale-105 transition-all mt-4 shadow-[0_0_15px_rgba(50,205,50,0.4)] disabled:opacity-50"
+                >
+                  {isLoading ? 'Confirmando...' : 'Confirmar Código'}
+                </button>
+                <div className="flex justify-between items-center mt-6">
+                  <button 
+                    type="button" 
+                    onClick={handleRequestCode}
+                    className="text-[10px] text-[#32CD32] hover:underline font-extrabold uppercase tracking-wider"
+                  >
+                    Reenviar Código
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => { setRecoveryStep('none'); setError(''); setSuccess(''); }}
+                    className="text-[10px] text-gray-400 hover:text-white font-extrabold uppercase tracking-wider"
+                  >
+                    Voltar para o Login
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {recoveryStep === 'reset' && (
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Nova Senha</label>
+                  <input 
+                    type="password" 
+                    required 
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600"
+                    placeholder="No mínimo 6 caracteres"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Confirmar Nova Senha</label>
+                  <input 
+                    type="password" 
+                    required 
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600"
+                    placeholder="Repita a nova senha"
+                  />
+                </div>
+                <button 
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-[#32CD32] text-black py-4 rounded-xl font-black uppercase italic tracking-wider hover:scale-105 transition-all mt-4 shadow-[0_0_15px_rgba(50,205,50,0.4)] disabled:opacity-50"
+                >
+                  {isLoading ? 'Salvando...' : 'Salvar Nova Senha'}
+                </button>
+                <div className="text-center mt-6">
+                  <button 
+                    type="button" 
+                    onClick={() => { setRecoveryStep('none'); setError(''); setSuccess(''); }}
+                    className="text-xs text-gray-400 hover:text-white font-extrabold uppercase tracking-widest"
+                  >
+                    Cancelar e Voltar
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        ) : (
+          <>
+            <h2 className="text-3xl font-black text-white italic uppercase mb-2">
+              {isRegister ? 'Criar Conta' : 'Bem-vindo'}
+            </h2>
+            <p className="text-gray-400 mb-8 font-bold">
+              {isRegister ? 'JUNTE-SE AO BOLÃO MAIS AGRESSIVO.' : 'ACESSE SUA CONTA PARA PALPITAR.'}
+            </p>
+
+            {error && (
+              <div className="mb-6 p-4 bg-[#FF6B00]/10 border border-[#FF6B00]/30 text-[#FF6B00] rounded-xl text-sm flex items-center font-bold uppercase tracking-wide">
+                <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" /> <span className="flex-1">{error}</span>
+              </div>
+            )}
+
+            {success && (
+              <div className="mb-6 p-4 bg-[#32CD32]/10 border border-[#32CD32]/30 text-[#32CD32] rounded-xl text-sm flex items-center font-bold uppercase tracking-wide">
+                <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0" /> <span className="flex-1">{success}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {isRegister && (
+                <>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Nome Completo</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600"
+                      placeholder="Seu nome"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Nickname (Apelido)</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={nickname}
+                      onChange={(e) => setNickname(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600"
+                      placeholder="Ex: artilheiro10"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Telefone (WhatsApp)</label>
+                    <input 
+                      type="tel" 
+                      required 
+                      value={phone}
+                      onChange={handlePhoneChange}
+                      className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600"
+                      placeholder="(00) 00000-0000"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Código de Indicação (Opcional)</label>
+                    <input 
+                      type="text" 
+                      value={referralCodeInput}
+                      onChange={(e) => setReferralCodeInput(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all uppercase placeholder-gray-600"
+                      placeholder="Ex: 50969B51"
+                    />
+                  </div>
+                </>
+              )}
+              <div>
+                <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">E-mail</label>
+                <input 
+                  type="email" 
+                  required 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600"
+                  placeholder="seu@email.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Senha</label>
+                <div className="relative">
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    required 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all pr-12 placeholder-gray-600"
+                    placeholder="••••••••"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+              
+              {!isRegister && (
+                <div className="text-right">
+                  <button 
+                    type="button"
+                    onClick={() => { setRecoveryStep('request'); setError(''); setSuccess(''); }}
+                    className="text-xs text-[#32CD32] hover:underline font-bold uppercase tracking-wider"
+                  >
+                    Esqueci minha senha
+                  </button>
+                </div>
+              )}
+
+              <button 
+                type="submit"
+                className="w-full bg-[#32CD32] text-black py-4 rounded-xl font-black uppercase italic tracking-wider hover:scale-105 transition-all mt-4 shadow-[0_0_15px_rgba(50,205,50,0.4)]"
+              >
+                {isRegister ? 'Criar Conta' : 'Entrar na Plataforma'}
+              </button>
+            </form>
+          </>
+        )}
 
         <div className="mt-8 text-center space-y-6">
           <button 
-            onClick={() => setIsRegister(!isRegister)}
+            onClick={() => { setIsRegister(!isRegister); setRecoveryStep('none'); setError(''); setSuccess(''); }}
             className="text-sm font-bold text-gray-400 uppercase hover:text-white transition-colors tracking-wider"
           >
             {isRegister ? 'JÁ TEM UMA CONTA? ENTRE' : 'NÃO TEM UMA CONTA? CADASTRE-SE'}

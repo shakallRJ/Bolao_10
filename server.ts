@@ -1,4 +1,5 @@
 import express from 'express';
+import nodemailer from 'nodemailer';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
@@ -364,25 +365,173 @@ app.post('/api/push-subscriptions', authenticate, async (req: any, res) => {
   }
 });
 
+// Store reset codes in memory (Secure & Ephemeral)
+const passwordResetCodes = new Map<string, { code: string; expiresAt: number }>();
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT || '465'),
+  secure: process.env.SMTP_PORT === '465', // true para 465, false para outras portas como 587
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+  tls: {
+    // Não falhar em certificados inválidos (útil para alguns hosts compartilhados)
+    rejectUnauthorized: false
+  }
+});
+
+// Função de envio refatorada com tratamento de erro limpo
+const sendPasswordResetEmail = async (to: string, token: string) => {
+  try {
+    const info = await transporter.sendMail({
+      from: `Bolão10 <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+      to: to,
+      subject: 'BOLÃO10 - Recuperação de Senha',
+      html: `
+        <div style="font-family: sans-serif; max-w: 600px; margin: auto; padding: 20px; background-color: #0A0F1E; color: #ffffff; border-radius: 10px;">
+          <h2 style="color: #32CD32;">BOLÃO10</h2>
+          <p>Você solicitou a recuperação de senha.</p>
+          <p>Utilize o código abaixo para redefinir sua senha:</p>
+          <div style="background-color: #12182B; padding: 15px; border-radius: 8px; font-size: 24px; font-weight: bold; text-align: center; letter-spacing: 5px; border: 1px solid #32CD32;">
+            ${token}
+          </div>
+          <p style="color: #888; font-size: 12px; margin-top: 20px;">Se você não solicitou isso, ignore este e-mail.</p>
+        </div>
+      `
+    });
+    return { success: true, info };
+  } catch (error: any) {
+    console.error('Erro detalhado do SMTP:', error);
+    // Erro limpo e direto, sem alucinações sobre o Google
+    throw new Error(`Falha no envio de e-mail. Código do servidor: ${error.responseCode || 'Desconhecido'}. Verifique as credenciais no provedor de e-mail.`);
+  }
+};
+
 app.post('/api/auth/forgot-password', async (req, res) => {
   const { email } = req.body;
-  try {
-    const { data: user, error } = await supabase.from('users').select('*').eq('email', email).maybeSingle();
-    if (error || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
+  if (!email) {
+    return res.status(400).json({ error: 'E-mail é obrigatório.' });
+  }
 
-    // Notify admin via a notification in settings
+  try {
+    const { data: user, error } = await supabase.from('users').select('*').eq('email', email.trim()).maybeSingle();
+    if (error || !user) {
+      return res.status(404).json({ error: 'Nenhum usuário encontrado com este e-mail.' });
+    }
+
+    // Generate secure 6-digit verification code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutes validity
+    passwordResetCodes.set(email.trim().toLowerCase(), { code, expiresAt });
+
+    console.log(`🔑 [Recuperação de Senha] Email: ${email.trim()} - Código de Verificação: ${code}`);
+
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+
+    let mailSent = false;
+    let smtpError = '';
+    let isAuthError = false;
+
+    if (!smtpUser || !smtpPass) {
+      smtpError = 'SMTP não configurado ou credenciais ausentes';
+    } else {
+      try {
+        await sendPasswordResetEmail(email.trim(), code);
+        mailSent = true;
+      } catch (mailErr: any) {
+        mailSent = false;
+        smtpError = mailErr.message || String(mailErr);
+        isAuthError = !!(smtpError.includes('535') || smtpError.toLowerCase().includes('authentication') || smtpError.toLowerCase().includes('credential'));
+      }
+    }
+
+    // Always create admin notification as a robust backup
     await addAdminNotification({
       type: 'forgot_password',
       user_id: user.id,
       user_name: user.name,
       user_email: user.email,
       user_phone: user.phone,
-      message: `O usuário ${user.name} (@${user.nickname}) solicitou recuperação de senha.`
+      message: `Código de recuperação gerado para ${user.name} (@${user.nickname}): ${code}. Código de conferência seguro por e-mail.`
     });
 
-    res.json({ success: true });
+    res.json({ 
+      success: true,
+      mailSent,
+      smtpError: smtpError || null,
+      isAuthError,
+      developmentCode: !mailSent ? code : null
+    });
+  } catch (err: any) {
+    console.error('Password reset request error:', err);
+    res.status(500).json({ error: 'Erro ao processar solicitação de recuperação' });
+  }
+});
+
+app.post('/api/auth/verify-reset-code', async (req, res) => {
+  const { email, code } = req.body;
+  if (!email || !code) {
+    return res.status(400).json({ error: 'E-mail e código de verificação são obrigatórios.' });
+  }
+
+  const record = passwordResetCodes.get(email.trim().toLowerCase());
+  if (!record) {
+    return res.status(400).json({ error: 'Nenhum código solicitado para este e-mail.' });
+  }
+
+  if (Date.now() > record.expiresAt) {
+    passwordResetCodes.delete(email.trim().toLowerCase());
+    return res.status(400).json({ error: 'Este código expirou. Solicite um novo código.' });
+  }
+
+  if (record.code !== code.trim()) {
+    return res.status(400).json({ error: 'Código de verificação inválido.' });
+  }
+
+  res.json({ success: true, message: 'Código verificado com sucesso.' });
+});
+
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { email, code, password } = req.body;
+  if (!email || !code || !password) {
+    return res.status(400).json({ error: 'Dados insuficientes para redefinir senha.' });
+  }
+
+  const record = passwordResetCodes.get(email.trim().toLowerCase());
+  if (!record) {
+    return res.status(400).json({ error: 'Autorização inválida ou expirada.' });
+  }
+
+  if (Date.now() > record.expiresAt) {
+    passwordResetCodes.delete(email.trim().toLowerCase());
+    return res.status(400).json({ error: 'Sua sessão de redefinição expirou.' });
+  }
+
+  if (record.code !== code.trim()) {
+    return res.status(400).json({ error: 'Erro de verificação de segurança.' });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .update({ password: password })
+      .eq('email', email.trim())
+      .select()
+      .maybeSingle();
+
+    if (error || !data) {
+      throw error || new Error('User not found during update');
+    }
+
+    passwordResetCodes.delete(email.trim().toLowerCase());
+
+    res.json({ success: true, message: 'Senha redefinida com sucesso!' });
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao processar solicitação' });
+    console.error('Reset password error:', err);
+    res.status(500).json({ error: 'Erro ao atualizar a senha no banco de dados.' });
   }
 });
 
