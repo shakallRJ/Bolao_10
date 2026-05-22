@@ -336,7 +336,7 @@ export const PagBankCheckout: React.FC<PagBankCheckoutProps> = ({ amount, token,
       </button>
 
       <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-center gap-2 grayscale opacity-50">
-        <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/PagBank.jpg" alt="PagBank" className="h-4" referrerPolicy="no-referrer" />
+        <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/PagBank.jpg" alt="PagBank" className="h-4 object-contain" referrerPolicy="no-referrer" />
         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ambiente Seguro</span>
       </div>
     </div>

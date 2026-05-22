@@ -231,11 +231,11 @@ const NotificationsDropdown = () => {
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={handleOpen}
-        className="relative p-2 text-gray-500 hover:text-primary transition-colors rounded-full hover:bg-gray-100"
+        className="relative p-2 text-gray-400 hover:text-white transition-colors rounded-full hover:bg-[#12182B]"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[#FF6B00] rounded-full border-2 border-[#0A0F1E]"></span>
         )}
       </button>
 
@@ -245,12 +245,12 @@ const NotificationsDropdown = () => {
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
+            className="absolute right-0 mt-2 w-80 bg-[#12182B] rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] border border-[#2A3441] overflow-hidden z-50"
           >
-            <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-              <h3 className="font-bold text-gray-900">Notificações</h3>
+            <div className="p-4 border-b border-[#2A3441] bg-[#0A0F1E] flex justify-between items-center">
+              <h3 className="font-bold text-white uppercase tracking-wider text-sm">Notificações</h3>
               {unreadCount > 0 && (
-                <span className="bg-primary text-white text-xs px-2 py-1 rounded-full font-medium">
+                <span className="bg-[#32CD32] text-black text-[10px] px-2 py-1 rounded-full font-black uppercase tracking-widest">
                   {unreadCount} novas
                 </span>
               )}
@@ -259,19 +259,19 @@ const NotificationsDropdown = () => {
             <div className="max-h-96 overflow-y-auto">
               {notifications.length === 0 ? (
                 <div className="p-6 text-center text-gray-500">
-                  <Bell className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                  <p className="text-sm">Nenhuma notificação no momento.</p>
+                  <Bell className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                  <p className="text-sm font-bold uppercase tracking-wider">Nenhuma notificação.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-[#2A3441]">
                   {notifications.map((notif) => {
                     const isAdminMsg = notif.type === 'admin_msg';
                     const iconColor = isAdminMsg ? (
-                      notif.msgType === 'success' ? 'bg-green-100 text-green-600' :
-                      notif.msgType === 'warning' ? 'bg-yellow-100 text-yellow-600' :
-                      (notif.msgType === 'alert' || notif.msgType === 'error') ? 'bg-red-100 text-red-600' :
-                      'bg-blue-100 text-blue-600'
-                    ) : 'bg-green-100 text-green-600';
+                      notif.msgType === 'success' ? 'bg-[#32CD32]/20 text-[#32CD32]' :
+                      notif.msgType === 'warning' ? 'bg-yellow-500/20 text-yellow-500' :
+                      (notif.msgType === 'alert' || notif.msgType === 'error') ? 'bg-[#FF6B00]/20 text-[#FF6B00]' :
+                      'bg-blue-500/20 text-blue-500'
+                    ) : 'bg-[#32CD32]/20 text-[#32CD32]';
 
                     const Icon = isAdminMsg ? (
                       (notif.msgType === 'alert' || notif.msgType === 'error') ? AlertCircle :
@@ -281,20 +281,20 @@ const NotificationsDropdown = () => {
                     ) : Trophy;
 
                     return (
-                      <div key={notif.id} className="p-4 hover:bg-gray-50 transition-colors">
+                      <div key={notif.id} className="p-4 hover:bg-[#1A2235] transition-colors">
                         <div className="flex items-start space-x-3">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${iconColor}`}>
                             <Icon className="w-5 h-5" />
                           </div>
                           <div className="flex-1">
-                            <p className="text-sm font-bold text-gray-900">{notif.title}</p>
-                            <p className="text-sm text-gray-600 mt-0.5 leading-snug">{notif.message}</p>
+                            <p className="text-sm font-black text-white">{notif.title}</p>
+                            <p className="text-sm text-gray-400 mt-0.5 leading-snug">{notif.message}</p>
                             <div className="flex items-center justify-between mt-2">
                               {isAdminMsg && (
-                                <p className="text-[10px] text-gray-400 uppercase font-bold">Aviso Oficial</p>
+                                <p className="text-[10px] text-gray-500 uppercase font-black">Aviso Oficial</p>
                               )}
                               {notif.createdAt && (
-                                <p className="text-[10px] text-gray-400">{formatDate(notif.createdAt, 'dd/MM HH:mm')}</p>
+                                <p className="text-[10px] text-gray-500 uppercase font-bold">{formatDate(notif.createdAt, 'dd/MM HH:mm')}</p>
                               )}
                             </div>
                           </div>
@@ -331,22 +331,22 @@ const Navbar = ({ onNavigate, currentPage }: { onNavigate: (page: string) => voi
   ];
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <nav className="bg-[#0A0F1E] border-b border-[#2A3441] sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => onNavigate('landing')}>
-              <span className="text-2xl font-bold text-primary">BOLÃO<span className="text-secondary">10</span></span>
+              <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/logo01.png" alt="Bolão 10" className="h-12 object-contain" />
             </div>
             <div className="hidden sm:ml-8 sm:flex sm:space-x-8">
               {navItems.filter(i => i.show).map((item) => (
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${
+                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-bold uppercase transition-colors ${
                     currentPage === item.id 
-                      ? 'border-secondary text-primary' 
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-[#32CD32] text-white' 
+                      : 'border-transparent text-gray-400 hover:text-white hover:border-gray-500'
                   }`}
                 >
                   <item.icon className="w-4 h-4 mr-2" />
@@ -361,14 +361,14 @@ const Navbar = ({ onNavigate, currentPage }: { onNavigate: (page: string) => voi
                 <NotificationsDropdown />
                 <button 
                   onClick={() => onNavigate('profile')}
-                  className="flex items-center text-sm text-gray-700 hover:text-primary transition-colors"
+                  className="flex items-center text-sm font-bold text-gray-400 hover:text-white transition-colors uppercase"
                 >
                   <UserIcon className="w-4 h-4 mr-2" />
                   {user.name}
                 </button>
                 <button
                   onClick={logout}
-                  className="text-gray-500 hover:text-red-600 transition-colors"
+                  className="text-gray-500 hover:text-[#FF6B00] transition-colors"
                 >
                   <LogOut className="w-5 h-5" />
                 </button>
@@ -376,9 +376,9 @@ const Navbar = ({ onNavigate, currentPage }: { onNavigate: (page: string) => voi
             ) : (
               <button
                 onClick={() => onNavigate('login')}
-                className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-opacity-90 transition-all"
+                className="bg-[#32CD32] text-black px-6 py-2 rounded-lg text-sm font-black uppercase hover:scale-105 transition-all shadow-[0_0_15px_rgba(50,205,50,0.4)]"
               >
-                Entrar
+                Entrar / Depositar
               </button>
             )}
           </div>
@@ -386,7 +386,7 @@ const Navbar = ({ onNavigate, currentPage }: { onNavigate: (page: string) => voi
             {user && <NotificationsDropdown />}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-400 hover:text-white"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -400,14 +400,14 @@ const Navbar = ({ onNavigate, currentPage }: { onNavigate: (page: string) => voi
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="sm:hidden bg-white border-b border-gray-200"
+            className="sm:hidden bg-[#0A0F1E] border-b border-[#2A3441]"
           >
             <div className="pt-2 pb-3 space-y-1">
               {navItems.filter(i => i.show).map((item) => (
                 <button
                   key={item.id}
                   onClick={() => { onNavigate(item.id); setIsMenuOpen(false); }}
-                  className="flex items-center w-full px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50"
+                  className="flex items-center w-full px-4 py-3 text-base font-bold uppercase text-gray-400 hover:text-white hover:bg-[#12182B]"
                 >
                   <item.icon className="w-5 h-5 mr-3" />
                   {item.label}
@@ -416,7 +416,7 @@ const Navbar = ({ onNavigate, currentPage }: { onNavigate: (page: string) => voi
               {user ? (
                 <button
                   onClick={logout}
-                  className="flex items-center w-full px-4 py-2 text-base font-medium text-red-600 hover:bg-red-50"
+                  className="flex items-center w-full px-4 py-3 text-base font-bold uppercase text-[#FF6B00] hover:bg-[#12182B]"
                 >
                   <LogOut className="w-5 h-5 mr-3" />
                   Sair
@@ -424,9 +424,9 @@ const Navbar = ({ onNavigate, currentPage }: { onNavigate: (page: string) => voi
               ) : (
                 <button
                   onClick={() => onNavigate('login')}
-                  className="flex items-center w-full px-4 py-2 text-base font-medium text-primary hover:bg-gray-50"
+                  className="flex items-center w-full px-4 py-3 text-base font-black uppercase text-[#32CD32] hover:bg-[#12182B]"
                 >
-                  Entrar
+                  Entrar / Depositar
                 </button>
               )}
             </div>
@@ -441,74 +441,58 @@ const Navbar = ({ onNavigate, currentPage }: { onNavigate: (page: string) => voi
 
 const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    <div className="min-h-screen bg-transparent">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/promo01.png" alt="Promoção" className="w-full max-w-4xl mx-auto rounded-2xl shadow-[0_0_20px_rgba(255,107,0,0.2)] border border-[#2A3441]" />
+          </motion.div>
+          
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl font-bold text-primary tracking-tight"
+            className="text-4xl sm:text-6xl font-black text-white uppercase italic tracking-tight"
           >
-            BOLÃO<span className="text-secondary">10</span>
+            O BOLÃO MAIS AGRESSIVO DO BRASIL.
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="mt-6 text-xl text-gray-600 max-w-2xl mx-auto"
+            className="mt-6 text-xl text-gray-400 font-bold uppercase"
           >
-            A plataforma de palpites de futebol focada em conhecimento e transparência. Sem algoritmos, sem truques.
+            MOSTRE QUE VOCÊ SABE E DOMINE A RODADA.
           </motion.p>
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mt-10 flex flex-col sm:flex-row justify-center gap-4"
+            className="mt-8 flex flex-col items-center justify-center gap-6"
           >
             <button 
               onClick={() => onNavigate('login')}
-              className="bg-primary text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg transition-all flex items-center justify-center"
+              className="bg-[#32CD32] text-black px-10 py-5 rounded-full font-black text-2xl uppercase italic tracking-wider hover:scale-105 transition-all shadow-[0_0_15px_rgba(50,205,50,0.4)]"
             >
-              Começar Agora <ArrowRight className="ml-2 w-5 h-5" />
+              Criar Conta / Depositar
             </button>
-            <button className="bg-gray-100 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-200 transition-all">
-              Como Funciona
-            </button>
+            
+             <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/game.png" alt="Game Stick" className="h-32 object-contain drop-shadow-[0_0_15px_rgba(50,205,50,0.3)] mt-6" />
           </motion.div>
         </div>
 
-        <div className="mt-32 grid grid-cols-1 md:grid-cols-3 gap-12">
-          {[
-            { title: 'Transparência Total', desc: 'Todos os palpites ficam visíveis para todos os participantes assim que a rodada começa.', icon: ShieldCheck },
-            { title: 'Prêmios Reais', desc: '75% da arrecadação vai para os vencedores da rodada. Simples e direto.', icon: Trophy },
-            { title: 'Bônus Acumulado', desc: 'Acerte os 10 resultados e leve o pote acumulado do Bônus 10 + 01 Game Stick M15.', icon: CheckCircle2 },
-          ].map((feature, i) => (
-            <motion.div 
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + i * 0.1 }}
-              className="p-8 bg-gray-50 rounded-3xl border border-gray-100"
-            >
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6">
-                <feature.icon className="w-6 h-6 text-secondary" />
-              </div>
-              <h3 className="text-xl font-bold text-primary mb-4">{feature.title}</h3>
-              <p className="text-gray-600 leading-relaxed">{feature.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-        
-        <div className="mt-32 pt-12 border-t border-gray-100 flex flex-col items-center gap-6">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">Parceiro Oficial de Pagamentos</p>
-          <div className="flex items-center gap-6 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
-            <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/PagBank.jpg" alt="PagBank" className="h-8" referrerPolicy="no-referrer" />
-            <div className="h-10 w-[1px] bg-gray-200"></div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Ambiente</span>
-              <span className="text-sm font-bold text-green-600 uppercase tracking-wider">100% Seguro</span>
+        <div className="mt-20 border-t border-[#2A3441] flex flex-wrap justify-center items-center gap-6 pt-12">
+            <div className="bg-[#12182B] border border-[#2A3441] p-4 rounded-2xl flex flex-col items-center justify-center min-w-[200px]">
+               <span className="text-gray-400 font-bold uppercase text-xs mb-3 text-center w-full">Ambiente 100% Seguro</span>
+               <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/PagBank.jpg" alt="PagBank" className="h-8 object-contain rounded-lg" referrerPolicy="no-referrer" />
             </div>
-          </div>
+            <div className="bg-[#12182B] border border-[#2A3441] p-4 rounded-2xl flex items-center justify-center min-w-[200px] h-[90px]">
+              <span className="text-white font-black text-3xl italic tracking-wider">+18</span>
+              <span className="text-gray-400 uppercase font-bold text-[10px] ml-3 leading-tight text-left">Jogue com<br/>Responsabilidade</span>
+            </div>
         </div>
       </div>
     </div>
@@ -601,24 +585,24 @@ const LoginPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border border-gray-100"
+        className="bg-[#12182B] p-8 rounded-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] w-full max-w-md border border-[#2A3441]"
       >
-        <h2 className="text-3xl font-bold text-primary mb-2">
+        <h2 className="text-3xl font-black text-white italic uppercase mb-2">
           {isRegister ? 'Criar Conta' : 'Bem-vindo'}
         </h2>
-        <p className="text-gray-500 mb-8">
-          {isRegister ? 'Junte-se ao Bolão10 hoje.' : 'Acesse sua conta para palpitar.'}
+        <p className="text-gray-400 mb-8 font-bold">
+          {isRegister ? 'JUNTE-SE AO BOLÃO MAIS AGRESSIVO.' : 'ACESSE SUA CONTA PARA PALPITAR.'}
         </p>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-sm flex items-center">
-            <AlertCircle className="w-4 h-4 mr-2" /> {error}
+          <div className="mb-6 p-4 bg-[#FF6B00]/10 border border-[#FF6B00]/30 text-[#FF6B00] rounded-xl text-sm flex items-center font-bold uppercase tracking-wide">
+            <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" /> <span className="flex-1">{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="mb-6 p-4 bg-green-50 text-green-600 rounded-xl text-sm flex items-center">
-            <CheckCircle2 className="w-4 h-4 mr-2" /> {success}
+          <div className="mb-6 p-4 bg-[#32CD32]/10 border border-[#32CD32]/30 text-[#32CD32] rounded-xl text-sm flex items-center font-bold uppercase tracking-wide">
+            <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0" /> <span className="flex-1">{success}</span>
           </div>
         )}
 
@@ -626,76 +610,76 @@ const LoginPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
           {isRegister && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Nome Completo</label>
                 <input 
                   type="text" 
                   required 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-secondary focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600"
                   placeholder="Seu nome"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nickname (Apelido)</label>
+                <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Nickname (Apelido)</label>
                 <input 
                   type="text" 
                   required 
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-secondary focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600"
                   placeholder="Ex: artilheiro10"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Telefone (WhatsApp)</label>
+                <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Telefone (WhatsApp)</label>
                 <input 
                   type="tel" 
                   required 
                   value={phone}
                   onChange={handlePhoneChange}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-secondary focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600"
                   placeholder="(00) 00000-0000"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Código de Indicação (Opcional)</label>
+                <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Código de Indicação (Opcional)</label>
                 <input 
                   type="text" 
                   value={referralCodeInput}
                   onChange={(e) => setReferralCodeInput(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-secondary focus:border-transparent outline-none transition-all uppercase"
+                  className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all uppercase placeholder-gray-600"
                   placeholder="Ex: 50969B51"
                 />
               </div>
             </>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+            <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">E-mail</label>
             <input 
               type="email" 
               required 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-secondary focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600"
               placeholder="seu@email.com"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+            <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Senha</label>
             <div className="relative">
               <input 
                 type={showPassword ? "text" : "password"} 
                 required 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-secondary focus:border-transparent outline-none transition-all pr-12"
+                className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all pr-12 placeholder-gray-600"
                 placeholder="••••••••"
               />
               <button 
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
@@ -707,7 +691,7 @@ const LoginPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
               <button 
                 type="button"
                 onClick={handleForgotPassword}
-                className="text-xs text-secondary hover:underline font-medium"
+                className="text-xs text-[#32CD32] hover:underline font-bold uppercase tracking-wider"
               >
                 Esqueci minha senha
               </button>
@@ -716,24 +700,24 @@ const LoginPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
 
           <button 
             type="submit"
-            className="w-full bg-primary text-white py-4 rounded-xl font-semibold hover:bg-opacity-90 transition-all mt-4"
+            className="w-full bg-[#32CD32] text-black py-4 rounded-xl font-black uppercase italic tracking-wider hover:scale-105 transition-all mt-4 shadow-[0_0_15px_rgba(50,205,50,0.4)]"
           >
-            {isRegister ? 'Cadastrar' : 'Entrar'}
+            {isRegister ? 'Criar Conta' : 'Entrar na Plataforma'}
           </button>
         </form>
 
         <div className="mt-8 text-center space-y-6">
           <button 
             onClick={() => setIsRegister(!isRegister)}
-            className="text-sm text-gray-500 hover:text-secondary transition-colors"
+            className="text-sm font-bold text-gray-400 uppercase hover:text-white transition-colors tracking-wider"
           >
-            {isRegister ? 'Já tem uma conta? Entre aqui' : 'Não tem uma conta? Cadastre-se'}
+            {isRegister ? 'JÁ TEM UMA CONTA? ENTRE' : 'NÃO TEM UMA CONTA? CADASTRE-SE'}
           </button>
 
-          <div className="pt-6 border-t border-gray-100 flex items-center justify-center gap-3 grayscale opacity-50">
-            <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/PagBank.jpg" alt="PagBank" className="h-4" referrerPolicy="no-referrer" />
-            <div className="h-4 w-[1px] bg-gray-200"></div>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ambiente Seguro</span>
+          <div className="pt-6 border-t border-[#2A3441] flex items-center justify-center gap-3">
+            <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/PagBank.jpg" alt="PagBank" className="h-5 object-contain rounded" referrerPolicy="no-referrer" />
+            <div className="h-4 w-[1px] bg-[#2A3441]"></div>
+            <span className="text-[10px] font-bold text-[#32CD32] uppercase tracking-widest">Ambiente Seguro</span>
           </div>
         </div>
       </motion.div>
@@ -937,86 +921,86 @@ const WalletPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   if (loading) return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-primary text-white p-4 flex justify-between items-center shadow-md">
+    <div className="min-h-[calc(100vh-64px)] bg-transparent flex flex-col">
+      <header className="bg-[#12182B] text-white p-4 flex justify-between items-center shadow-[0_4px_20px_rgba(0,0,0,0.5)] border-b border-[#2A3441] sticky top-0 z-50">
         <div className="flex items-center space-x-4">
-          <button onClick={() => onNavigate('dashboard')} className="hover:bg-white/10 p-2 rounded-full transition-colors">
-            <ArrowLeft className="w-6 h-6" />
+          <button onClick={() => onNavigate('dashboard')} className="hover:bg-[#1A2235] p-2 rounded-full transition-colors group">
+            <ArrowLeft className="w-6 h-6 text-gray-400 group-hover:text-white" />
           </button>
-          <h1 className="text-xl font-bold">Resumo Financeiro</h1>
+          <h1 className="text-xl font-black uppercase italic tracking-wider">Resumo Financeiro</h1>
         </div>
-        <div className="hidden sm:flex items-center gap-3 bg-white/10 px-4 py-1.5 rounded-full backdrop-blur-sm border border-white/10">
-          <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/PagBank.jpg" alt="PagBank" className="h-4 brightness-0 invert opacity-80" referrerPolicy="no-referrer" />
-          <div className="h-4 w-[1px] bg-white/20"></div>
-          <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest">Ambiente Seguro</span>
+        <div className="hidden sm:flex items-center gap-3 bg-[#1A2235] px-4 py-1.5 rounded-full backdrop-blur-sm border border-[#2A3441]">
+          <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/PagBank.jpg" alt="PagBank" className="h-4 object-contain rounded" referrerPolicy="no-referrer" />
+          <div className="h-4 w-[1px] bg-[#2A3441]"></div>
+          <span className="text-[10px] font-bold text-[#32CD32] uppercase tracking-widest">Ambiente Seguro</span>
         </div>
       </header>
       
       <main className="flex-1 p-4 md:p-8 max-w-4xl mx-auto w-full">
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center">
-            <AlertCircle className="w-5 h-5 mr-2" />
-            {error}
+          <div className="bg-[#FF6B00]/10 border border-[#FF6B00]/30 text-[#FF6B00] px-4 py-3 rounded-xl mb-6 flex items-center font-bold uppercase tracking-wide text-sm">
+            <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
+            <span className="flex-1">{error}</span>
           </div>
         )}
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
+        <div className="bg-[#12182B] rounded-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-[#2A3441] p-6 md:p-8 mb-8">
           <div className="flex items-center space-x-4 mb-6">
-            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+            <div className="w-12 h-12 bg-[#1A2235] rounded-full flex items-center justify-center text-gray-400 border border-[#2A3441]">
               <Wallet className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Minha Carteira</h2>
-              <p className="text-gray-500">Resumo da sua conta</p>
+              <h2 className="text-2xl font-black text-white italic uppercase tracking-wider">Minha Carteira</h2>
+              <p className="text-gray-400 font-bold uppercase tracking-wider text-xs mt-1">Resumo da sua conta</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-            <div className="bg-gradient-to-br from-primary to-primary/80 rounded-2xl p-6 border border-gray-100 text-white shadow-md flex flex-col justify-between">
+            <div className="bg-[#1A2235] rounded-2xl p-6 border border-[#2A3441] text-white shadow-[0_0_15px_rgba(0,0,0,0.5)] flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-white/80 font-medium">Saldo Disponível</h3>
-                  <Wallet className="w-5 h-5 text-white" />
+                  <h3 className="text-gray-400 font-bold uppercase tracking-wider text-xs">Saldo Disponível</h3>
+                  <Wallet className="w-5 h-5 text-gray-400" />
                 </div>
-                <p className="text-3xl font-bold mb-4">
+                <p className="text-3xl font-black text-[#32CD32] italic mb-4">
                   R$ {balance.toFixed(2)}
                 </p>
               </div>
               <div className="flex gap-2 mt-auto">
                 <button 
                   onClick={() => setIsDepositModalOpen(true)}
-                  className="flex-1 bg-white text-primary font-bold py-2 rounded-xl hover:bg-gray-50 transition-colors"
+                  className="flex-1 bg-[#32CD32] text-black font-black uppercase tracking-wider py-2 rounded-xl hover:scale-105 transition-all text-sm shadow-[0_0_10px_rgba(50,205,50,0.3)]"
                 >
                   Depositar
                 </button>
                 <button 
                   onClick={() => setIsWithdrawModalOpen(true)}
-                  className="flex-1 bg-primary-dark border border-white/20 text-white font-bold py-2 rounded-xl hover:bg-white/10 transition-colors"
+                  className="flex-1 border border-[#2A3441] bg-transparent text-white font-black uppercase tracking-wider py-2 rounded-xl hover:bg-[#2A3441] transition-all text-sm"
                 >
                   Sacar
                 </button>
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 flex flex-col justify-between">
+            <div className="bg-[#0A0F1E] rounded-2xl p-6 border border-[#2A3441] flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-gray-500 font-medium">Total Ganho</h3>
-                  <TrendingUp className="w-5 h-5 text-green-500" />
+                  <h3 className="text-gray-400 font-bold uppercase tracking-wider text-xs">Total Ganho</h3>
+                  <TrendingUp className="w-5 h-5 text-[#32CD32]" />
                 </div>
-                <p className="text-3xl font-bold text-green-600">
+                <p className="text-3xl font-black italic text-[#32CD32]">
                   R$ {walletData?.totalWinnings?.toFixed(2) || '0.00'}
                 </p>
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 flex flex-col justify-between">
+            <div className="bg-[#0A0F1E] rounded-2xl p-6 border border-[#2A3441] flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-gray-500 font-medium">Palpites Feitos</h3>
-                  <Trophy className="w-5 h-5 text-primary" />
+                  <h3 className="text-gray-400 font-bold uppercase tracking-wider text-xs">Palpites Feitos</h3>
+                  <Trophy className="w-5 h-5 text-white" />
                 </div>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-black italic text-white">
                   {walletData?.predictionsMade || 0}
                 </p>
               </div>
@@ -1024,40 +1008,40 @@ const WalletPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-orange-50 rounded-2xl p-6 border border-orange-100 flex flex-col justify-between">
+            <div className="bg-[#FF6B00]/10 rounded-2xl p-6 border border-[#FF6B00]/30 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-orange-800 font-medium">Depósitos Pendentes</h3>
-                  <Clock className="w-5 h-5 text-orange-500" />
+                  <h3 className="text-[#FF6B00] font-black uppercase tracking-wider text-xs">Depósitos Pendentes</h3>
+                  <Clock className="w-5 h-5 text-[#FF6B00]" />
                 </div>
-                <p className="text-3xl font-bold text-orange-600">
+                <p className="text-3xl font-black italic text-[#FF6B00]">
                   R$ {(walletData?.pendingDeposits?.reduce((acc: number, d: any) => acc + d.amount, 0) || 0).toFixed(2)}
                 </p>
-                <p className="text-sm text-orange-700 mt-2">
+                <p className="text-[10px] text-[#FF6B00]/80 mt-2 font-bold uppercase tracking-widest">
                   {walletData?.pendingDeposits?.length || 0} solicitação(ões) em análise
                 </p>
               </div>
             </div>
 
-            <div className="bg-blue-50 rounded-2xl p-6 border border-blue-100 flex flex-col justify-between">
+            <div className="bg-[#32CD32]/10 rounded-2xl p-6 border border-[#32CD32]/30 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-blue-800 font-medium">Saques Pendentes</h3>
-                  <Clock className="w-5 h-5 text-blue-500" />
+                  <h3 className="text-[#32CD32] font-black uppercase tracking-wider text-xs">Saques Pendentes</h3>
+                  <Clock className="w-5 h-5 text-[#32CD32]" />
                 </div>
-                <p className="text-3xl font-bold text-blue-600">
+                <p className="text-3xl font-black italic text-[#32CD32]">
                   R$ {(walletData?.pendingWithdrawals?.reduce((acc: number, d: any) => acc + Math.abs(d.amount), 0) || 0).toFixed(2)}
                 </p>
-                <p className="text-sm text-blue-700 mt-2">
+                <p className="text-[10px] text-[#32CD32]/80 mt-2 font-bold uppercase tracking-widest">
                   {walletData?.pendingWithdrawals?.length || 0} solicitação(ões) em análise
                 </p>
               </div>
             </div>
           </div>
           
-          <div className="mt-8 p-4 bg-blue-50 text-blue-800 rounded-xl text-sm flex items-start">
-            <Info className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
-            <p>
+          <div className="mt-8 p-4 bg-[#2A3441] border border-[#2A3441] text-gray-400 rounded-xl text-sm flex items-start">
+            <Info className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5 text-blue-400" />
+            <p className="uppercase tracking-wider font-bold text-xs leading-relaxed">
               O total gasto considera apenas os palpites que foram validados pelo administrador. 
               Os ganhos são calculados com base nas rodadas finalizadas onde você foi um dos vencedores.
             </p>
@@ -1065,35 +1049,35 @@ const WalletPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
         </div>
 
         {walletData?.pendingPredictions?.length > 0 && (
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
-            <h3 className="text-xl font-bold text-primary mb-6 flex items-center">
-              <Clock className="w-5 h-5 mr-2" /> Palpites Pendentes de Pagamento
+          <div className="bg-[#12182B] rounded-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-[#2A3441] p-6 md:p-8 mb-8">
+            <h3 className="text-xl font-black text-[#FF6B00] mb-6 flex items-center uppercase italic tracking-wider">
+              <Clock className="w-5 h-5 mr-3" /> Palpites Pendentes de Pagamento
             </h3>
             <div className="space-y-4">
               {walletData.pendingPredictions.map((p: any) => (
-                <div key={p.id} className="p-4 bg-orange-50 border border-orange-100 rounded-2xl">
+                <div key={p.id} className="p-4 bg-[#0A0F1E] border border-[#FF6B00]/30 rounded-2xl">
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                      <p className="font-bold text-orange-800">Rodada #{p.rounds?.number}</p>
-                      <p className="text-sm text-orange-600">Aguardando validação do comprovante.</p>
-                      <p className="text-xs text-orange-500 mt-1">Enviado em: {formatDate(p.created_at, 'dd/MM/yyyy HH:mm')}</p>
+                      <p className="font-black text-white italic text-lg uppercase">Rodada #{p.rounds?.number}</p>
+                      <p className="text-sm font-bold text-[#FF6B00] uppercase tracking-wider mt-1">Aguardando validação do comprovante.</p>
+                      <p className="text-[10px] text-gray-500 mt-1 font-bold uppercase tracking-widest">Enviado em: {formatDate(p.created_at, 'dd/MM/yyyy HH:mm')}</p>
                     </div>
                     <div className="w-full md:w-auto">
                       <div className="flex flex-col space-y-2">
-                        <label className="text-xs font-bold text-orange-700 uppercase">Reenviar Comprovante:</label>
+                        <label className="text-[10px] font-black text-white uppercase tracking-widest">Reenviar Comprovante:</label>
                         <div className="flex gap-2">
                           <input 
                             type="file" 
                             accept="image/*"
                             onChange={(e) => setProofFile(e.target.files?.[0] || null)}
-                            className="text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-orange-100 file:text-orange-700 hover:file:bg-orange-200"
+                            className="text-xs file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-[#1A2235] file:text-white hover:file:bg-[#2A3441] w-full max-w-[200px] text-gray-400"
                           />
                           <button 
                             onClick={() => handleUpdateProof(p.id)}
                             disabled={uploadingId === p.id || !proofFile}
-                            className="bg-orange-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-orange-700 transition-all disabled:opacity-50"
+                            className="bg-[#32CD32] text-black px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 flex-shrink-0"
                           >
-                            {uploadingId === p.id ? 'Enviando...' : 'Pagar Palpite Pendente'}
+                            {uploadingId === p.id ? 'Enviando...' : 'Pagar'}
                           </button>
                         </div>
                       </div>
@@ -1106,27 +1090,27 @@ const WalletPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
         )}
 
         {walletData?.pendingDeposits?.length > 0 && (
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
-            <h3 className="text-xl font-bold text-orange-600 mb-6 flex items-center">
-              <Clock className="w-5 h-5 mr-2" /> Depósitos em Análise
+          <div className="bg-[#12182B] rounded-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-[#2A3441] p-6 md:p-8 mb-8">
+            <h3 className="text-xl font-black text-[#FF6B00] mb-6 flex items-center uppercase italic tracking-wider">
+              <Clock className="w-5 h-5 mr-3" /> Depósitos em Análise
             </h3>
             <div className="space-y-4">
               {walletData.pendingDeposits.map((d: any) => (
-                <div key={d.id} className="p-4 bg-orange-50 border border-orange-100 rounded-2xl flex justify-between items-center">
+                <div key={d.id} className="p-4 bg-[#0A0F1E] border border-orange-500/30 rounded-2xl flex justify-between items-center">
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100 text-orange-600">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-orange-500/10 border border-orange-500/30 text-[#FF6B00]">
                       <ArrowDownCircle className="w-5 h-5" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="font-bold text-orange-800">Depósito via PIX</p>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-orange-100 text-orange-700">Pendente</span>
+                        <p className="font-bold text-white uppercase tracking-wide text-sm">Depósito via PIX</p>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider bg-orange-500/20 text-[#FF6B00] border border-orange-500/30">Pendente</span>
                       </div>
-                      <p className="text-xs text-orange-500 mt-1">Solicitado em: {formatDate(d.created_at, 'dd/MM/yyyy HH:mm')}</p>
+                      <p className="text-xs text-gray-400 mt-1 uppercase tracking-wide font-medium">Solicitado em: {formatDate(d.created_at, 'dd/MM/yyyy HH:mm')}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-orange-600">R$ {d.amount.toFixed(2)}</p>
+                    <p className="font-black text-[#FF6B00] text-lg">R$ {d.amount.toFixed(2)}</p>
                   </div>
                 </div>
               ))}
@@ -1135,28 +1119,28 @@ const WalletPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
         )}
 
         {walletData?.pendingWithdrawals?.length > 0 && (
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
-            <h3 className="text-xl font-bold text-blue-600 mb-6 flex items-center">
-              <Clock className="w-5 h-5 mr-2" /> Saques em Análise
+          <div className="bg-[#12182B] rounded-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-[#2A3441] p-6 md:p-8 mb-8">
+            <h3 className="text-xl font-black text-blue-400 mb-6 flex items-center uppercase italic tracking-wider">
+              <Clock className="w-5 h-5 mr-3" /> Saques em Análise
             </h3>
             <div className="space-y-4">
               {walletData.pendingWithdrawals.map((w: any) => (
-                <div key={w.id} className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex justify-between items-center">
+                <div key={w.id} className="p-4 bg-[#0A0F1E] border border-blue-500/30 rounded-2xl flex justify-between items-center">
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-100 text-blue-600">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-500/10 border border-blue-500/30 text-blue-400">
                       <ArrowUpCircle className="w-5 h-5" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="font-bold text-blue-800">Saque PIX</p>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-blue-100 text-blue-700">Pendente</span>
+                        <p className="font-bold text-white uppercase tracking-wide text-sm">Saque PIX</p>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider bg-blue-500/20 text-blue-400 border border-blue-500/30">Pendente</span>
                       </div>
-                      <p className="text-sm text-blue-600 mt-0.5">Chave: {w.reference_id?.replace('pending_', '')}</p>
-                      <p className="text-xs text-blue-500 mt-0.5">Solicitado em: {formatDate(w.created_at, 'dd/MM/yyyy HH:mm')}</p>
+                      <p className="text-xs text-gray-300 mt-0.5 font-medium">Chave: {w.reference_id?.replace('pending_', '')}</p>
+                      <p className="text-xs text-gray-400 mt-0.5 uppercase tracking-wide font-medium">Solicitado em: {formatDate(w.created_at, 'dd/MM/yyyy HH:mm')}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-blue-600">R$ {Math.abs(w.amount).toFixed(2)}</p>
+                    <p className="font-black text-blue-400 text-lg">R$ {Math.abs(w.amount).toFixed(2)}</p>
                   </div>
                 </div>
               ))}
@@ -1164,53 +1148,57 @@ const WalletPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
           </div>
         )}
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
-          <h3 className="text-xl font-bold text-primary mb-6 flex items-center">
-            <History className="w-5 h-5 mr-2" /> Extrato da Carteira
+        <div className="bg-[#12182B] rounded-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-[#2A3441] p-6 md:p-8 mb-8">
+          <h3 className="text-xl font-black text-white mb-6 flex items-center uppercase italic tracking-wider">
+            <History className="w-5 h-5 mr-3 text-[#32CD32]" /> Extrato da Carteira
           </h3>
           <div className="space-y-4">
             {transactions.length > 0 ? transactions.map((tx: any) => (
-              <div key={tx.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-2xl bg-gray-50">
+              <div key={tx.id} className="flex items-center justify-between p-4 border border-[#2A3441]/50 rounded-2xl bg-[#0A0F1E]">
                 <div className="flex items-center space-x-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getTransactionColor(tx.type, tx.amount, tx.description)}`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    tx.amount > 0 ? 'bg-[#32CD32]/10 text-[#32CD32] border border-[#32CD32]/25' : 'bg-red-500/10 text-red-500 border border-red-500/25'
+                  }`}>
                     {getTransactionIcon(tx.type, tx.amount, tx.description)}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-bold text-gray-900">{tx.description}</p>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${getTransactionColor(tx.type, tx.amount, tx.description)}`}>
+                      <p className="font-bold text-white font-sans text-sm md:text-base leading-snug">{tx.description}</p>
+                      <span className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest border ${
+                        tx.amount > 0 ? 'bg-[#32CD32]/15 text-[#32CD32] border-[#32CD32]/35' : 'bg-red-500/15 text-red-500 border-red-500/35'
+                      }`}>
                         {getTransactionLabel(tx.type, tx.description)}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5">{formatDate(tx.created_at, 'dd/MM/yyyy HH:mm')}</p>
+                    <p className="text-xs text-gray-500 mt-0.5 uppercase tracking-wide font-bold">{formatDate(tx.created_at, 'dd/MM/yyyy HH:mm')}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className={`font-bold ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <p className={`font-black text-lg ${tx.amount > 0 ? 'text-[#32CD32]' : 'text-red-500'}`}>
                     {tx.amount > 0 ? '+' : ''}R$ {Math.abs(tx.amount).toFixed(2)}
                   </p>
-                  <p className="text-xs text-gray-500">Saldo: R$ {tx.balance_after.toFixed(2)}</p>
+                  <p className="text-xs text-gray-400 font-bold">Saldo: R$ {tx.balance_after.toFixed(2)}</p>
                 </div>
               </div>
             )) : (
-              <p className="text-gray-500 text-center py-4">Nenhuma transação encontrada.</p>
+              <p className="text-gray-400 text-center py-4 font-bold uppercase tracking-wider text-sm">Nenhuma transação encontrada.</p>
             )}
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
+        <div className="bg-[#12182B] rounded-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-[#2A3441] p-6 md:p-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-            <h3 className="text-xl font-bold text-primary flex items-center">
-              <History className="w-5 h-5 mr-2" /> Histórico de Palpites
+            <h3 className="text-xl font-black text-white flex items-center uppercase italic tracking-wider">
+              <History className="w-5 h-5 mr-3 text-[#32CD32]" /> Histórico de Palpites
             </h3>
             
             <div className="flex flex-wrap gap-3">
               <div className="flex items-center gap-2">
-                <label className="text-xs font-bold text-gray-500 uppercase">Rodada:</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Rodada:</label>
                 <select 
                   value={filterRound}
                   onChange={(e) => setFilterRound(e.target.value)}
-                  className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                  className="bg-[#1A2235] border border-[#2A3441] text-[#32CD32] rounded-xl px-3 py-1.5 text-xs font-black uppercase tracking-wider outline-none focus:ring-2 focus:ring-[#32CD32]"
                 >
                   <option value="all">Todas</option>
                   {availableRounds.map(r => (
@@ -1220,11 +1208,11 @@ const WalletPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
               </div>
               
               <div className="flex items-center gap-2">
-                <label className="text-xs font-bold text-gray-500 uppercase">Status:</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Status:</label>
                 <select 
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                  className="bg-[#1A2235] border border-[#2A3441] text-[#32CD32] rounded-xl px-3 py-1.5 text-xs font-black uppercase tracking-wider outline-none focus:ring-2 focus:ring-[#32CD32]"
                 >
                   <option value="all">Todos</option>
                   <option value="pending">Pendente</option>
@@ -1237,40 +1225,40 @@ const WalletPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
 
           <div className="space-y-4">
             {filteredPredictions.length > 0 ? filteredPredictions.map((pred) => (
-              <div key={pred.id} className="border border-gray-100 rounded-2xl overflow-hidden hover:shadow-sm transition-shadow">
+              <div key={pred.id} className="border border-[#2A3441] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 <div 
                   onClick={() => setExpandedPrediction(expandedPrediction === pred.id ? null : pred.id)}
-                  className="flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="flex items-center justify-between p-4 bg-[#0A0F1E] hover:bg-[#1A2235]/40 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center space-x-4">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      pred.status === 'approved' ? 'bg-green-100 text-green-600' : 
-                      pred.status === 'rejected' ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600'
+                      pred.status === 'approved' ? 'bg-[#32CD32]/10 text-[#32CD32] border border-[#32CD32]/20' : 
+                      pred.status === 'rejected' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'
                     }`}>
                       {pred.status === 'approved' ? <CheckCircle2 className="w-5 h-5" /> : 
                        pred.status === 'rejected' ? <X className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
                     </div>
                     <div>
-                      <p className="font-bold text-primary">Rodada #{pred.round_number}</p>
-                      <p className="text-xs text-gray-500">{formatDate(pred.created_at, 'dd/MM/yyyy HH:mm')}</p>
+                      <p className="font-bold text-white uppercase tracking-wide text-sm">Rodada #{pred.round_number}</p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider mt-0.5 font-bold">{formatDate(pred.created_at, 'dd/MM/yyyy HH:mm')}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
                     <div className="text-right">
-                      <p className="text-sm font-medium text-gray-700">
+                      <p className="text-sm font-black text-gray-200">
                         {pred.status === 'approved' 
                           ? (pred.round_status === 'finished' ? `${pred.score} pontos` : 'Em andamento') 
                           : 'Aguardando'}
                       </p>
-                      <p className={`text-xs ${
-                        pred.status === 'approved' ? 'text-green-600' : 
-                        pred.status === 'rejected' ? 'text-red-600' : 'text-yellow-600'
+                      <p className={`text-[10px] font-black uppercase tracking-widest ${
+                        pred.status === 'approved' ? 'text-[#32CD32]' : 
+                        pred.status === 'rejected' ? 'text-red-500' : 'text-yellow-500'
                       }`}>
                         {pred.status === 'approved' ? 'Validado' : 
                          pred.status === 'rejected' ? 'Rejeitado' : 'Pendente'}
                       </p>
                     </div>
-                    <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedPrediction === pred.id ? 'rotate-90' : ''}`} />
+                    <ChevronRight className={`w-5 h-5 text-gray-500 transition-transform ${expandedPrediction === pred.id ? 'rotate-90' : ''}`} />
                   </div>
                 </div>
                 
@@ -1280,10 +1268,10 @@ const WalletPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      className="bg-gray-50 border-t border-gray-100"
+                      className="bg-[#12182B] border-t border-[#2A3441]"
                     >
                       <div className="p-4">
-                        <h4 className="text-sm font-bold text-gray-700 mb-3">Seus Palpites</h4>
+                        <h4 className="text-xs font-black uppercase tracking-widest text-[#32CD32] mb-3">Seus Palpites</h4>
                         {pred.items && pred.games ? (
                           <div className="space-y-2">
                             {pred.games.map((game: any) => {
@@ -1293,22 +1281,36 @@ const WalletPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
                               const isFinished = !!game.result;
                               
                               return (
-                                <div key={game.id} className="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-100">
+                                <div key={game.id} className="flex items-center justify-between bg-[#0A0F1E] p-3 rounded-xl border border-[#2A3441]">
                                   <div className="flex items-center space-x-3 flex-1">
-                                    <span className="text-xs font-bold text-gray-400 w-4">{game.game_order + 1}</span>
+                                    <span className="text-xs font-bold text-gray-500 w-4">{game.game_order + 1}</span>
                                     <div className="flex-1 flex justify-between items-center text-sm">
-                                      <span className={`font-medium ${guess === '1' ? 'text-primary' : 'text-gray-600'}`}>{game.home_team}</span>
-                                      <span className="text-gray-300 mx-2">x</span>
-                                      <span className={`font-medium ${guess === '2' ? 'text-primary' : 'text-gray-600'}`}>{game.away_team}</span>
+                                      <div className="flex items-center gap-2 flex-1 justify-end">
+                                        <span className={`font-black uppercase text-xs md:text-sm truncate text-right ${guess === '1' ? 'text-[#32CD32]' : 'text-gray-400'}`}>{game.home_team}</span>
+                                        {getTeamCrestUrl(game.home_team) && (
+                                          <div className="w-5 h-5 rounded-full border border-[#2A3441]/50 bg-[#1A2235]/60 flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
+                                            <img src={getTeamCrestUrl(game.home_team)!} alt="" className="w-full h-full object-contain" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                                          </div>
+                                        )}
+                                      </div>
+                                      <span className="text-gray-600 mx-3 text-[10px] font-black italic">VS</span>
+                                      <div className="flex items-center gap-2 flex-1 justify-start">
+                                        {getTeamCrestUrl(game.away_team) && (
+                                          <div className="w-5 h-5 rounded-full border border-[#2A3441]/50 bg-[#1A2235]/60 flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
+                                            <img src={getTeamCrestUrl(game.away_team)!} alt="" className="w-full h-full object-contain" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                                          </div>
+                                        )}
+                                        <span className={`font-black uppercase text-xs md:text-sm truncate text-left ${guess === '2' ? 'text-[#32CD32]' : 'text-gray-400'}`}>{game.away_team}</span>
+                                      </div>
                                     </div>
                                   </div>
                                   <div className="ml-4 flex items-center space-x-2">
-                                    <span className="text-xs font-bold bg-gray-100 px-2 py-1 rounded text-gray-600">
+                                    <span className="text-[10px] font-black uppercase tracking-widest bg-[#1A2235] px-2 py-1 rounded text-[#32CD32] border border-[#2A3441]">
                                       {guess === '1' ? 'Casa' : guess === '2' ? 'Fora' : 'Empate'}
                                     </span>
                                     {isFinished && (
                                       isCorrect 
-                                        ? <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                        ? <CheckCircle2 className="w-4 h-4 text-[#32CD32]" />
                                         : <X className="w-4 h-4 text-red-500" />
                                     )}
                                   </div>
@@ -1317,7 +1319,7 @@ const WalletPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
                             })}
                           </div>
                         ) : (
-                          <p className="text-sm text-gray-500 italic">Detalhes não disponíveis.</p>
+                          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest italic">Detalhes não disponíveis.</p>
                         )}
                       </div>
                     </motion.div>
@@ -1325,7 +1327,7 @@ const WalletPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
                 </AnimatePresence>
               </div>
             )) : (
-              <p className="text-gray-500 text-center py-8">Nenhum palpite encontrado para os filtros selecionados.</p>
+              <p className="text-gray-500 text-center py-8 font-bold uppercase tracking-wider text-sm">Nenhum palpite encontrado para os filtros selecionados.</p>
             )}
           </div>
         </div>
@@ -1342,18 +1344,18 @@ const WalletPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
       />
 
       {isWithdrawModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="bg-[#12182B] border border-[#2A3441] rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Solicitar Saque</h3>
-              <button onClick={() => setIsWithdrawModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <h3 className="text-xl font-black text-white italic uppercase tracking-wider">Solicitar Saque</h3>
+              <button onClick={() => setIsWithdrawModalOpen(false)} className="text-gray-400 hover:text-white transition-colors">
                 <X className="w-6 h-6" />
               </button>
             </div>
             
             <form onSubmit={handleWithdraw} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Valor do Saque (R$)</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Valor do Saque (R$)</label>
                 <input
                   type="number"
                   step="0.01"
@@ -1361,20 +1363,20 @@ const WalletPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
                   max={balance}
                   value={withdrawAmount}
                   onChange={e => setWithdrawAmount(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full p-3 bg-[#0A0F1E] border border-[#2A3441] rounded-xl text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-700"
                   placeholder="0.00"
                   required
                 />
-                <p className="text-sm text-gray-500 mt-1">Saldo disponível: R$ {balance.toFixed(2)}</p>
+                <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-wide">Saldo disponível: R$ {balance.toFixed(2)}</p>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Chave PIX</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Chave PIX</label>
                 <input
                   type="text"
                   value={pixKey}
                   onChange={e => setPixKey(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full p-3 bg-[#0A0F1E] border border-[#2A3441] rounded-xl text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-700"
                   placeholder="CPF, E-mail, Telefone ou Chave Aleatória"
                   required
                 />
@@ -1383,7 +1385,7 @@ const WalletPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
               <button
                 type="submit"
                 disabled={withdrawing || !withdrawAmount || !pixKey}
-                className="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50 mt-6"
+                className="w-full bg-[#32CD32] text-black font-black py-4 rounded-xl hover:scale-105 transition-all disabled:opacity-50 mt-6 shadow-[0_0_15px_rgba(50,205,50,0.4)] uppercase tracking-wider block text-center"
               >
                 {withdrawing ? 'Processando...' : 'Confirmar Saque'}
               </button>
@@ -1593,11 +1595,87 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedPrediction, setExpandedPrediction] = useState<string | null>(null);
+  const [engagementTab, setEngagementTab] = useState<'lideres' | 'aovivo' | 'tendencia'>('aovivo');
+  const [annualRanking, setAnnualRanking] = useState<any[]>([]);
+  const [liveScores, setLiveScores] = useState<any[]>([]);
+  const [roundTrends, setRoundTrends] = useState<any[]>([]);
+  const [timeLeft, setTimeLeft] = useState<string>('');
+  const [isUrgent, setIsUrgent] = useState(false);
+
+  useEffect(() => {
+    if (!currentRound?.start_time) return;
+
+    const calculateTimeLeft = () => {
+      const difference = new Date(currentRound.start_time).getTime() - new Date().getTime();
+
+      if (difference <= 0) {
+        setTimeLeft('ENCERRADO');
+        setIsUrgent(false);
+        return;
+      }
+
+      const d = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const h = Math.floor((difference / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((difference / 1000 / 60) % 60);
+      const s = Math.floor((difference / 1000) % 60);
+
+      // Se faltar menos de 24 horas, ativa o modo de urgência (muda a cor para laranja/vermelho)
+      setIsUrgent(d === 0);
+
+      setTimeLeft(`${d}d ${h.toString().padStart(2, '0')}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`);
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(timer);
+  }, [currentRound]);
+
+  useEffect(() => {
+    if (engagementTab !== 'aovivo') return;
+
+    const fetchLiveScores = async () => {
+      try {
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        const res = await fetch('/api/live-scores', { headers });
+        if (res.ok) {
+          const data = await res.json();
+          setLiveScores(Array.isArray(data) ? data : []);
+        }
+      } catch (err) {
+        console.error('Error fetching live scores:', err);
+      }
+    };
+
+    fetchLiveScores();
+    const interval = setInterval(fetchLiveScores, 60000);
+    return () => clearInterval(interval);
+  }, [engagementTab, token]);
+
+  useEffect(() => {
+    if (engagementTab !== 'tendencia' || !currentRound?.id) return;
+
+    const fetchTrends = async () => {
+      try {
+        const res = await fetch(`/api/round/trends/${currentRound.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setRoundTrends(Array.isArray(data) ? data : []);
+        }
+      } catch (err) {
+        console.error('Error fetching round trends:', err);
+      }
+    };
+
+    fetchTrends();
+  }, [engagementTab, currentRound?.id]);
 
   const fetchData = async () => {
     if (!token) return;
     try {
-      const [roundRes, predRes, walletRes, balanceRes, luckyRes] = await Promise.all([
+      const [roundRes, predRes, walletRes, balanceRes, luckyRes, rankingRes] = await Promise.all([
         fetch('/api/rounds/current'),
         fetch('/api/my-predictions', {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -1610,7 +1688,8 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
         }),
         fetch('/api/me/lucky-numbers', {
           headers: { 'Authorization': `Bearer ${token}` }
-        })
+        }),
+        fetch('/api/ranking/anual')
       ]);
       
       if (roundRes.status === 401 || predRes.status === 401 || walletRes.status === 401 || luckyRes.status === 401) {
@@ -1636,12 +1715,14 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
       const walletData = await safeJson(walletRes);
       const balanceData = await safeJson(balanceRes).catch(() => ({ balance: 0 }));
       const luckyData = await safeJson(luckyRes).catch(() => []);
+      const rankingData = await safeJson(rankingRes).catch(() => []);
       
       setCurrentRound(roundData);
       setMyPredictions(Array.isArray(predData) ? predData : []);
       setWalletData(walletData);
       setBalance(balanceData?.balance || 0);
       setLuckyNumbers(Array.isArray(luckyData) ? luckyData : []);
+      setAnnualRanking(Array.isArray(rankingData) ? rankingData : []);
     } catch (err: any) {
       console.error('Dashboard error:', err);
       setError(err.message);
@@ -1671,18 +1752,18 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
     };
   }, [token]);
 
-  if (loading) return <div className="flex justify-center items-center h-64">Carregando...</div>;
+  if (loading) return <div className="flex justify-center items-center h-64 font-black text-[#32CD32] uppercase tracking-widest text-2xl animate-pulse">Carregando...</div>;
 
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12 text-center">
-        <div className="bg-red-50 p-8 rounded-3xl border border-red-100 inline-block">
-          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-red-800 mb-2">Erro ao carregar Dashboard</h3>
-          <p className="text-red-600 mb-6">{error}</p>
+        <div className="bg-[#FF6B00]/10 p-8 rounded-3xl border border-[#FF6B00]/30 inline-block shadow-[0_0_20px_rgba(255,107,0,0.2)]">
+          <AlertCircle className="w-12 h-12 text-[#FF6B00] mx-auto mb-4" />
+          <h3 className="text-xl font-black text-white italic uppercase tracking-wider mb-2">Erro ao carregar Dashboard</h3>
+          <p className="text-[#FF6B00] mb-6 font-bold uppercase tracking-wider">{error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="bg-red-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-red-700 transition-all"
+            className="bg-[#FF6B00] text-black px-6 py-2 rounded-xl font-black uppercase italic tracking-wider hover:scale-105 transition-all shadow-[0_0_15px_rgba(255,107,0,0.4)]"
           >
             Tentar Novamente
           </button>
@@ -1692,355 +1773,430 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full mt-6">
+      <div className="mb-8">
+         <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/promo01.png" alt="Promoção" className="w-full max-w-4xl mx-auto rounded-2xl shadow-[0_0_20px_rgba(255,107,0,0.2)] border border-[#2A3441]" />
+      </div>
+
       <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-primary">Olá, {user?.nickname || user?.name}! 👋</h1>
-          <p className="text-gray-500">Bem-vindo de volta ao Bolão10.</p>
+          <h1 className="text-3xl font-black text-white italic uppercase">Olá, {user?.nickname || user?.name}! DOMINE A RODADA 👋</h1>
+          <p className="text-gray-400">Bem-vindo de volta ao Bolão10.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="bg-white px-4 py-2 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 h-[48px]">
-            <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/PagBank.jpg" alt="PagBank" className="h-6" referrerPolicy="no-referrer" />
-            <div className="h-8 w-[1px] bg-gray-200"></div>
+      </div>
+      <div className="max-w-4xl mx-auto flex flex-col gap-6 w-full pb-12">
+        {/* Wallet Summary Consolidated - 1 */}
+        {walletData && (
+          <div className="bg-[#12182B] border border-[#2A3441] rounded-xl flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-[#1A2235] shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+            {/* Saldo - Maior destaque */}
+            <div className="flex-1 p-6 flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[#1A2235] border border-[#2A3441] rounded-lg flex items-center justify-center">
+                    <Wallet className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div>
+                    <p className="text-gray-500 font-bold uppercase tracking-wider text-[10px]">Saldo em Carteira</p>
+                    <h2 className="text-3xl font-black text-white italic tracking-tight">R$ {balance.toFixed(2)}</h2>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsDepositModalOpen(true)}
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#32CD32] text-black py-3 rounded-lg font-black uppercase text-xs hover:scale-105 transition-all shadow-[0_0_15px_rgba(50,205,50,0.3)]"
+                >
+                  <span className="whitespace-nowrap">Depositar Agora</span>
+                </button>
+                <button
+                  onClick={() => onNavigate('wallet')}
+                  className="flex items-center justify-center px-4 bg-[#1A2235] text-white border border-[#2A3441] rounded-lg font-black uppercase text-xs hover:bg-[#2A3441] transition-all"
+                  title="Extrato"
+                >
+                  Extrato
+                </button>
+              </div>
+            </div>
+
+            {/* Grid 2 colunas para o resto */}
+            <div className="flex-1 grid grid-cols-2 divide-x divide-[#1A2235]">
+              <div className="p-4 flex flex-col justify-center">
+                <p className="font-bold uppercase tracking-wider mb-1 text-[10px] text-[#32CD32]">Total Ganho</p>
+                <p className="text-xl font-black italic text-white mb-2">R$ {walletData.totalWinnings?.toFixed(2) || '0.00'}</p>
+                <div className="w-8 h-8 bg-[#32CD32]/10 rounded-lg flex items-center justify-center border border-[#32CD32]/20 mt-auto">
+                  <TrendingUp className="w-4 h-4 text-[#32CD32]" />
+                </div>
+              </div>
+
+              <div className="p-4 flex flex-col justify-center">
+                <p className="font-bold uppercase tracking-wider mb-1 text-[10px] text-[#FF6B00]">Bônus 10 Ac</p>
+                <p className="text-xl font-black italic text-white mb-2">R$ {walletData?.jackpotPool?.toFixed(2) || '0.00'}</p>
+                <div className="w-8 h-8 bg-[#FF6B00]/10 rounded-lg flex items-center justify-center border border-[#FF6B00]/20 mt-auto">
+                  <Trophy className="w-4 h-4 text-[#FF6B00]" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Current Round Card - 2 */}
+        <div className="bg-[#12182B] rounded-xl p-6 border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h2 className="text-xl font-black text-white italic uppercase">Rodada Atual</h2>
+              <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Rodada #{currentRound?.number || '?'}</p>
+            </div>
+            <div className="bg-[#32CD32]/10 border border-[#32CD32]/30 text-[#32CD32] px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider">
+              {currentRound?.status === 'open' ? 'Aberta' : 'Fechada'}
+            </div>
+          </div>
+
+          {currentRound ? (
+            <div className="space-y-4">
+              <div className="flex items-center text-[10px] text-gray-400 font-bold uppercase tracking-widest bg-[#0A0F1E] p-2 rounded-lg w-fit border border-[#1A2235]">
+                <Clock className="w-3 h-3 mr-2 text-[#32CD32]" />
+                Início: {formatDate(currentRound.start_time, "dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
+              </div>
+
+              {timeLeft && (
+                <div className={`p-3.5 rounded-xl border flex items-center justify-between transition-all duration-300 ${isUrgent ? 'bg-red-500/15 border-red-500/40 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'bg-[#0A0F1E] border-[#1A2235] text-amber-500'}`}>
+                  <div className="flex items-center gap-2">
+                    <Clock className={`w-4 h-4 ${isUrgent ? 'text-red-500 animate-bounce' : 'text-amber-500'}`} />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Encerra em:</span>
+                  </div>
+                  <span className="font-mono text-sm font-black tracking-wider">{timeLeft}</span>
+                </div>
+              )}
+              <div className="p-4 bg-[#0A0F1E] rounded-xl flex justify-between items-center border border-[#1A2235]">
+                <div>
+                  <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Valor do Palpite</p>
+                  <p className="text-2xl font-black text-white italic">R$ {currentRound.entry_value.toFixed(2)}</p>
+                </div>
+                <button 
+                  onClick={() => onNavigate('predictions')}
+                  disabled={currentRound.status !== 'open'}
+                  className="bg-[#32CD32] text-black px-6 py-3 rounded-lg font-black uppercase text-xs hover:scale-105 transition-all shadow-[0_0_15px_rgba(50,205,50,0.4)] disabled:opacity-50 disabled:hover:scale-100 disabled:shadow-none"
+                >
+                  Palpitar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-500 italic text-sm">Nenhuma rodada ativa no momento.</p>
+          )}
+        </div>
+
+        {/* Portal de Engajamento - 3 */}
+        <div className="bg-[#12182B] rounded-xl p-4 border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] flex flex-col h-[400px]">
+          <div className="flex bg-[#0A0F1E] rounded-lg p-1 border border-[#1A2235] mb-4 shrink-0">
+            <button 
+              onClick={() => setEngagementTab('lideres')}
+              className={`flex-1 py-1.5 rounded text-[10px] sm:text-xs font-black uppercase transition-all ${engagementTab === 'lideres' ? 'bg-[#1A2235] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
+            >
+              Líderes
+            </button>
+            <button 
+              onClick={() => setEngagementTab('aovivo')}
+              className={`flex-1 py-1.5 rounded text-[10px] sm:text-xs font-black uppercase transition-all ${engagementTab === 'aovivo' ? 'bg-[#1A2235] text-[#32CD32] shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
+            >
+              Ao Vivo
+            </button>
+            <button 
+              onClick={() => setEngagementTab('tendencia')}
+              className={`flex-1 py-1.5 rounded text-[10px] sm:text-xs font-black uppercase transition-all ${engagementTab === 'tendencia' ? 'bg-[#1A2235] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
+            >
+              Tendência
+            </button>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            {engagementTab === 'lideres' && (
+              <div className="space-y-2.5">
+                {annualRanking.length > 0 ? (
+                  annualRanking.map((player, i) => {
+                    const isMe = player.userId === user?.id;
+                    return (
+                      <div key={player.userId || i} className={`flex items-center justify-between p-3 rounded-lg border ${isMe ? 'bg-[#32CD32]/10 border-[#32CD32]/30' : 'bg-[#0A0F1E] border-[#1A2235]'}`}>
+                        <div className="flex items-center gap-4">
+                          <span className={`w-8 h-8 rounded flex items-center justify-center text-xs font-black ${i === 0 ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/50' : i === 1 ? 'bg-gray-300/20 text-gray-300 border border-gray-300/50' : i === 2 ? 'bg-orange-400/20 text-orange-400 border border-orange-400/50' : 'bg-[#1A2235] text-gray-400 border border-[#2A3441]'}`}>
+                            {i === 0 || i === 1 || i === 2 ? <Trophy className="w-4 h-4" /> : i + 1}
+                          </span>
+                          <span className={`text-sm md:text-base font-black uppercase ${isMe ? 'text-[#32CD32]' : 'text-white'}`}>{isMe ? 'Você' : player.nickname}</span>
+                        </div>
+                        <span className="text-sm font-bold text-gray-400">{player.totalPoints} <span className="text-[10px] uppercase">pts</span></span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-gray-500 text-center py-8 font-black uppercase text-xs">Nenhum palpiteceiro pontuado até o momento.</p>
+                )}
+              </div>
+            )}
+            
+            {engagementTab === 'aovivo' && (
+              <div className="space-y-3">
+                {liveScores.length > 0 ? (
+                  liveScores.map((game) => (
+                    <div key={game.id} className="bg-[#0A0F1E] border border-[#2A3441] rounded-xl p-4">
+                      <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4">
+                        <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div> {game.league || 'Brasileirão'}</span>
+                        <span className="text-[#32CD32] bg-[#32CD32]/10 px-2 py-0.5 rounded">{game.time}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-black text-white text-base md:text-lg w-16 text-right">{game.home.short}</span>
+                        <div className="flex-1 flex justify-center">
+                          <span className="font-mono font-black text-2xl text-white bg-[#12182B] border border-[#2A3441] px-4 py-1.5 rounded shadow-inner tracking-widest">{game.home.score} - {game.away.score}</span>
+                        </div>
+                        <span className="font-black text-white text-base md:text-lg w-16 text-left">{game.away.short}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-center py-12 italic text-sm">Nenhum jogo do Brasileirão ao vivo no momento.</p>
+                )}
+              </div>
+            )}
+            
+            {engagementTab === 'tendencia' && (
+              <div className="space-y-4">
+                {roundTrends.length > 0 ? (
+                  roundTrends.map((game, i) => (
+                    <div key={game.gameId || i} className="bg-[#0A0F1E] border border-[#2A3441] rounded-xl p-4">
+                      <div className="text-xs font-black uppercase text-gray-400 mb-3 text-center">{game.home} <span className="text-[10px] italic text-gray-600 mx-2">VS</span> {game.away}</div>
+                      <div className="flex h-4 bg-[#1A2235] rounded-full overflow-hidden">
+                        <div style={{ width: `${game.p1}%` }} className="bg-[#32CD32] relative group cursor-pointer hover:brightness-110 transition-all"></div>
+                        <div style={{ width: `${game.pX}%` }} className="bg-gray-500 relative group cursor-pointer hover:brightness-110 transition-all"></div>
+                        <div style={{ width: `${game.p2}%` }} className="bg-red-500 relative group cursor-pointer hover:brightness-110 transition-all"></div>
+                      </div>
+                      <div className="flex justify-between text-[10px] md:text-xs font-black uppercase text-gray-500 mt-3">
+                        <span className="text-[#32CD32] flex items-center gap-1">Casa {game.p1}%</span>
+                        <span className="text-gray-400">Empate {game.pX}%</span>
+                        <span className="text-red-500 flex items-center gap-1">{game.p2}% Fora</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-center py-12 italic text-sm">Sem tendências disponíveis para esta rodada.</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Lucky Numbers Banner - 4 */}
+        {luckyNumbers.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-gradient-to-r from-[#12182B] to-[#1A2235] text-white rounded-xl p-4 shadow-[0_0_20px_rgba(50,205,50,0.1)] border border-[#32CD32]/30 relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#32CD32] opacity-5 rounded-full -mr-32 -mt-32 pointer-events-none blur-3xl"></div>
+            
+            <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10 w-full justify-between">
+              <div className="flex items-center gap-4">
+                <div className="shrink-0 relative group">
+                  <img 
+                    src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/game.png" 
+                    alt="Game Stick M15" 
+                    className="w-16 h-16 object-contain drop-shadow-[0_0_15px_rgba(50,205,50,0.5)] transition-transform"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute -bottom-2 -right-2 bg-[#32CD32] text-black font-black px-1.5 py-0.5 rounded text-[8px] uppercase">
+                    M15 PRO
+                  </div>
+                </div>
+                
+                <div className="flex-1 text-left">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <Trophy className="w-3 h-3 text-[#32CD32] drop-shadow-sm" />
+                    <span className="text-[#32CD32] font-black text-[10px] tracking-widest uppercase">Promoção Especial</span>
+                  </div>
+                  <h2 className="text-lg font-black leading-tight tracking-tighter italic text-white uppercase">
+                    Sorteio Dia 19/07
+                  </h2>
+                  <p className="text-gray-400 font-bold text-[10px] uppercase">
+                    Ganhe cupons a cada palpite!
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:items-end items-center gap-1.5 mt-2 sm:mt-0">
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Meus Cupons:</span>
+                <div className="flex flex-wrap gap-1">
+                  {luckyNumbers.slice(0, 4).map((num, i) => (
+                    <span key={i} className="bg-[#0A0F1E] px-2 py-1 rounded font-mono font-bold text-xs border border-[#32CD32]/30 text-[#32CD32]">
+                      {num.number}
+                    </span>
+                  ))}
+                  {luckyNumbers.length > 4 && (
+                    <span className="text-[10px] font-bold text-[#FF6B00] bg-[#FF6B00]/10 px-2 py-1 rounded border border-[#FF6B00]/30">
+                      +{luckyNumbers.length - 4}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Ranking & Transparência - 5 */}
+        <div className="bg-[#12182B] text-white rounded-xl p-6 shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-[#2A3441] flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Trophy className="w-10 h-10 text-[#32CD32]" />
+            <div>
+              <h3 className="text-xl font-black mb-1 uppercase italic">Ranking & Transparência</h3>
+              <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider leading-relaxed">Acompanhe seus adversários e os maiores pontuadores da plataforma.</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => onNavigate('ranking')}
+            className="w-full md:w-auto shrink-0 px-6 bg-[#1A2235] text-white border border-[#2A3441] py-3 rounded-lg font-black uppercase text-xs hover:border-[#32CD32] hover:text-[#32CD32] hover:bg-[#32CD32]/10 transition-all group shadow-sm flex items-center justify-center gap-2"
+          >
+            <span>Entrar no Ranking</span>
+            <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-[#32CD32]" />
+          </button>
+        </div>
+
+        {/* History / Meus Palpites - 6 */}
+        <div className="bg-[#12182B] rounded-xl p-6 border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+          <h2 className="text-xl font-black text-white italic uppercase mb-4">Meus Palpites</h2>
+          <div className="space-y-3">
+            {myPredictions.length > 0 ? myPredictions.map((pred) => (
+              <div key={pred.id} className="border border-[#2A3441] rounded-lg overflow-hidden bg-[#0A0F1E]">
+                <div 
+                  onClick={() => setExpandedPrediction(expandedPrediction === pred.id ? null : pred.id)}
+                  className="flex items-center justify-between p-3 hover:bg-[#1A2235] transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${
+                      pred.status === 'approved' ? 'bg-[#32CD32]/10 border-[#32CD32]/30 text-[#32CD32]' : 
+                      pred.status === 'rejected' ? 'bg-[#FF6B00]/10 border-[#FF6B00]/30 text-[#FF6B00]' : 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500'
+                    }`}>
+                      {pred.status === 'approved' ? <CheckCircle2 className="w-4 h-4" /> : 
+                       pred.status === 'rejected' ? <X className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+                    </div>
+                    <div>
+                      <p className="font-black text-white text-sm uppercase italic">Rodada #{pred.round_number}</p>
+                      <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">{formatDate(pred.created_at, 'dd/MM/yyyy HH:mm')}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="text-right">
+                      <p className="text-xs font-bold text-gray-300 uppercase">
+                        {pred.status === 'approved' 
+                          ? (pred.round_status === 'finished' ? `${pred.score} pts` : 'Em andamento') 
+                          : 'Aguardando'}
+                      </p>
+                      <p className={`text-[9px] font-bold uppercase tracking-widest rounded px-1.5 py-0.5 mt-0.5 inline-block ${
+                        pred.status === 'approved' ? 'text-[#32CD32] bg-[#32CD32]/10' : 
+                        pred.status === 'rejected' ? 'text-[#FF6B00] bg-[#FF6B00]/10' : 'text-yellow-500 bg-yellow-500/10'
+                      }`}>
+                        {pred.status === 'approved' ? 'Validado' : 
+                         pred.status === 'rejected' ? 'Rejeitado' : 'Pendente'}
+                      </p>
+                    </div>
+                    <ChevronRight className={`w-4 h-4 text-gray-500 transition-transform ${expandedPrediction === pred.id ? 'rotate-90' : ''}`} />
+                  </div>
+                </div>
+                
+                <AnimatePresence>
+                  {expandedPrediction === pred.id && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="bg-[#12182B] border-t border-[#1A2235]"
+                    >
+                      <div className="p-3">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Suas Escolhas</h4>
+                          {pred.lucky_number && (
+                            <div className="flex items-center gap-1.5 bg-[#32CD32]/10 px-2 py-1 rounded border border-[#32CD32]/30">
+                              <Ticket className="w-3 h-3 text-[#32CD32]" />
+                              <span className="text-[9px] font-bold text-[#32CD32] uppercase tracking-wider mr-1">Cupom:</span>
+                              <span className="font-mono font-black text-[#32CD32] text-xs leading-none">{pred.lucky_number}</span>
+                            </div>
+                          )}
+                        </div>
+                        {pred.items && pred.games ? (
+                          <div className="space-y-1.5">
+                            {pred.games.map((game: any) => {
+                              const item = pred.items.find((i: any) => i.game_id === game.id);
+                              const guess = item?.guess;
+                              const isCorrect = game.result && guess === game.result;
+                              const isFinished = !!game.result;
+                              
+                              return (
+                                <div key={game.id} className="flex items-center justify-between bg-[#0A0F1E] p-2 rounded-lg border border-[#1A2235]">
+                                  <div className="flex items-center space-x-2 flex-1">
+                                    <span className="text-[10px] font-bold text-gray-500 w-3">{game.game_order + 1}</span>
+                                    <div className="flex items-center gap-1.5 flex-1 justify-end">
+                                      <span className={`font-black uppercase tracking-wider truncate text-right ${guess === '1' ? 'text-[#32CD32]' : 'text-gray-400'}`}>{game.home_team}</span>
+                                      {getTeamCrestUrl(game.home_team) && (
+                                        <div className="w-4 h-4 rounded-full border border-[#2A3441]/50 bg-[#1A2235]/60 flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
+                                          <img src={getTeamCrestUrl(game.home_team)!} alt="" className="w-full h-full object-contain" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                                        </div>
+                                      )}
+                                    </div>
+                                    <span className="text-gray-600 mx-2 text-[8px] italic">VS</span>
+                                    <div className="flex items-center gap-1.5 flex-1 justify-start">
+                                      {getTeamCrestUrl(game.away_team) && (
+                                        <div className="w-4 h-4 rounded-full border border-[#2A3441]/50 bg-[#1A2235]/60 flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
+                                          <img src={getTeamCrestUrl(game.away_team)!} alt="" className="w-full h-full object-contain" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                                        </div>
+                                      )}
+                                      <span className={`font-black uppercase tracking-wider truncate text-left ${guess === '2' ? 'text-[#32CD32]' : 'text-gray-400'}`}>{game.away_team}</span>
+                                    </div>
+                                  </div>
+                                  <div className="ml-2 flex items-center space-x-1.5 shrink-0">
+                                    <span className="text-[10px] font-black uppercase tracking-widest bg-[#1A2235] border border-[#2A3441] px-1.5 py-0.5 rounded text-gray-400">
+                                      {guess === '1' ? 'Casa' : guess === '2' ? 'Fora' : 'Empate'}
+                                    </span>
+                                    {isFinished && (
+                                      isCorrect 
+                                        ? <CheckCircle2 className="w-3 h-3 text-[#32CD32]" />
+                                        : <X className="w-3 h-3 text-[#FF6B00]" />
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-500 italic">Detalhes não disponíveis.</p>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )) : (
+              <p className="text-gray-500 text-center py-8 font-black uppercase text-xs">Você ainda não fez nenhum palpite hoje.</p>
+            )}
+          </div>
+        </div>
+
+        {/* PagBank & WhatsApp Group Footer Section */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 pt-6 border-t border-[#2A3441]/40">
+          <div className="bg-[#12182B] px-4 py-2 rounded-2xl border border-[#2A3441] shadow-sm flex items-center gap-3 h-[48px]">
+            <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/PagBank.jpg" alt="PagBank" className="h-6 object-contain rounded" referrerPolicy="no-referrer" />
+            <div className="h-8 w-[1px] bg-[#2A3441]"></div>
             <div className="flex flex-col">
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Ambiente</span>
-              <span className="text-xs font-bold text-green-600 uppercase tracking-wider">100% Seguro</span>
+              <span className="text-xs font-bold text-[#32CD32] uppercase tracking-wider">100% Seguro</span>
             </div>
           </div>
           <a 
             href="https://chat.whatsapp.com/LWJCq74sKbvGav8mYX6Kx7?mode=gi_t" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-[#25D366] text-white px-4 py-2 rounded-2xl font-bold hover:bg-[#128C7E] transition-all shadow-sm hover:shadow-md w-fit h-[48px]"
+            className="flex items-center gap-2 bg-[#25D366] text-white px-4 py-2 rounded-2xl font-bold hover:bg-[#128C7E] transition-all shadow-sm hover:shadow-md h-[48px]"
           >
             <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
             Entrar no Grupo
           </a>
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Lucky Numbers Banner */}
-          {luckyNumbers.length > 0 && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-gradient-to-r from-primary via-blue-900 to-primary text-white rounded-[32px] p-6 shadow-xl relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-32 -mt-32 pointer-events-none"></div>
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary opacity-10 rounded-full -ml-24 -mb-24 pointer-events-none"></div>
-              
-              <div className="flex flex-col sm:flex-row items-center gap-6 relative z-10">
-                <div className="shrink-0 relative group">
-                  <div className="absolute -inset-4 bg-secondary/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <img 
-                    src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/Game_Stick.webp" 
-                    alt="Game Stick M15" 
-                    className="w-24 h-24 object-contain drop-shadow-2xl hover:scale-110 transition-transform"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute bottom-0 right-0 bg-yellow-400 text-primary font-black px-1.5 py-0.5 rounded text-[8px] border border-primary">
-                    M15 PRO
-                  </div>
-                </div>
-                
-                <div className="flex-1 text-center sm:text-left">
-                  <div className="flex items-center gap-2 mb-1 justify-center sm:justify-start">
-                    <Trophy className="w-4 h-4 text-yellow-400 drop-shadow-sm" />
-                    <span className="text-yellow-400 font-black text-[10px] tracking-widest uppercase drop-shadow-sm">Promoção Especial</span>
-                  </div>
-                  <h2 className="text-xl sm:text-2xl font-black mb-2 leading-tight tracking-tighter italic">
-                    SORTEIO DIA 19/07
-                  </h2>
-                  <p className="text-white/70 text-xs mb-4 max-w-sm">
-                    Ganhe CUPONS para concorrer ao GAME STICK M15 a cada palpite!
-                  </p>
-                  <div className="flex flex-wrap items-center gap-2 justify-center sm:justify-start">
-                    <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest mr-1">Seus Cupons:</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {luckyNumbers.slice(0, 6).map((num, i) => (
-                        <span key={i} className="bg-white/20 px-2 py-1 rounded-lg font-mono font-bold text-xs border border-white/10">
-                          {num.number}
-                        </span>
-                      ))}
-                      {luckyNumbers.length > 6 && (
-                        <span className="text-[10px] font-bold text-secondary">
-                          +{luckyNumbers.length - 6}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Wallet Summary */}
-          {walletData && (
-            <div className="space-y-4">
-              {/* Prominent Wallet Card */}
-              <div className="bg-primary rounded-3xl p-6 md:p-8 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-20 -mt-20 pointer-events-none"></div>
-                <div className="absolute bottom-0 left-0 w-40 h-40 bg-white opacity-5 rounded-full -ml-10 -mb-10 pointer-events-none"></div>
-                
-                <div className="relative z-10 flex items-center gap-6 w-full md:w-auto">
-                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm flex-shrink-0">
-                    <Wallet className="w-8 h-8 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-white/80 font-medium mb-1">Saldo em Carteira</p>
-                    <h2 className="text-4xl font-bold tracking-tight">R$ {balance.toFixed(2)}</h2>
-                  </div>
-                </div>
-                
-                <div className="relative z-10 flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                  <button
-                    onClick={() => setIsDepositModalOpen(true)}
-                    className="flex items-center justify-center gap-2 bg-[#25D366] text-white px-8 py-4 rounded-2xl font-bold hover:bg-[#128C7E] transition-all shadow-md hover:shadow-lg"
-                  >
-                    <PlusCircle className="w-5 h-5" />
-                    Depositar Agora
-                  </button>
-                  <button
-                    onClick={() => onNavigate('wallet')}
-                    className="flex items-center justify-center gap-2 bg-white/10 text-white px-6 py-4 rounded-2xl font-bold hover:bg-white/20 transition-all backdrop-blur-sm"
-                  >
-                    Ver Extrato
-                  </button>
-                </div>
-              </div>
-
-              {/* Other Stats */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-3xl p-6 text-white shadow-md flex items-center justify-between">
-                  <div>
-                    <p className="text-green-100 font-medium mb-1">Total Ganho</p>
-                    <p className="text-2xl font-bold">R$ {walletData.totalWinnings?.toFixed(2) || '0.00'}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-                <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-3xl p-6 text-white shadow-md flex items-center justify-between">
-                  <div>
-                    <p className="text-amber-100 font-medium mb-1">Bônus 10 Acertos</p>
-                    <p className="text-2xl font-bold">R$ {walletData?.jackpotPool?.toFixed(2) || '0.00'}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                    <Trophy className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-                <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex items-center justify-between cursor-pointer hover:shadow-md transition-all" onClick={() => onNavigate('profile')}>
-                  <div>
-                    <p className="text-gray-500 font-medium mb-1">Meu Perfil</p>
-                    <p className="text-xl font-bold text-primary">Editar Dados</p>
-                  </div>
-                  <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center">
-                    <UserIcon className="w-6 h-6 text-secondary" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Current Round Card */}
-          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-            <div className="flex justify-between items-start mb-8">
-              <div>
-                <h2 className="text-2xl font-bold text-primary">Rodada Atual</h2>
-                <p className="text-gray-500">Rodada #{currentRound?.number || '?'}</p>
-              </div>
-              <div className="bg-secondary bg-opacity-10 text-secondary px-4 py-2 rounded-full text-sm font-bold">
-                {currentRound?.status === 'open' ? 'Aberta' : 'Fechada'}
-              </div>
-            </div>
-
-            {currentRound ? (
-              <div className="space-y-4">
-                <div className="flex items-center text-sm text-gray-600">
-                  <Clock className="w-4 h-4 mr-2" />
-                  Início: {formatDate(currentRound.start_time, "dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
-                </div>
-                <div className="p-4 bg-gray-50 rounded-2xl flex justify-between items-center">
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Valor do Palpite</p>
-                    <p className="text-2xl font-bold text-primary">R$ {currentRound.entry_value.toFixed(2)}</p>
-                  </div>
-                  <button 
-                    onClick={() => onNavigate('predictions')}
-                    disabled={currentRound.status !== 'open'}
-                    className="bg-primary text-white px-6 py-3 rounded-xl font-bold hover:shadow-md transition-all disabled:opacity-50"
-                  >
-                    Palpitar
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <p className="text-gray-500 italic">Nenhuma rodada ativa no momento.</p>
-            )}
-          </div>
-
-          {/* History */}
-          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-            <h2 className="text-2xl font-bold text-primary mb-6">Meus Palpites</h2>
-            <div className="space-y-4">
-              {myPredictions.length > 0 ? myPredictions.map((pred) => (
-                <div key={pred.id} className="border border-gray-100 rounded-2xl overflow-hidden hover:shadow-sm transition-shadow">
-                  <div 
-                    onClick={() => setExpandedPrediction(expandedPrediction === pred.id ? null : pred.id)}
-                    className="flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        pred.status === 'approved' ? 'bg-green-100 text-green-600' : 
-                        pred.status === 'rejected' ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600'
-                      }`}>
-                        {pred.status === 'approved' ? <CheckCircle2 className="w-5 h-5" /> : 
-                         pred.status === 'rejected' ? <X className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
-                      </div>
-                      <div>
-                        <p className="font-bold text-primary">Rodada #{pred.round_number}</p>
-                        <p className="text-xs text-gray-500">{formatDate(pred.created_at, 'dd/MM/yyyy HH:mm')}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-gray-700">
-                          {pred.status === 'approved' 
-                            ? (pred.round_status === 'finished' ? `${pred.score} pontos` : 'Em andamento') 
-                            : 'Aguardando'}
-                        </p>
-                        <p className={`text-xs ${
-                          pred.status === 'approved' ? 'text-green-600' : 
-                          pred.status === 'rejected' ? 'text-red-600' : 'text-yellow-600'
-                        }`}>
-                          {pred.status === 'approved' ? 'Validado' : 
-                           pred.status === 'rejected' ? 'Rejeitado' : 'Pendente'}
-                        </p>
-                      </div>
-                      <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedPrediction === pred.id ? 'rotate-90' : ''}`} />
-                    </div>
-                  </div>
-                  
-                  <AnimatePresence>
-                    {expandedPrediction === pred.id && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="bg-gray-50 border-t border-gray-100"
-                      >
-                        <div className="p-4">
-                          <div className="flex items-center justify-between mb-4">
-                            <h4 className="text-sm font-bold text-gray-700">Seus Palpites</h4>
-                            {pred.lucky_number && (
-                              <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100">
-                                <Ticket className="w-4 h-4 text-primary" />
-                                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mr-1">Cupom Sorteio:</span>
-                                <span className="font-mono font-bold text-primary">{pred.lucky_number}</span>
-                              </div>
-                            )}
-                          </div>
-                          {pred.items && pred.games ? (
-                            <div className="space-y-2">
-                              {pred.games.map((game: any) => {
-                                const item = pred.items.find((i: any) => i.game_id === game.id);
-                                const guess = item?.guess;
-                                const isCorrect = game.result && guess === game.result;
-                                const isFinished = !!game.result;
-                                
-                                return (
-                                  <div key={game.id} className="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-100">
-                                    <div className="flex items-center space-x-3 flex-1">
-                                      <span className="text-xs font-bold text-gray-400 w-4">{game.game_order + 1}</span>
-                                      <div className="flex-1 flex justify-between items-center text-sm">
-                                        <span className={`font-medium ${guess === '1' ? 'text-primary' : 'text-gray-600'}`}>{game.home_team}</span>
-                                        <span className="text-gray-300 mx-2">x</span>
-                                        <span className={`font-medium ${guess === '2' ? 'text-primary' : 'text-gray-600'}`}>{game.away_team}</span>
-                                      </div>
-                                    </div>
-                                    <div className="ml-4 flex items-center space-x-2">
-                                      <span className="text-xs font-bold bg-gray-100 px-2 py-1 rounded text-gray-600">
-                                        {guess === '1' ? 'Casa' : guess === '2' ? 'Fora' : 'Empate'}
-                                      </span>
-                                      {isFinished && (
-                                        isCorrect 
-                                          ? <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                          : <X className="w-4 h-4 text-red-500" />
-                                      )}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          ) : (
-                            <p className="text-sm text-gray-500 italic">Detalhes não disponíveis.</p>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )) : (
-                <p className="text-gray-500 text-center py-8">Você ainda não fez nenhum palpite.</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-8">
-          <div className="bg-primary text-white rounded-3xl p-8 shadow-lg">
-            <Trophy className="w-10 h-10 mb-4 text-secondary" />
-            <h3 className="text-xl font-bold mb-2">Ranking de Transparência</h3>
-            <p className="text-white text-opacity-70 text-sm mb-6">Confira quem são os maiores pontuadores da plataforma.</p>
-            <button 
-              onClick={() => onNavigate('ranking')}
-              className="w-full bg-white text-primary py-3 rounded-xl font-bold hover:bg-opacity-90 transition-all"
-            >
-              Ver Ranking
-            </button>
-          </div>
-
-          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-            <h3 className="text-lg font-bold text-primary mb-4">Como Funciona</h3>
-            <ul className="space-y-4 text-sm text-gray-600">
-              <li className="flex items-start">
-                <div className="w-5 h-5 bg-secondary bg-opacity-10 text-secondary rounded-full flex items-center justify-center mr-3 mt-0.5 font-bold text-xs">1</div>
-                <div>
-                  <strong>Adicione Saldo:</strong> Deposite em sua carteira via PIX ou Cartão através do PagBank de forma segura.
-                </div>
-              </li>
-              <li className="flex items-start">
-                <div className="w-5 h-5 bg-secondary bg-opacity-10 text-secondary rounded-full flex items-center justify-center mr-3 mt-0.5 font-bold text-xs">2</div>
-                <div>
-                  <strong>Palpites:</strong> Escolha os resultados. Cada palpite custa R$ {currentRound?.entry_value.toFixed(2) || '10,00'}.
-                </div>
-              </li>
-              <li className="flex items-start">
-                <div className="w-5 h-5 bg-secondary bg-opacity-10 text-secondary rounded-full flex items-center justify-center mr-3 mt-0.5 font-bold text-xs">3</div>
-                <div>
-                  <strong>Prêmios:</strong> 75% da arrecadação vai para os vencedores. 5% vai para o pote acumulado dos 10 acertos!
-                </div>
-              </li>
-              <li className="flex items-start">
-                <div className="w-5 h-5 bg-secondary bg-opacity-10 text-secondary rounded-full flex items-center justify-center mr-3 mt-0.5 font-bold text-xs">4</div>
-                <div>
-                  <strong>Indique e Ganhe:</strong> Ganhe R$ 2,00 por cada amigo que depositar R$ 10,00 ou mais usando seu link.
-                </div>
-              </li>
-              <li className="flex items-start">
-                <div className="w-5 h-5 bg-secondary bg-opacity-10 text-secondary rounded-full flex items-center justify-center mr-3 mt-0.5 font-bold text-xs">5</div>
-                <div>
-                  <strong>Sorteio M15:</strong> Cada palpite registrado gera um cupom para o sorteio do Game Stick M15 em 19/07!
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
       <DepositModal
         isOpen={isDepositModalOpen}
         onClose={() => setIsDepositModalOpen(false)}
@@ -2052,6 +2208,71 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
       />
     </div>
   );
+};
+
+export const getTeamCrestUrl = (teamName: string) => {
+  if (!teamName) return null;
+  const name = teamName.toLowerCase().trim();
+  
+  const countryCodes: Record<string, string> = {
+    'brasil': 'br', 'argentina': 'ar', 'méxico': 'mx', 'mexico': 'mx', 'coreia do sul': 'kr',
+    'rep. checa': 'cz', 'áfrica do sul': 'za', 'africa do sul': 'za', 'frança': 'fr',
+    'alemanha': 'de', 'espanha': 'es', 'inglaterra': 'gb-eng', 'itália': 'it', 'italia': 'it',
+    'portugal': 'pt', 'colômbia': 'co', 'colombia': 'co', 'uruguai': 'uy', 'chile': 'cl',
+    'estados unidos': 'us', 'eua': 'us', 'japão': 'jp', 'japao': 'jp'
+  };
+  
+  if (countryCodes[name]) {
+    return `https://flagcdn.com/${countryCodes[name]}.svg`;
+  }
+
+  const clubLogos: Record<string, string> = {
+    'flamengo': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Flamengo.png',
+    'palmeiras': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Palmeiras.png',
+    'são paulo': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/SaoPaulo.png',
+    'sao paulo': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/SaoPaulo.png',
+    'corinthians': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Corinthians.png',
+    'fluminense': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Fluminense.png',
+    'vasco': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Vasco.png',
+    'vasco da gama': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Vasco.png',
+    'botafogo': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Botafogo.png',
+    'atlético-mg': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Atletico-MG.png',
+    'atlético mg': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Atletico-MG.png',
+    'atletico mg': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Atletico-MG.png',
+    'atletico-mg': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Atletico-MG.png',
+    'cruzeiro': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Cruzeiro.png',
+    'grêmio': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Gremio.png',
+    'gremio': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Gremio.png',
+    'internacional': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Internacional.png',
+    'bahia': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Bahia.png',
+    'vitoria': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Vitoria.png',
+    'vitória': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Vitoria.png',
+    'fortaleza': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Fortaleza_Esporte_Clube_logo.svg/1000px-Fortaleza_Esporte_Clube_logo.svg.png',
+    'ceará': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Cear%C3%A1_Sporting_Club_logo.svg/1000px-Cear%C3%A1_Sporting_Club_logo.svg.png',
+    'ceara': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Cear%C3%A1_Sporting_Club_logo.svg/1000px-Cear%C3%A1_Sporting_Club_logo.svg.png',
+    'athletico-pr': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Athletico-PR.png',
+    'athletico pr': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Athletico-PR.png',
+    'atletico pr': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Athletico-PR.png',
+    'atletico-pr': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Athletico-PR.png',
+    'coritiba': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Coritiba.png',
+    'juventude': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Esporte_Clube_Juventude_logo.svg/1000px-Esporte_Clube_Juventude_logo.svg.png',
+    'cuiabá': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Cuiab%C3%A1_Esporte_Clube_logo.svg/1000px-Cuiab%C3%A1_Esporte_Clube_logo.svg.png',
+    'cuiaba': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Cuiab%C3%A1_Esporte_Clube_logo.svg/1000px-Cuiab%C3%A1_Esporte_Clube_logo.svg.png',
+    'atlético-go': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Atl%C3%A9tico_Clube_Goianiense_logo.svg/1000px-Atl%C3%A9tico_Clube_Goianiense_logo.svg.png',
+    'bragantino': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Bragantino.png',
+    'red bull bragantino': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Bragantino.png',
+    'chapecoense': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Chapecoense.png',
+    'mirassol': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Mirassol.png',
+    'remo': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Remo.png',
+    'santos': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Santos.png',
+    'sport': 'https://upload.wikimedia.org/wikipedia/pt/1/16/Sport_Club_do_Recife.png',
+    'goiás': 'https://upload.wikimedia.org/wikipedia/commons/4/41/Goi%C3%A1s_Esporte_Clube_logo.svg',
+    'goias': 'https://upload.wikimedia.org/wikipedia/commons/4/41/Goi%C3%A1s_Esporte_Clube_logo.svg',
+  };
+
+  if (clubLogos[name]) return clubLogos[name];
+
+  return null;
 };
 
 const PredictionsPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
@@ -2251,28 +2472,25 @@ const PredictionsPage = ({ onNavigate }: { onNavigate: (page: string) => void })
   if (!round || round.status !== 'open') return <div className="text-center py-20">Nenhuma rodada aberta no momento.</div>;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-8 pb-32">
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h2 className="text-3xl font-bold text-primary">Rodada #{round.number}</h2>
-        <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-gray-100 shadow-sm w-fit">
-          <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/PagBank.jpg" alt="PagBank" className="h-4" referrerPolicy="no-referrer" />
-          <div className="h-4 w-[1px] bg-gray-200"></div>
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ambiente Seguro</span>
+        <h2 className="text-3xl font-black text-white italic uppercase">Rodada #{round.number}</h2>
+        <div className="flex items-center gap-3 bg-[#12182B] px-4 py-2 rounded-2xl border border-[#2A3441] shadow-sm w-fit h-[48px]">
+          <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/PagBank.jpg" alt="PagBank" className="h-5 object-contain rounded" referrerPolicy="no-referrer" />
+          <div className="h-6 w-[1px] bg-[#2A3441]"></div>
+          <span className="text-[10px] font-bold text-[#32CD32] uppercase tracking-widest">Ambiente Seguro</span>
         </div>
       </div>
 
       {step === 1 ? (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-          <div className="bg-blue-50 p-4 rounded-2xl text-blue-700 text-sm mb-6 flex items-start">
-            <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
-            Selecione o resultado de cada um dos 10 jogos abaixo. 1 = Mandante, X = Empate, 2 = Visitante.
-          </div>
+
           
           {predictionsList.length > 0 && (
-            <div className="bg-green-50 p-4 rounded-2xl text-green-700 text-sm mb-6 flex items-center justify-between">
+            <div className="bg-[#32CD32] bg-opacity-20 p-4 rounded-2xl border border-[#32CD32]/30 text-[#32CD32] text-sm mb-6 flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="font-bold">{predictionsList.length} palpite(s) adicionado(s) ao carrinho.</span>
-                <span className="font-bold">Total: R$ {(predictionsList.length * (round.entry_value || 10)).toFixed(2)}</span>
+                <span className="font-black uppercase tracking-wide">{predictionsList.length} palpite(s) adicionado(s) ao carrinho.</span>
+                <span className="font-black">Total: R$ {(predictionsList.length * (round.entry_value || 10)).toFixed(2)}</span>
               </div>
               <button 
                 onClick={() => {
@@ -2281,89 +2499,141 @@ const PredictionsPage = ({ onNavigate }: { onNavigate: (page: string) => void })
                     setPredictionsList([]);
                   }
                 }}
-                className="text-xs bg-white text-red-500 px-3 py-1 rounded-lg font-bold border border-red-100 hover:bg-red-50 transition-colors"
+                className="text-xs bg-[#12182B] text-red-500 px-3 py-2 rounded-lg font-black uppercase tracking-widest border border-red-500/50 hover:bg-red-500/20 transition-colors"
               >
-                Limpar Carrinho
+                Limpar
               </button>
             </div>
           )}
 
-          {round.games.map((game: any) => (
-            <div key={game.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex-1 grid grid-cols-3 items-center gap-4">
-                <span className="text-right font-bold text-primary">{game.home_team}</span>
-                <span className="text-center text-gray-400 font-mono">VS</span>
-                <span className="text-left font-bold text-primary">{game.away_team}</span>
-              </div>
-              <div className="flex justify-center space-x-2">
-                {['1', 'X', '2'].map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => handleGuess(game.id, opt)}
-                    className={`w-12 h-12 rounded-xl font-bold transition-all ${
-                      guesses[game.id] === opt 
-                        ? 'bg-secondary text-white shadow-md scale-105' 
-                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                    }`}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
+          <div className="bg-[#12182B] border border-[#2A3441] rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden">
+          {round.games.map((game: any, index: number) => {
+  // Função para pegar as iniciais do time (ex: "São Paulo" -> "SÃ")
+  const getInitials = (name: string) => {
+    if (!name) return '??';
+    const words = name.trim().split(' ');
+    if (words.length > 1) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
 
-          <div className="flex flex-col sm:flex-row gap-4 mt-8">
-            <button
-              disabled={Object.keys(guesses).length < 10 || submitting}
-              onClick={handleAddPrediction}
-              className="flex-1 bg-gray-100 text-primary py-4 rounded-2xl font-bold text-lg hover:bg-gray-200 transition-all disabled:opacity-50"
-            >
-              {submitting ? 'Salvando...' : 'Fazer Mais um Palpite'}
-            </button>
+  return (
+    <div key={game.id} className="flex flex-col md:flex-row items-center justify-between p-4 border-b border-[#1A2235] hover:bg-[#1A2235]/50 transition-colors">
+      
+      {/* Container dos Times e Escudos */}
+      <div className="flex-1 grid grid-cols-[1fr_auto_1fr] items-center gap-4 w-full md:w-auto mb-4 md:mb-0">
+        
+        {/* Mandante */}
+        <div className="flex items-center justify-end gap-3">
+          <span className="font-black text-white text-sm md:text-base text-right">{game.home_team}</span>
+          {getTeamCrestUrl(game.home_team) ? (
+            <div className="w-9 h-9 md:w-11 md:h-11 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.3)] border border-[#2A3441] bg-[#1A2235]/50 flex items-center justify-center p-1.5 flex-shrink-0 transition-transform hover:scale-105">
+              <img src={getTeamCrestUrl(game.home_team)!} alt="" className="w-full h-full object-contain" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+            </div>
+          ) : (
+            <div className="w-9 h-9 md:w-11 md:h-11 rounded-full bg-[#1A2235] border border-[#2A3441] shadow-md flex items-center justify-center flex-shrink-0">
+              <span className="font-black text-[#32CD32] text-xs md:text-sm tracking-tighter">
+                {getInitials(game.home_team)}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* VS */}
+        <span className="text-gray-600 font-black text-xs md:text-sm mx-2 italic">VS</span>
+
+        {/* Visitante */}
+        <div className="flex items-center justify-start gap-3">
+          {getTeamCrestUrl(game.away_team) ? (
+            <div className="w-9 h-9 md:w-11 md:h-11 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.3)] border border-[#2A3441] bg-[#1A2235]/50 flex items-center justify-center p-1.5 flex-shrink-0 transition-transform hover:scale-105">
+              <img src={getTeamCrestUrl(game.away_team)!} alt="" className="w-full h-full object-contain" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+            </div>
+          ) : (
+            <div className="w-9 h-9 md:w-11 md:h-11 rounded-full bg-[#1A2235] border border-[#2A3441] shadow-md flex items-center justify-center flex-shrink-0">
+              <span className="font-black text-[#32CD32] text-xs md:text-sm tracking-tighter">
+                {getInitials(game.away_team)}
+              </span>
+            </div>
+          )}
+          <span className="font-black text-white text-sm md:text-base text-left">{game.away_team}</span>
+        </div>
+      </div>
+
+      {/* Botões de Aposta [1] [X] [2] */}
+      <div className="flex justify-center space-x-2">
+        {['1', 'X', '2'].map((opt) => (
+          <button
+            key={opt}
+            onClick={() => handleGuess(game.id, opt)}
+            className={`w-12 h-10 md:w-14 md:h-11 rounded-lg font-black text-sm md:text-base transition-all ${
+              guesses[game.id] === opt 
+                ? 'bg-[#32CD32] text-black border border-[#32CD32] shadow-[0_0_15px_rgba(50,205,50,0.4)] scale-105 transform' 
+                : 'bg-[#0A0F1E] text-gray-400 border border-[#2A3441] hover:border-[#32CD32] hover:text-[#32CD32]'
+            }`}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+})}
+          </div>
+
+          <div className="flex flex-col gap-3 mt-8 sticky bottom-4 z-40 bg-[#12182B] p-4 md:p-6 rounded-2xl border border-[#2A3441] shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
+            {Object.keys(guesses).length === 10 && (
+              <button
+                disabled={submitting}
+                onClick={handleAddPrediction}
+                className="w-full bg-[#1A2235] text-gray-400 border border-[#2A3441] py-3 rounded-lg font-black uppercase tracking-wider text-xs hover:border-gray-500 transition-all hover:text-white"
+              >
+                {submitting ? 'Aguarde...' : '+ Adicionar Palpite Extra (Opcional)'}
+              </button>
+            )}
             <button
               disabled={(Object.keys(guesses).length < 10 && predictionsList.length === 0) || submitting}
               onClick={handleProceedToPayment}
-              className="flex-1 bg-primary text-white py-4 rounded-2xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50"
+              className="w-full bg-[#32CD32] text-black py-4 rounded-xl font-black uppercase italic tracking-wider text-lg sm:text-xl hover:scale-[1.02] transition-transform shadow-[0_0_20px_rgba(50,205,50,0.4)] disabled:opacity-50 disabled:hover:scale-100 disabled:shadow-none"
             >
-              {submitting ? 'Salvando...' : 'Continuar para Pagamento'}
+              {submitting ? 'Aguarde...' : 'Confirmar Palpite'}
             </button>
           </div>
         </motion.div>
       ) : (
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-          <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm text-center">
-            <h3 className="text-xl font-bold text-primary mb-4">Confirmar Palpites</h3>
-            <p className="text-gray-600 mb-6">
-              Você está prestes a validar {predictionsList.length} palpite(s). O valor total de <span className="font-bold text-primary">R$ {totalAmount.toFixed(2)}</span> será debitado da sua carteira.
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-5">
+          <div className="bg-[#12182B] p-8 rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] text-center">
+            <h3 className="text-2xl font-black text-white uppercase italic mb-4">Confirmar Palpites</h3>
+            <p className="text-gray-400 mb-6">
+              Você está prestes a validar <span className="text-white font-bold">{predictionsList.length}</span> palpite(s). O valor total de <span className="font-black text-[#32CD32]">R$ {totalAmount.toFixed(2)}</span> será debitado da sua carteira.
             </p>
 
-            <div className="bg-gray-50 p-6 rounded-2xl mb-8 max-w-md mx-auto border border-gray-200">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-gray-600">Saldo Atual:</span>
-                <span className="font-bold text-lg text-gray-900">R$ {walletBalance.toFixed(2)}</span>
+            <div className="bg-[#0A0F1E] p-6 rounded-2xl mb-8 max-w-md mx-auto border border-[#2A3441]">
+              <div className="flex justify-between items-center mb-4 text-sm font-bold uppercase tracking-wider">
+                <span className="text-gray-400">Saldo Atual:</span>
+                <span className="text-white">R$ {walletBalance.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-gray-600">Valor a Pagar:</span>
-                <span className="font-bold text-lg text-red-600">- R$ {totalAmount.toFixed(2)}</span>
+              <div className="flex justify-between items-center mb-4 text-sm font-bold uppercase tracking-wider">
+                <span className="text-gray-400">Valor a Pagar:</span>
+                <span className="text-red-500">- R$ {totalAmount.toFixed(2)}</span>
               </div>
-              <div className="border-t border-gray-200 pt-4 flex justify-between items-center">
-                <span className="text-gray-900 font-medium">Saldo Final:</span>
-                <span className={`font-bold text-xl ${walletBalance >= totalAmount ? 'text-green-600' : 'text-red-600'}`}>
+              <div className="border-t border-[#2A3441] pt-4 flex justify-between items-center text-sm font-black uppercase tracking-wider">
+                <span className="text-white">Saldo Final:</span>
+                <span className={`text-xl ${walletBalance >= totalAmount ? 'text-[#32CD32]' : 'text-red-500'}`}>
                   R$ {(walletBalance - totalAmount).toFixed(2)}
                 </span>
               </div>
             </div>
 
             {walletBalance < totalAmount && (
-              <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 flex items-start text-left">
-                <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
+              <div className="mb-8 p-6 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-2xl text-[#FF6B00] flex items-start text-left">
+                <AlertCircle className="w-6 h-6 mr-4 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-bold mb-1">Saldo Insuficiente</p>
-                  <p className="text-sm">Você precisa adicionar fundos à sua carteira para confirmar estes palpites.</p>
+                  <p className="font-black uppercase tracking-wide mb-1">Saldo Insuficiente</p>
+                  <p className="text-sm font-medium">Você precisa adicionar fundos à sua carteira para confirmar estes palpites.</p>
                   <button 
                     onClick={() => setIsDepositModalOpen(true)}
-                    className="mt-3 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-red-700 transition-colors"
+                    className="mt-3 bg-[#FF6B00] text-black px-4 py-2 rounded-lg text-sm font-black uppercase tracking-wider hover:opacity-90 transition-colors"
                   >
                     Depositar Agora
                   </button>
@@ -2374,14 +2644,14 @@ const PredictionsPage = ({ onNavigate }: { onNavigate: (page: string) => void })
             <div className="flex gap-4 max-w-md mx-auto">
               <button
                 onClick={() => setStep(1)}
-                className="flex-1 bg-gray-100 text-gray-700 py-4 rounded-2xl font-bold hover:bg-gray-200 transition-all"
+                className="flex-1 bg-[#1A2235] text-white border border-[#2A3441] py-4 rounded-xl font-black uppercase tracking-wider text-sm sm:text-lg hover:bg-opacity-80 transition-all"
               >
                 Voltar
               </button>
               <button
                 disabled={submitting || walletBalance < totalAmount}
                 onClick={handleSubmit}
-                className="flex-[2] bg-secondary text-white py-4 rounded-2xl font-bold hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center"
+                className="flex-[2] bg-[#32CD32] text-black py-4 rounded-xl font-black uppercase italic tracking-wider text-sm sm:text-lg hover:scale-105 transition-all shadow-[0_0_15px_rgba(50,205,50,0.4)] disabled:opacity-50 disabled:hover:scale-100 disabled:shadow-none flex items-center justify-center"
               >
                 {submitting ? 'Processando...' : 'Confirmar e Pagar'}
               </button>
@@ -2481,115 +2751,115 @@ const ReferralPage = () => {
         className="space-y-8"
       >
         <div className="text-center">
-          <h2 className="text-4xl font-bold text-primary mb-4">Indique e Ganhe</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Convide seus amigos para o Bolão 10 e ganhe <span className="font-bold text-secondary">R$ 2,00</span> por cada amigo que fizer o primeiro depósito de pelo menos R$ 10,00.
+          <h2 className="text-4xl font-black text-white italic uppercase tracking-wider mb-4">Indique e Ganhe</h2>
+          <p className="text-gray-400 max-w-2xl mx-auto font-medium">
+            Convide seus amigos para o Bolão 10 e ganhe <span className="font-bold text-[#32CD32]">R$ 2,00</span> por cada amigo que fizer o primeiro depósito de pelo menos R$ 10,00.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm text-center">
-            <Users className="w-8 h-8 text-blue-500 mx-auto mb-4" />
-            <div className="text-2xl font-bold text-gray-900">{referralInfo?.total_referred || 0}</div>
-            <div className="text-sm text-gray-500 uppercase tracking-wider font-bold">Amigos Indicados</div>
+          <div className="bg-[#12182B] p-6 rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] text-center">
+            <Users className="w-8 h-8 text-blue-400 mx-auto mb-4" />
+            <div className="text-3xl font-black text-white">{referralInfo?.total_referred || 0}</div>
+            <div className="text-xs text-gray-400 uppercase tracking-widest font-black mt-2">Amigos Indicados</div>
           </div>
-          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm text-center">
-            <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-4" />
-            <div className="text-2xl font-bold text-gray-900">{referralInfo?.paid_referrals || 0}</div>
-            <div className="text-sm text-gray-500 uppercase tracking-wider font-bold">Indicações Pagas</div>
+          <div className="bg-[#12182B] p-6 rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] text-center">
+            <CheckCircle className="w-8 h-8 text-[#32CD32] mx-auto mb-4" />
+            <div className="text-3xl font-black text-white">{referralInfo?.paid_referrals || 0}</div>
+            <div className="text-xs text-gray-400 uppercase tracking-widest font-black mt-2">Indicações Pagas</div>
           </div>
-          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm text-center">
-            <Wallet className="w-8 h-8 text-secondary mx-auto mb-4" />
-            <div className="text-2xl font-bold text-gray-900">R$ {(referralInfo?.total_bonus || 0).toFixed(2)}</div>
-            <div className="text-sm text-gray-500 uppercase tracking-wider font-bold">Bônus Recebido</div>
+          <div className="bg-[#12182B] p-6 rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] text-center">
+            <Wallet className="w-8 h-8 text-[#32CD32] mx-auto mb-4" />
+            <div className="text-3xl font-black text-[#32CD32]">R$ {(referralInfo?.total_bonus || 0).toFixed(2)}</div>
+            <div className="text-xs text-gray-400 uppercase tracking-widest font-black mt-2">Bônus Recebido</div>
           </div>
         </div>
 
-        <div className="bg-primary text-white p-8 rounded-3xl shadow-xl relative overflow-hidden">
+        <div className="bg-[#12182B] text-white p-8 rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] relative overflow-hidden">
           <div className="relative z-10">
-            <h3 className="text-2xl font-bold mb-4">Seu Link de Indicação</h3>
-            <p className="text-white/80 mb-6">Compartilhe este link com seus amigos para começar a ganhar.</p>
+            <h3 className="text-2xl font-black italic uppercase tracking-wider text-white mb-4">Seu Link de Indicação</h3>
+            <p className="text-gray-400 font-bold uppercase tracking-wider text-xs mb-6">Compartilhe este link com seus amigos para começar a ganhar.</p>
             
             <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 font-mono text-sm break-all">
+              <div className="flex-1 bg-[#0A0F1E] border border-[#232F47] rounded-2xl p-4 font-mono text-sm break-all text-gray-300">
                 {referralLink}
               </div>
               <button 
                 onClick={copyToClipboard}
-                className="bg-secondary text-white px-8 py-4 rounded-2xl font-bold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                className="bg-[#32CD32] text-black px-8 py-4 rounded-2xl font-black uppercase hover:scale-105 transition-all shadow-[0_0_15px_rgba(50,205,50,0.4)] flex items-center justify-center gap-2"
               >
                 <Copy className="w-5 h-5" />
                 Copiar Link
               </button>
             </div>
           </div>
-          <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
+          <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
         </div>
 
-        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <h3 className="text-xl font-bold text-primary mb-6 flex items-center gap-2">
-            <Gift className="w-6 h-6 text-secondary" />
+        <div className="bg-[#12182B] p-8 rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+          <h3 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase italic tracking-wider">
+            <Gift className="w-6 h-6 text-[#32CD32]" />
             Como funciona?
           </h3>
           <div className="space-y-6">
             <div className="flex gap-4">
-              <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+              <div className="w-10 h-10 bg-[#1A2235] text-[#32CD32] border border-[#2A3441] rounded-full flex items-center justify-center font-black flex-shrink-0">1</div>
               <div>
-                <h4 className="font-bold text-gray-900">Compartilhe seu link</h4>
-                <p className="text-gray-600 text-sm">Envie seu link exclusivo para seus amigos via WhatsApp, Redes Sociais ou E-mail.</p>
+                <h4 className="font-bold text-white text-base">Compartilhe seu link</h4>
+                <p className="text-gray-400 text-sm mt-0.5">Envie seu link exclusivo para seus amigos via WhatsApp, Redes Sociais ou E-mail.</p>
               </div>
             </div>
             <div className="flex gap-4">
-              <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
+              <div className="w-10 h-10 bg-[#1A2235] text-[#32CD32] border border-[#2A3441] rounded-full flex items-center justify-center font-black flex-shrink-0">2</div>
               <div>
-                <h4 className="font-bold text-gray-900">Amigo se cadastra</h4>
-                <p className="text-gray-600 text-sm">Seu amigo deve se cadastrar usando seu link exclusivo.</p>
+                <h4 className="font-bold text-white text-base">Amigo se cadastra</h4>
+                <p className="text-gray-400 text-sm mt-0.5">Seu amigo deve se cadastrar usando seu link exclusivo.</p>
               </div>
             </div>
             <div className="flex gap-4">
-              <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
+              <div className="w-10 h-10 bg-[#1A2235] text-[#32CD32] border border-[#2A3441] rounded-full flex items-center justify-center font-black flex-shrink-0">3</div>
               <div>
-                <h4 className="font-bold text-gray-900">Primeiro depósito de R$ 10+</h4>
-                <p className="text-gray-600 text-sm">Assim que seu amigo fizer o primeiro depósito de no mínimo R$ 10,00 e ele for aprovado, você ganha o bônus.</p>
+                <h4 className="font-bold text-white text-base">Primeiro depósito de R$ 10+</h4>
+                <p className="text-gray-400 text-sm mt-0.5">Assim que seu amigo fizer o primeiro depósito de no mínimo R$ 10,00 e ele for aprovado, você ganha o bônus.</p>
               </div>
             </div>
             <div className="flex gap-4">
-              <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold flex-shrink-0">4</div>
+              <div className="w-10 h-10 bg-[#1A2235] text-[#32CD32] border border-[#2A3441] rounded-full flex items-center justify-center font-black flex-shrink-0">4</div>
               <div>
-                <h4 className="font-bold text-gray-900">Bônus na carteira!</h4>
-                <p className="text-gray-600 text-sm">O valor de R$ 2,00 será creditado automaticamente na sua carteira para você usar como quiser.</p>
+                <h4 className="font-bold text-white text-base">Bônus na carteira!</h4>
+                <p className="text-gray-400 text-sm mt-0.5">O valor de R$ 2,00 será creditado automaticamente na sua carteira para você usar como quiser.</p>
               </div>
             </div>
           </div>
         </div>
 
         {referralInfo?.referrals?.length > 0 && (
-          <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-            <h3 className="text-xl font-bold text-primary mb-6">Suas Indicações</h3>
+          <div className="bg-[#12182B] p-8 rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden">
+            <h3 className="text-xl font-black text-white mb-6 uppercase italic tracking-wider">Suas Indicações</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-gray-100">
-                    <th className="pb-4 font-bold text-gray-500 uppercase text-xs tracking-wider">Amigo</th>
-                    <th className="pb-4 font-bold text-gray-500 uppercase text-xs tracking-wider">Data</th>
-                    <th className="pb-4 font-bold text-gray-500 uppercase text-xs tracking-wider text-center">Status</th>
+                  <tr className="border-b border-[#2A3441]">
+                    <th className="pb-4 font-bold text-gray-400 uppercase text-xs tracking-wider">Amigo</th>
+                    <th className="pb-4 font-bold text-gray-400 uppercase text-xs tracking-wider">Data</th>
+                    <th className="pb-4 font-bold text-gray-400 uppercase text-xs tracking-wider text-center">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-[#1A2235]">
                   {referralInfo.referrals.map((ref: any) => (
-                    <tr key={ref.id}>
+                    <tr key={ref.id} className="hover:bg-[#1A2235]/25 transition-colors">
                       <td className="py-4">
-                        <div className="font-bold text-gray-900">{ref.referred_name}</div>
-                        <div className="text-xs text-gray-500">{ref.referred_nickname}</div>
+                        <div className="font-bold text-white">{ref.referred_name}</div>
+                        <div className="text-xs text-gray-500 font-bold uppercase tracking-wider">@{ref.referred_nickname}</div>
                       </td>
-                      <td className="py-4 text-sm text-gray-600">
+                      <td className="py-4 text-sm text-gray-300 font-medium">
                         {new Date(ref.created_at).toLocaleDateString('pt-BR')}
                       </td>
                       <td className="py-4 text-center">
                         {ref.bonus_paid ? (
-                          <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">Pago</span>
+                          <span className="bg-[#32CD32]/10 text-[#32CD32] border border-[#32CD32]/20 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest">Pago</span>
                         ) : (
-                          <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">Pendente</span>
+                          <span className="bg-[#FF6B00]/10 text-[#FF6B00] border border-[#FF6B00]/20 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest">Pendente</span>
                         )}
                       </td>
                     </tr>
@@ -4619,20 +4889,29 @@ const TransparencyPage = () => {
     if (!selectedRoundId) return;
     setLoading(true);
     
+    // Fetch round details first to check status
+    const roundRes = await fetch(`/api/rounds/${selectedRoundId}`);
+    const roundData = await safeJson(roundRes);
+    setRound(roundData);
+
     // Check access
     const accessRes = await fetch(`/api/rounds/${selectedRoundId}/check-prediction`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const accessData = await safeJson(accessRes);
-    const userHasAccess = accessData?.hasPrediction || isAdmin;
+    
+    // Logic for transparency access
+    // 1. Admin always has access
+    // 2. If round is open, block for non-admins
+    // 3. Otherwise, check if user has a validated prediction
+    let userHasAccess = accessData?.hasPrediction || isAdmin;
+    if (roundData?.status === 'open' && !isAdmin) {
+      userHasAccess = false;
+    }
+    
     setHasAccess(userHasAccess);
 
     if (userHasAccess) {
-      // Fetch round details including games
-      const roundRes = await fetch(`/api/rounds/${selectedRoundId}`);
-      const roundData = await safeJson(roundRes);
-      setRound(roundData);
-
       const transRes = await fetch(`/api/rounds/${selectedRoundId}/transparency`);
       if (transRes.ok) {
         const transData = await safeJson(transRes);
@@ -4753,20 +5032,26 @@ const TransparencyPage = () => {
     doc.save(`bolao10-transparencia-rodada-${round?.number || '?'}.pdf`);
   };
 
-  if (loading && rounds.length === 0) return <div className="p-8">Carregando...</div>;
+  if (loading && rounds.length === 0) return <div className="p-8 font-black text-[#32CD32] uppercase tracking-widest text-2xl animate-pulse text-center">Carregando...</div>;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-primary">Transparência</h2>
-          <div className="mt-2 flex items-center gap-3">
-            <p className="text-gray-500">Selecione a Rodada:</p>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-2xl flex items-center justify-center text-[#FF6B00]">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <h2 className="text-3xl font-black text-white italic uppercase tracking-wider">Transparência</h2>
+          </div>
+          <div className="mt-4 flex items-center gap-3 bg-[#0A0F1E] p-3 rounded-2xl border border-[#2A3441] w-fit">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-2">Selecione a Rodada:</p>
             <select 
               value={selectedRoundId}
               onChange={(e) => setSelectedRoundId(e.target.value)}
-              className="bg-white border border-gray-200 rounded-xl px-3 py-1 text-sm font-bold outline-none focus:ring-2 focus:ring-secondary"
+              className="bg-[#1A2235] border border-[#2A3441] text-[#32CD32] rounded-xl px-4 py-2 text-sm font-black uppercase tracking-wider outline-none focus:ring-2 focus:ring-[#32CD32]"
             >
+              <option value="" disabled>Selecione...</option>
               {rounds.map(r => (
                 <option key={r.id} value={r.id}>Rodada #{r.number}</option>
               ))}
@@ -4774,47 +5059,51 @@ const TransparencyPage = () => {
           </div>
         </div>
         {hasAccess && (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 mt-4 md:mt-0">
             <button 
               onClick={downloadPDF}
-              className="flex items-center bg-gray-100 text-gray-700 px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-200 transition-all"
+              className="flex items-center bg-[#1A2235] text-white border border-[#2A3441] px-6 py-3 rounded-xl text-sm font-black uppercase tracking-wider hover:bg-[#2A3441] transition-all hover:scale-105"
             >
-              <Download className="w-4 h-4 mr-2" /> Baixar PDF
+              <Download className="w-4 h-4 mr-3 text-[#32CD32]" /> Baixar PDF
             </button>
           </div>
         )}
       </div>
 
       {!hasAccess ? (
-        <div className="bg-white p-12 rounded-[40px] border border-dashed border-gray-200 text-center">
-          <ShieldCheck className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-primary mb-2">Acesso Restrito</h3>
-          <p className="text-gray-500 max-w-md mx-auto">
-            Você só pode visualizar a transparência de rodadas em que possui palpites validados.
+        <div className="bg-[#12182B] p-12 rounded-[40px] border border-dashed border-[#2A3441] text-center shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+          <div className="w-20 h-20 bg-[#1A2235] rounded-full flex items-center justify-center mx-auto mb-6 border border-[#2A3441]">
+            <ShieldCheck className="w-10 h-10 text-gray-500" />
+          </div>
+          <h3 className="text-2xl font-black text-white mb-2 uppercase italic tracking-wider">Acesso Restrito</h3>
+          <p className="text-gray-400 font-bold uppercase tracking-wider max-w-md mx-auto text-sm leading-relaxed">
+            {round?.status === 'open' && !isAdmin
+              ? "A transparência só será liberada após o fechamento da rodada (fim das apostas)."
+              : "Você só pode visualizar a transparência de rodadas em que possui palpites validados."}
           </p>
         </div>
       ) : (
         <>
           {round?.status === 'finished' && (
             <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-6 bg-green-50 border border-green-100 rounded-3xl">
-                <h3 className="text-lg font-bold text-green-800 mb-2">Prêmio da Rodada (75%)</h3>
-                <p className="text-green-700">
-                  Vencedor(es): <span className="font-bold">{round.winners_names || 'Ninguém'}</span>
+              <div className="p-6 bg-[#32CD32]/10 border border-[#32CD32]/30 rounded-3xl">
+                <h3 className="text-lg font-black text-[#32CD32] mb-2 uppercase italic tracking-wider">Prêmio da Rodada (75%)</h3>
+                <p className="text-gray-300 font-medium">
+                  Vencedor(es): <span className="font-extrabold text-white">{round.winners_names || 'Ninguém'}</span>
                 </p>
-                <p className="text-green-700">
-                  Prêmio Pago: <span className="font-bold text-green-800">R$ {round.winners_prize?.toFixed(2) || '0.00'}</span>
+                <p className="text-gray-300 font-medium mt-1">
+                  Prêmio Pago: <span className="font-black text-[#32CD32]">R$ {round.winners_prize?.toFixed(2) || '0.00'}</span>
                 </p>
               </div>
               
               {round.jackpot_winners_names && (
-                <div className="p-6 bg-secondary bg-opacity-10 border border-secondary border-opacity-20 rounded-3xl">
-                  <h3 className="text-lg font-bold text-secondary mb-2">Bônus 10 (Jackpot)</h3>
-                  <p className="text-secondary">
-                    Vencedor(es): <span className="font-bold">{round.jackpot_winners_names}</span>
+                <div className="p-6 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-3xl">
+                  <h3 className="text-lg font-black text-[#FF6B00] mb-2 uppercase italic tracking-wider">Bônus 10 (Jackpot)</h3>
+                  <p className="text-gray-300 font-medium">
+                    Vencedor(es): <span className="font-extrabold text-white">{round.jackpot_winners_names}</span>
                   </p>
-                  <p className="text-secondary">
-                    Bônus Pago: <span className="font-bold">R$ {round.jackpot_prize_paid?.toFixed(2) || '0.00'}</span>
+                  <p className="text-gray-300 font-medium mt-1">
+                    Bônus Pago: <span className="font-black text-[#FF6B00]">R$ {round.jackpot_prize_paid?.toFixed(2) || '0.00'}</span>
                   </p>
                 </div>
               )}
@@ -4823,26 +5112,40 @@ const TransparencyPage = () => {
 
           {/* Lista de Jogos da Rodada */}
           {round && round.games && round.games.length > 0 && (
-            <div className="mb-8 bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+            <div className="mb-8 bg-[#12182B] rounded-2xl border border-[#2A3441] overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.5)]">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                  <thead className="text-xs text-white uppercase bg-[#002B5B]">
+                  <thead className="text-xs text-gray-400 uppercase bg-[#0A0F1E] border-b border-[#2A3441]">
                     <tr>
-                      <th className="px-6 py-3 font-bold border-r border-[#001f42]">#</th>
-                      <th className="px-6 py-3 font-bold border-r border-[#001f42]">Confronto</th>
-                      <th className="px-6 py-3 font-bold">Resultado</th>
+                      <th className="px-6 py-3 font-black border-r border-[#2A3441]">#</th>
+                      <th className="px-6 py-3 font-black border-r border-[#2A3441] text-center">Confronto</th>
+                      <th className="px-6 py-3 font-black text-center">Resultado</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-[#1A2235]">
                     {round.games.map((g: any, i: number) => (
-                      <tr key={g.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-3 whitespace-nowrap text-gray-500">
+                      <tr key={g.id} className="hover:bg-[#1A2235]/35 transition-all">
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-400 font-bold uppercase tracking-wider text-xs border-r border-[#2A3441]/40">
                           Jogo {i + 1}
                         </td>
-                        <td className="px-6 py-3 uppercase text-gray-700">
-                          {g.home_team} <span className="text-gray-400 font-normal mx-1">vs</span> {g.away_team}
+                        <td className="px-6 py-4 uppercase text-white border-r border-[#2A3441]/40">
+                          <div className="flex items-center gap-2 max-w-md mx-auto justify-center">
+                            <span className="font-black flex-1 text-right text-xs md:text-sm">{g.home_team}</span>
+                            {getTeamCrestUrl(g.home_team) && (
+                              <div className="w-5 h-5 rounded-full border border-[#2A3441]/50 bg-[#1A2235]/60 flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
+                                <img src={getTeamCrestUrl(g.home_team)!} alt="" className="w-full h-full object-contain" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                              </div>
+                            )}
+                            <span className="text-gray-500 font-black mx-2 text-[10px] italic">VS</span>
+                            {getTeamCrestUrl(g.away_team) && (
+                              <div className="w-5 h-5 rounded-full border border-[#2A3441]/50 bg-[#1A2235]/60 flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
+                                <img src={getTeamCrestUrl(g.away_team)!} alt="" className="w-full h-full object-contain" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                              </div>
+                            )}
+                            <span className="font-black flex-1 text-left text-xs md:text-sm">{g.away_team}</span>
+                          </div>
                         </td>
-                        <td className="px-6 py-3 font-bold text-gray-900">
+                        <td className="px-6 py-4 font-black text-[#32CD32] text-center text-sm md:text-base">
                           {g.result || '-'}
                         </td>
                       </tr>
@@ -4856,16 +5159,16 @@ const TransparencyPage = () => {
           {/* Ranking Info */}
           <div className="mb-6 flex flex-wrap gap-4 items-center">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
-              <span className="text-xs font-bold text-gray-600">Líder(es)</span>
+              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">Líder(es)</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-slate-400"></div>
-              <span className="text-xs font-bold text-gray-600">Ainda na Disputa</span>
+              <div className="w-3 h-3 rounded-full bg-slate-500"></div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">Ainda na Disputa</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-red-500"></div>
-              <span className="text-xs font-bold text-gray-600">Sem Chances</span>
+              <div className="w-3 h-3 rounded-full bg-red-500"></div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">Sem Chances</span>
             </div>
           </div>
 
@@ -4879,40 +5182,40 @@ const TransparencyPage = () => {
 
               return sorted.map((p, index) => {
                 const scoreVal = p.score || 0;
-                let badgeColor = 'bg-gray-100 text-gray-500';
+                let badgeColor = 'bg-[#1A2235] text-gray-400 border border-[#2A3441]';
                 
                 if (round?.status !== 'open') {
                   if (scoreVal === maxScore && maxScore > 0) {
-                    badgeColor = 'bg-yellow-500 text-white shadow-lg shadow-yellow-200 ring-2 ring-yellow-200';
+                    badgeColor = 'bg-yellow-500 text-black shadow-[0_0_15px_rgba(234,179,8,0.4)]';
                   } else if (scoreVal + remainingGames >= maxScore) {
-                    badgeColor = 'bg-slate-400 text-white';
+                    badgeColor = 'bg-[#1A2235] text-gray-300 border border-[#2A3441]';
                   } else {
-                    badgeColor = 'bg-red-500 text-white';
+                    badgeColor = 'bg-red-500/10 text-red-500 border border-red-500/20';
                   }
                 }
 
                 return (
-                  <div key={p.id} className={`bg-white p-6 rounded-3xl border border-gray-100 shadow-sm transition-all hover:shadow-md ${scoreVal === maxScore && maxScore > 0 ? 'ring-2 ring-yellow-400 ring-offset-2' : ''}`}>
+                  <div key={p.id} className={`bg-[#12182B] p-6 rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-all hover:shadow-[0_0_20px_rgba(0,0,0,0.8)] ${scoreVal === maxScore && maxScore > 0 ? 'ring-2 ring-yellow-400 ring-offset-2' : ''}`}>
                     <div className="flex justify-between items-center mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary bg-opacity-10 flex items-center justify-center font-bold text-primary text-xs shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-[#1A2235] border border-[#2A3441] flex items-center justify-center font-black text-white text-xs shrink-0">
                           {index + 1}º
                         </div>
                         <div className="flex flex-col">
-                          <h4 className="font-bold text-primary leading-tight text-sm truncate max-w-[120px]">{p.user_name}</h4>
-                          <span className="text-[10px] text-gray-400 italic">@{p.user_nickname}</span>
+                          <h4 className="font-extrabold text-white leading-tight text-sm truncate max-w-[120px]">{p.user_name}</h4>
+                          <span className="text-[10px] text-gray-500 italic font-bold uppercase tracking-wider">@{p.user_nickname}</span>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span className={`${badgeColor} px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5`}>
-                          {scoreVal === maxScore && maxScore > 0 && <Trophy className="w-3 h-3" />}
+                          {scoreVal === maxScore && maxScore > 0 && <Trophy className="w-3 h-3 text-black" />}
                           {scoreVal} Pontos
                         </span>
                         {isAdmin && (
                           <button
                             onClick={() => handleDeletePrediction(p.id)}
                             disabled={deletingId === p.id}
-                            className="text-[9px] text-red-500 hover:text-red-700 font-bold uppercase tracking-widest flex items-center gap-1 transition-colors mt-1"
+                            className="text-[9px] text-red-400 hover:text-red-300 font-bold uppercase tracking-widest flex items-center gap-1 transition-colors mt-1"
                           >
                             <Trash2 className="w-2.5 h-2.5" />
                             {deletingId === p.id ? '...' : 'Excluir'}
@@ -4920,7 +5223,7 @@ const TransparencyPage = () => {
                         )}
                       </div>
                     </div>
-                    <div className="grid grid-cols-5 gap-2 bg-gray-50/50 p-3 rounded-2xl border border-gray-100/50">
+                    <div className="grid grid-cols-5 gap-2 bg-[#0A0F1E] p-3 rounded-2xl border border-[#1A2235]">
                       {(p.items || []).map((item: any, i: number) => {
                         const game = round?.games?.[i];
                         const isCorrect = game?.result && game.result === item.guess;
@@ -4928,11 +5231,11 @@ const TransparencyPage = () => {
 
                         return (
                           <div key={i} className="flex flex-col items-center">
-                            <span className="text-[9px] font-bold text-gray-300 mb-1">J{i+1}</span>
+                            <span className="text-[9px] font-black text-gray-500 mb-1">J{i+1}</span>
                             <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black border transition-all
-                              ${isCorrect ? 'bg-green-500 text-white border-green-400 shadow-sm' : 
-                                isIncorrect ? 'bg-red-50 text-red-300 border-red-100' : 
-                                'bg-white text-primary border-gray-200'}`}
+                              ${isCorrect ? 'bg-[#32CD32] text-black border-[#32CD32] shadow-[0_0_10px_rgba(50,205,50,0.3)]' : 
+                                isIncorrect ? 'bg-red-500/10 text-red-500 border-red-500/20' : 
+                                'bg-[#12182B] text-gray-400 border-[#2A3441]'}`}
                             >
                               {item.guess}
                             </div>
@@ -4945,9 +5248,9 @@ const TransparencyPage = () => {
               });
             })()}
             {predictions.length === 0 && (
-              <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-200">
-                <ShieldCheck className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">Nenhum palpite aprovado encontrado para esta rodada.</p>
+              <div className="col-span-full py-20 text-center bg-[#12182B] rounded-3xl border border-dashed border-[#2A3441]">
+                <ShieldCheck className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-400 font-extrabold uppercase tracking-wider text-sm">Nenhum palpite aprovado encontrado para esta rodada.</p>
               </div>
             )}
           </div>
@@ -5400,7 +5703,7 @@ const Podium = ({ top3, roundStatus }: { top3: any[], roundStatus?: string }) =>
             <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-tighter mb-1">
               {item.pos === 1 ? '🏆 Campeão' : item.pos === 2 ? '🥈 2º Lugar' : '🥉 3º Lugar'}
             </p>
-            <p className="text-[10px] md:text-xs font-black text-primary truncate max-w-[70px] md:max-w-[100px]">
+            <p className="text-[10px] md:text-xs font-black text-white truncate max-w-[70px] md:max-w-[100px]">
               {item.user_name}
             </p>
           </div>
@@ -5412,7 +5715,7 @@ const Podium = ({ top3, roundStatus }: { top3: any[], roundStatus?: string }) =>
                 ? 'w-20 md:w-28 h-24 md:h-32 bg-gradient-to-b from-gray-200 via-gray-300 to-gray-400' 
                 : 'w-20 md:w-28 h-20 md:h-24 bg-gradient-to-b from-orange-300 via-orange-400 to-orange-500'
           }`}>
-            <div className="absolute -top-4 md:-top-6 bg-white rounded-full p-2 md:p-3 shadow-xl border-2 border-gray-50">
+            <div className="absolute -top-4 md:-top-6 bg-[#1A2235] border border-[#2A3441] rounded-full p-2 md:p-3 shadow-xl">
               {item.pos === 1 ? <Trophy className="w-5 h-5 md:w-8 md:h-8 text-yellow-500" /> : 
                item.pos === 2 ? <Trophy className="w-4 h-4 md:w-6 md:h-6 text-gray-400" /> : 
                <Trophy className="w-4 h-4 md:w-6 md:h-6 text-orange-500" />}
@@ -5461,7 +5764,13 @@ const RankingPage = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const accessData = await safeJson(accessRes);
-      const userHasAccess = accessData?.hasPrediction || isAdmin;
+      
+      const roundToCheck = rounds.find(r => r.id.toString() === selectedRoundId);
+      let userHasAccess = accessData?.hasPrediction || isAdmin;
+      if (roundToCheck?.status === 'open' && !isAdmin) {
+        userHasAccess = false;
+      }
+
       setHasAccess(userHasAccess);
 
       if (userHasAccess) {
@@ -5478,7 +5787,7 @@ const RankingPage = () => {
     fetchData();
   }, [selectedRoundId, token, isAdmin]);
 
-  if (loading && rounds.length === 0) return <div className="p-8">Carregando...</div>;
+  if (loading && rounds.length === 0) return <div className="p-8 font-black text-[#32CD32] uppercase tracking-widest text-2xl animate-pulse text-center">Carregando...</div>;
 
   const selectedRound = rounds.find(r => r.id.toString() === selectedRoundId);
 
@@ -5486,34 +5795,34 @@ const RankingPage = () => {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-8 gap-6 text-center md:text-left">
         <div className="w-full">
-          <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-            <div className="w-10 h-10 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+          <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
+            <div className="w-12 h-12 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-2xl flex items-center justify-center text-[#FF6B00]">
               <Trophy className="w-6 h-6" />
             </div>
-            <h2 className="text-3xl md:text-4xl font-black text-primary tracking-tight">Ranking</h2>
+            <h2 className="text-3xl md:text-4xl font-black text-white italic uppercase tracking-wider">Ranking</h2>
           </div>
           
-          <div className="flex flex-col md:flex-row items-center gap-3 bg-gray-50 p-4 rounded-3xl border border-gray-100">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Selecione a Rodada</p>
+          <div className="flex flex-col md:flex-row items-center gap-4 bg-[#0A0F1E] p-4 rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-2">Selecione a Rodada</p>
             <div className="flex flex-wrap justify-center gap-2">
               {rounds.slice(0, 5).map(r => (
                 <button
                   key={r.id}
                   onClick={() => setSelectedRoundId(r.id.toString())}
-                  className={`px-4 py-2 rounded-2xl text-sm font-bold transition-all ${
+                  className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
                     selectedRoundId === r.id.toString()
-                      ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105'
-                      : 'bg-white text-gray-500 border border-gray-200 hover:border-primary/30'
+                      ? 'bg-[#FF6B00] text-black shadow-[0_0_15px_rgba(255,107,0,0.4)] scale-105 border-transparent'
+                      : 'bg-[#1A2235] text-gray-400 border border-[#2A3441] hover:text-white'
                   }`}
                 >
                   #{r.number}
                 </button>
               ))}
               {rounds.length > 5 && (
-                <select 
+                <select
                   value={selectedRoundId}
                   onChange={(e) => setSelectedRoundId(e.target.value)}
-                  className="bg-white border border-gray-200 rounded-2xl px-4 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-primary/20"
+                  className="bg-[#1A2235] border border-[#2A3441] text-[#32CD32] rounded-xl px-4 py-2 text-xs font-black uppercase tracking-wider outline-none focus:ring-2 focus:ring-[#32CD32]"
                 >
                   <option value="" disabled>Outras...</option>
                   {rounds.slice(5).map(r => (
@@ -5527,42 +5836,44 @@ const RankingPage = () => {
       </div>
 
       {!hasAccess ? (
-        <div className="bg-white p-8 md:p-12 rounded-[32px] md:rounded-[40px] border border-dashed border-gray-200 text-center">
-          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ShieldCheck className="w-8 h-8 text-gray-300" />
+        <div className="bg-[#12182B] p-12 rounded-[40px] border border-dashed border-[#2A3441] text-center shadow-[0_0_15px_rgba(0,0,0,0.5)] mt-8">
+          <div className="w-20 h-20 bg-[#1A2235] rounded-full flex items-center justify-center mx-auto mb-6 border border-[#2A3441]">
+            <ShieldCheck className="w-10 h-10 text-gray-500" />
           </div>
-          <h3 className="text-xl font-bold text-primary mb-2">Acesso Restrito</h3>
-          <p className="text-gray-500 max-w-md mx-auto text-sm md:text-base">
-            Você só pode visualizar o ranking de rodadas em que possui palpites validados.
+          <h3 className="text-2xl font-black text-white italic uppercase tracking-wider mb-2">Acesso Restrito</h3>
+          <p className="text-gray-400 font-bold uppercase tracking-wider max-w-md mx-auto text-sm md:text-base leading-relaxed">
+            {selectedRound?.status === 'open' && !isAdmin
+              ? "O ranking só será liberado após o fechamento da rodada (fim das apostas)."
+              : "Você só pode visualizar o ranking de rodadas em que possui palpites validados."}
           </p>
         </div>
       ) : (
         <>
           {ranking.length > 0 && <Podium top3={ranking.slice(0, 3)} roundStatus={selectedRound?.status} />}
 
-          <div className="bg-white rounded-[32px] md:rounded-[40px] border border-gray-100 shadow-xl shadow-primary/5 overflow-hidden">
+          <div className="bg-[#12182B] rounded-[32px] md:rounded-[40px] border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden">
             {/* Header for Desktop */}
-            <div className="hidden md:grid grid-cols-12 bg-gray-50 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 px-8 py-4">
+            <div className="hidden md:grid grid-cols-12 bg-[#0A0F1E] text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-[#2A3441] px-8 py-4">
               <div className="col-span-2">Posição</div>
               <div className="col-span-7">Participante</div>
               <div className="col-span-3 text-right">Pontuação</div>
             </div>
 
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-[#1A2235]">
               {ranking.map((item, index) => (
                 <div 
                   key={item.id} 
-                  className={`group hover:bg-gray-50 transition-all px-4 md:px-8 py-4 md:py-5 grid grid-cols-12 items-center gap-3 ${
-                    index < 3 ? 'bg-primary/[0.02]' : ''
+                  className={`group hover:bg-[#1A2235]/30 transition-all px-4 md:px-8 py-4 md:py-5 grid grid-cols-12 items-center gap-3 ${
+                    index < 3 ? 'bg-[#32CD32]/[0.02]' : ''
                   }`}
                 >
                   {/* Position */}
                   <div className="col-span-2 md:col-span-2">
                     <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-black text-xs md:text-sm transition-transform group-hover:scale-110 ${
-                      index === 0 ? 'bg-yellow-100 text-yellow-700 border-2 border-yellow-200' : 
-                      index === 1 ? 'bg-gray-100 text-gray-600 border-2 border-gray-200' :
-                      index === 2 ? 'bg-orange-100 text-orange-700 border-2 border-orange-200' : 
-                      'bg-white text-gray-400 border border-gray-100'
+                      index === 0 ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/35' : 
+                      index === 1 ? 'bg-slate-400/10 text-slate-300 border border-slate-400/35' :
+                      index === 2 ? 'bg-orange-500/10 text-orange-400 border border-orange-500/35' : 
+                      'bg-[#1A2235] text-gray-400 border border-[#2A3441]'
                     }`}>
                       {index + 1}º
                     </div>
@@ -5571,11 +5882,11 @@ const RankingPage = () => {
                   {/* User Name */}
                   <div className="col-span-7 md:col-span-7">
                     <div className="flex flex-col">
-                      <p className="font-bold text-primary text-sm md:text-base truncate">
+                      <p className="font-extrabold text-white text-sm md:text-base truncate">
                         {item.user_name}
                       </p>
                       {index < 3 && (
-                        <span className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-tighter">
+                        <span className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5">
                           {index === 0 ? '🥇 Líder da Rodada' : index === 1 ? '🥈 Vice-Líder' : '🥉 3º Colocado'}
                         </span>
                       )}
@@ -5587,14 +5898,14 @@ const RankingPage = () => {
                     <div className="flex flex-col items-end">
                       <div className={`flex items-center gap-1.5 px-3 md:px-4 py-1.5 rounded-2xl font-black text-xs md:text-sm shadow-sm transition-all group-hover:translate-x-[-4px] ${
                         selectedRound?.status === 'finished' 
-                          ? 'bg-secondary text-white shadow-secondary/20' 
-                          : 'bg-white text-blue-600 border border-blue-100 shadow-blue-100/50'
+                          ? 'bg-[#32CD32] text-black shadow-[0_0_10px_rgba(50,205,50,0.3)]' 
+                          : 'bg-[#1A2235] text-[#32CD32] border border-[#2A3441]'
                       }`}>
                         <span>{item.score || 0}</span>
                         <span className="text-[8px] md:text-[10px] opacity-70 uppercase">pts</span>
                       </div>
                       {selectedRound?.status !== 'finished' && (
-                        <span className="text-[8px] md:text-[9px] font-black text-blue-400 uppercase mt-1 tracking-tighter">Parcial</span>
+                        <span className="text-[8px] md:text-[9px] font-black text-[#32CD32] opacity-80 uppercase mt-1 tracking-widest">Parcial</span>
                       )}
                     </div>
                   </div>
@@ -5602,11 +5913,11 @@ const RankingPage = () => {
               ))}
               
               {ranking.length === 0 && !loading && (
-                <div className="px-8 py-20 text-center">
-                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Trophy className="w-8 h-8 text-gray-200" />
+                <div className="px-8 py-20 text-center bg-[#12182B]">
+                  <div className="w-16 h-16 bg-[#1A2235] border border-[#2A3441] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Trophy className="w-8 h-8 text-gray-500" />
                   </div>
-                  <p className="text-gray-400 font-medium">Nenhum resultado disponível para esta rodada.</p>
+                  <p className="text-gray-400 font-extrabold uppercase tracking-wider text-sm">Nenhum resultado disponível para esta rodada.</p>
                 </div>
               )}
             </div>
@@ -5971,7 +6282,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[url('https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/fundo.png')] bg-cover bg-fixed bg-center text-white">
       <Toaster position="top-right" richColors />
       <Navbar onNavigate={setPage} currentPage={page} />
       {/* <PromoPopup onNavigate={setPage} /> */}
@@ -5988,30 +6299,30 @@ export default function App() {
           </motion.div>
         </AnimatePresence>
       </main>
-      <footer className="bg-white border-t border-gray-100 py-8">
+      <footer className="bg-[#0A0F1E] border-t border-[#2A3441] py-8 mt-auto">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <div className="mb-4 flex justify-center space-x-6">
             <button 
               onClick={() => setPage('terms')}
-              className="text-xs font-bold text-gray-500 hover:text-primary uppercase tracking-wider transition-colors"
+              className="text-xs font-black text-gray-500 hover:text-white uppercase tracking-wider transition-colors"
             >
               Termos de Uso
             </button>
             <button 
               onClick={() => setPage('privacy')}
-              className="text-xs font-bold text-gray-500 hover:text-primary uppercase tracking-wider transition-colors"
+              className="text-xs font-black text-gray-500 hover:text-white uppercase tracking-wider transition-colors"
             >
               Política de Privacidade
             </button>
           </div>
-          <p className="text-sm text-gray-500">© 2026 BOLÃO10 - Entretenimento baseado em conhecimento esportivo.</p>
-          <p className="text-xs text-gray-400 mt-2">Plataforma transparente e auditável entre amigos.</p>
+          <p className="text-sm font-black text-gray-300">© 2026 BOLÃO10 - Entretenimento baseado em conhecimento esportivo.</p>
+          <p className="text-xs font-bold text-gray-500 mt-2">Plataforma transparente e auditável entre amigos.</p>
           <div className="mt-4 flex justify-center items-center space-x-4">
-            <span className="text-gray-400 text-xs font-medium">Contato:</span>
-            <a href="mailto:admin@bolao10.com" className="text-gray-500 hover:text-primary transition-colors flex items-center text-sm" title="admin@bolao10.com">
+            <span className="text-gray-500 text-xs font-black uppercase tracking-widest">Contato:</span>
+            <a href="mailto:admin@bolao10.com" className="text-gray-400 hover:text-white transition-colors flex items-center text-sm" title="admin@bolao10.com">
               <Mail className="w-5 h-5" />
             </a>
-            <a href="https://wa.me/5521989886916" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-green-600 transition-colors flex items-center text-sm" title="(21) 98988-6916">
+            <a href="https://wa.me/5521989886916" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#32CD32] transition-colors flex items-center text-sm" title="(21) 98988-6916">
               <MessageCircle className="w-5 h-5" />
             </a>
           </div>

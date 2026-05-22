@@ -531,6 +531,99 @@ app.get('/api/rounds/current', async (req, res) => {
   }
 });
 
+app.get('/api/round/trends/:roundId', async (req, res) => {
+  try {
+    const { roundId } = req.params;
+
+    // 1. Get all games for this round in correct order
+    const { data: games, error: gamesError } = await supabase
+      .from('games')
+      .select('*')
+      .eq('round_id', roundId)
+      .order('game_order', { ascending: true });
+
+    if (gamesError) {
+      console.error('Fetch games for trends error:', gamesError);
+      return res.status(500).json({ error: 'Erro ao buscar jogos da rodada para tendências' });
+    }
+
+    if (!games || games.length === 0) {
+      return res.json([]);
+    }
+
+    // 2. Fetch approved rules/predictions for this round
+    const { data: predictions, error: predictionsError } = await supabase
+      .from('predictions')
+      .select('id, prediction_items(game_id, guess)')
+      .eq('round_id', roundId)
+      .eq('status', 'approved');
+
+    if (predictionsError) {
+      console.error('Fetch predictions for trends error:', predictionsError);
+      return res.status(500).json({ error: 'Erro ao buscar palpites para tendências' });
+    }
+
+    // 3. Count guesses for each game
+    const counts: Record<any, { '1': number, 'X': number, '2': number, total: number }> = {};
+    games.forEach((game: any) => {
+      counts[game.id] = { '1': 0, 'X': 0, '2': 0, total: 0 };
+    });
+
+    if (predictions) {
+      predictions.forEach((p: any) => {
+        const items = p.prediction_items || [];
+        items.forEach((item: any) => {
+          const gId = item.game_id;
+          const guess = item.guess;
+          if (counts[gId]) {
+            if (guess === '1' || guess === 'X' || guess === '2') {
+              counts[gId][guess]++;
+              counts[gId].total++;
+            }
+          }
+        });
+      });
+    }
+
+    // 4. Calculate percentages
+    const trends = games.map((game: any) => {
+      const gameCounts = counts[game.id] || { '1': 0, 'X': 0, '2': 0, total: 0 };
+      const total = gameCounts.total;
+
+      let p1 = 0;
+      let pX = 0;
+      let p2 = 0;
+
+      if (total > 0) {
+        p1 = Math.round((gameCounts['1'] / total) * 100);
+        p2 = Math.round((gameCounts['2'] / total) * 100);
+        pX = 100 - p1 - p2;
+        if (pX < 0) pX = 0;
+      } else {
+        // Defaults when there are no predictions to avoid empty progress bars
+        p1 = 34;
+        pX = 32;
+        p2 = 34;
+      }
+
+      return {
+        gameId: game.id,
+        home: game.home_team,
+        away: game.away_team,
+        p1,
+        pX,
+        p2,
+        totalPredicts: total
+      };
+    });
+
+    res.json(trends);
+  } catch (err: any) {
+    console.error('Trend calculation error:', err.message || err);
+    res.status(500).json({ error: 'Erro ao calcular tendências da rodada' });
+  }
+});
+
 app.get('/api/rounds/:id', async (req, res) => {
   try {
     const { data: round, error: roundErr } = await supabase
@@ -1328,6 +1421,73 @@ app.post('/api/pagbank/create-payment', authenticate, async (req: any, res) => {
     res.status(500).json({ error: err.message || 'Erro interno ao processar pagamento' });
   }
 });
+
+// --- CACHE PARA PLACAR AO VIVO (Proteção do Plano Gratuito) ---
+let liveScoresCache: any = null;
+let lastLiveScoresFetch = 0;
+const CACHE_TTL = 60000; // 60 segundos (1 minuto)
+
+app.get('/api/live-scores', async (req, res) => {
+  try {
+    const now = Date.now();
+    
+    // Se o cache ainda for válido (menos de 60s), retorna a memória sem gastar a API externa
+    if (liveScoresCache && (now - lastLiveScoresFetch < CACHE_TTL)) {
+      return res.json(liveScoresCache);
+    }
+
+    // AQUI VOCÊ COLOCA A SUA CHAVE DA API-FOOTBALL (RAPIDAPI)
+    const API_KEY = process.env.API_FOOTBALL_KEY || '201e2cd07e74406ca5abcff4a8e9d636'; 
+
+    // Endpoint da API-Football para buscar jogos acontecendo AGORA ('live')
+    const response = await fetch('https://v3.football.api-sports.io/fixtures?live=all', {
+      method: 'GET',
+      headers: {
+        'x-apisports-key': API_KEY,
+        'x-rapidapi-host': 'v3.football.api-sports.io'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Falha ao buscar dados da API de Futebol');
+    }
+
+    const apiData = await response.json();
+
+    // Filtra apenas ligas relevantes (ex: 71 é o Brasileirão Série A na API-Football)
+    // Se quiser todos, basta remover este filtro.
+    const brGames = apiData.response.filter((game: any) => game.league.id === 71 || game.league.country === 'Brazil');
+
+    // Formata os dados para o seu frontend ficar limpo
+    const formattedScores = brGames.map((game: any) => ({
+      id: game.fixture.id,
+      league: game.league.name,
+      time: `${game.fixture.status.elapsed}' ${game.fixture.status.short === '1H' ? '1T' : '2T'}`,
+      home: {
+        name: game.teams.home.name,
+        short: game.teams.home.name.substring(0, 3).toUpperCase(),
+        score: game.goals.home
+      },
+      away: {
+        name: game.teams.away.name,
+        short: game.teams.away.name.substring(0, 3).toUpperCase(),
+        score: game.goals.away
+      }
+    }));
+
+    // Atualiza o Cache
+    liveScoresCache = formattedScores;
+    lastLiveScoresFetch = now;
+
+    res.json(formattedScores);
+  } catch (err: any) {
+    console.error('Erro na rota de Live Scores:', err.message);
+    // Em caso de erro (ex: limite da API excedido), retorna o último cache salvo ou array vazio
+    res.json(liveScoresCache || []);
+  }
+});
+
+
 
 // Shared function to approve a deposit and update wallet
 async function approveDeposit(deposit: any) {
@@ -3453,6 +3613,67 @@ app.post('/api/copa/predictions', authenticate, async (req: any, res) => {
     res.json(responsePayload);
   } catch (err: any) {
     res.status(500).json({ error: 'Erro ao salvar palpites', detail: err.message });
+  }
+});
+
+app.get('/api/ranking/anual', async (req, res) => {
+  try {
+    // 1. Get all finished round IDs
+    const { data: finishedRounds, error: roundsError } = await supabase
+      .from('rounds')
+      .select('id')
+      .eq('status', 'finished');
+
+    if (roundsError) throw roundsError;
+
+    const finishedRoundIds = (finishedRounds || []).map((r: any) => r.id);
+
+    if (finishedRoundIds.length === 0) {
+      return res.json([]);
+    }
+
+    // 2. Fetch approved predictions in finished rounds
+    const { data: predictions, error: predError } = await supabase
+      .from('predictions')
+      .select('score, user_id, users(name, nickname)')
+      .eq('status', 'approved')
+      .in('round_id', finishedRoundIds);
+
+    if (predError) throw predError;
+
+    // 3. Aggregate points per user
+    const userMap: Record<string, { userId: string, nickname: string, totalPoints: number }> = {};
+
+    (predictions || []).forEach((p: any) => {
+      const uId = p.user_id;
+      if (!uId) return;
+
+      const userDetail = p.users || {};
+      const nickname = userDetail.nickname || userDetail.name || 'Sem Nome';
+
+      if (!userMap[uId]) {
+        userMap[uId] = {
+          userId: uId,
+          nickname,
+          totalPoints: 0
+        };
+      }
+      userMap[uId].totalPoints += (p.score || 0);
+    });
+
+    // Convert map to array, sort descending, and add position
+    const sortedRanking = Object.values(userMap)
+      .sort((a, b) => b.totalPoints - a.totalPoints);
+
+    const rankingWithPosition = sortedRanking.map((item, index) => ({
+      ...item,
+      position: index + 1
+    }));
+
+    res.json(rankingWithPosition);
+  } catch (err: any) {
+    console.error('Anual ranking error:', err.message || err);
+    res.status(500).json({ error: 'Erro ao buscar o ranking anual' });
   }
 });
 
