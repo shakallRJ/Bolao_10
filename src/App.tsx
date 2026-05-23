@@ -1695,13 +1695,13 @@ const ProfilePage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-primary text-white p-4 flex justify-between items-center shadow-md">
+    <div className="min-h-screen bg-[#0A0F1E] flex flex-col text-white">
+      <header className="bg-[#12182B] text-white p-4 flex justify-between items-center shadow-[0_4px_20px_rgba(0,0,0,0.5)] border-b border-[#2A3441] sticky top-0 z-50">
         <div className="flex items-center space-x-4">
-          <button onClick={() => onNavigate('dashboard')} className="hover:bg-white/10 p-2 rounded-full transition-colors">
-            <ArrowLeft className="w-6 h-6" />
+          <button onClick={() => onNavigate('dashboard')} className="hover:bg-[#1A2235] p-2 rounded-full transition-colors group">
+            <ArrowLeft className="w-6 h-6 text-gray-400 group-hover:text-white" />
           </button>
-          <h1 className="text-xl font-bold">Editar Perfil</h1>
+          <h1 className="text-xl font-black uppercase italic tracking-wider">Editar Perfil</h1>
         </div>
       </header>
 
@@ -1709,26 +1709,26 @@ const ProfilePage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 md:p-12"
+          className="bg-[#12182B] rounded-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-[#2A3441] p-8 md:p-12"
         >
           <div className="flex items-center space-x-4 mb-8">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+            <div className="w-16 h-16 bg-[#1A2235] text-[#32CD32] rounded-full border border-[#2A3441] flex items-center justify-center">
               <UserIcon className="w-8 h-8" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Configurações da Conta</h2>
-              <p className="text-gray-500">Mantenha seus dados atualizados</p>
+              <h2 className="text-2xl font-black italic uppercase tracking-wider text-white">Configurações da Conta</h2>
+              <p className="text-gray-400 font-bold uppercase tracking-wider text-xs">Mantenha seus dados atualizados</p>
             </div>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-2xl text-sm flex items-center">
+            <div className="mb-6 p-4 bg-red-500/10 text-red-400 border border-red-500/20 rounded-2xl text-sm flex items-center font-bold uppercase tracking-wide">
               <AlertCircle className="w-4 h-4 mr-2" /> {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-6 p-4 bg-green-50 text-green-600 rounded-2xl text-sm flex items-center">
+            <div className="mb-6 p-4 bg-[#32CD32]/10 text-[#32CD32] border border-[#32CD32]/20 rounded-2xl text-sm flex items-center font-bold uppercase tracking-wide">
               <CheckCircle2 className="w-4 h-4 mr-2" /> {success}
             </div>
           )}
@@ -1736,73 +1736,73 @@ const ProfilePage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Nome Completo</label>
+                <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Nome Completo</label>
                 <input 
                   type="text" 
                   required 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-secondary outline-none transition-all"
+                  className="w-full px-4 py-3 bg-[#0A0F1E] text-white border border-[#232F47] rounded-xl focus:ring-2 focus:ring-[#32CD32] outline-none transition-all text-sm font-bold"
                   placeholder="Seu nome"
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Nickname (Apelido)</label>
+                <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Nickname (Apelido)</label>
                 <input 
                   type="text" 
                   required 
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-secondary outline-none transition-all"
+                  className="w-full px-4 py-3 bg-[#0A0F1E] text-white border border-[#232F47] rounded-xl focus:ring-2 focus:ring-[#32CD32] outline-none transition-all text-sm font-bold"
                   placeholder="Seu apelido"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Telefone (WhatsApp)</label>
+              <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Telefone (WhatsApp)</label>
               <input 
                 type="tel" 
                 required 
                 value={phone}
                 onChange={handlePhoneChange}
-                className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-secondary outline-none transition-all"
+                className="w-full px-4 py-3 bg-[#0A0F1E] text-white border border-[#232F47] rounded-xl focus:ring-2 focus:ring-[#32CD32] outline-none transition-all text-sm font-bold"
                 placeholder="(00) 00000-0000"
               />
             </div>
 
-            <hr className="border-gray-100 my-8" />
+            <hr className="border-[#2A3441] my-8" />
             
-            <h3 className="text-lg font-bold text-primary mb-4">Alterar Senha</h3>
-            <p className="text-sm text-gray-500 mb-6">Deixe em branco se não desejar alterar sua senha atual.</p>
+            <h3 className="text-lg font-black uppercase italic tracking-wider text-white mb-2">Alterar Senha</h3>
+            <p className="text-sm font-bold text-gray-400 mb-6">Deixe em branco se não desejar alterar sua senha atual.</p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Nova Senha</label>
+                <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Nova Senha</label>
                 <div className="relative">
                   <input 
                     type={showPassword ? "text" : "password"} 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-secondary outline-none transition-all pr-12"
+                    className="w-full px-4 py-3 bg-[#0A0F1E] text-white border border-[#232F47] rounded-xl focus:ring-2 focus:ring-[#32CD32] outline-none transition-all pr-12 text-sm font-bold"
                     placeholder="••••••••"
                   />
                   <button 
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Confirmar Nova Senha</label>
+                <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Confirmar Nova Senha</label>
                 <input 
                   type={showPassword ? "text" : "password"} 
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-secondary outline-none transition-all"
+                  className="w-full px-4 py-3 bg-[#0A0F1E] text-white border border-[#232F47] rounded-xl focus:ring-2 focus:ring-[#32CD32] outline-none transition-all text-sm font-bold"
                   placeholder="••••••••"
                 />
               </div>
@@ -1811,7 +1811,7 @@ const ProfilePage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             <button 
               type="submit"
               disabled={loading}
-              className="w-full bg-primary text-white py-4 rounded-2xl font-bold hover:bg-opacity-90 transition-all shadow-md disabled:opacity-50 mt-8"
+              className="w-full bg-[#32CD32] text-black py-4 rounded-xl font-black uppercase italic tracking-wider text-lg hover:scale-105 transition-all shadow-[0_0_15px_rgba(50,205,50,0.4)] disabled:opacity-50 mt-8"
             >
               {loading ? 'Salvando...' : 'Salvar Alterações'}
             </button>
@@ -5646,19 +5646,19 @@ const AdminRoundsPage = () => {
     }
   };
 
-  if (loading && rounds.length === 0) return <div className="p-8">Carregando...</div>;
+  if (loading && rounds.length === 0) return <div className="p-8 text-white font-black uppercase text-sm animate-pulse">Carregando...</div>;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto px-4 py-8 text-white">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-primary">Gerenciar Rodadas</h1>
-          <p className="text-gray-500">Crie, edite e finalize as rodadas do bolão.</p>
+          <h1 className="text-3xl font-black uppercase italic tracking-wider text-white">Gerenciar Rodadas</h1>
+          <p className="text-gray-400 font-bold uppercase tracking-wider text-xs">Crie, edite e finalize as rodadas do bolão.</p>
         </div>
         {isAdmin && (
           <button 
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className="bg-primary text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition-all flex items-center"
+            className="bg-[#32CD32] text-black px-6 py-3 rounded-xl font-black uppercase italic tracking-wider hover:scale-105 transition-all flex items-center shadow-[0_0_15px_rgba(50,205,50,0.4)]"
           >
             {showCreateForm ? <X className="w-5 h-5 mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
             {showCreateForm ? 'Cancelar' : 'Nova Rodada'}
@@ -5670,53 +5670,53 @@ const AdminRoundsPage = () => {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm mb-8"
+          className="bg-[#12182B] p-8 rounded-[32px] border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] mb-8 text-white"
         >
-          <h2 className="text-xl font-bold text-primary mb-6">Configurar Nova Rodada</h2>
+          <h2 className="text-xl font-black uppercase italic tracking-wider text-[#32CD32] mb-6">Configurar Nova Rodada</h2>
           <form onSubmit={handleCreateRound} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Número da Rodada</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">Número da Rodada</label>
                 <input 
                   type="number" 
                   required 
                   value={newRound.number}
                   onChange={(e) => setNewRound({...newRound, number: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-secondary outline-none"
+                  className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600 font-bold"
                   placeholder="Ex: 15"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Limite para Palpites</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">Limite para Palpites</label>
                 <input 
                   type="datetime-local" 
                   required 
                   value={newRound.startTime}
                   onChange={(e) => setNewRound({...newRound, startTime: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-secondary outline-none"
+                  className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600 font-bold"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Valor de Entrada (R$)</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">Valor de Entrada (R$)</label>
                 <input 
                   type="number" 
                   required 
                   value={newRound.entryValue}
                   onChange={(e) => setNewRound({...newRound, entryValue: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-secondary outline-none"
+                  className="w-full px-4 py-3 rounded-xl bg-[#0A0F1E] border border-[#2A3441] text-white focus:ring-2 focus:ring-[#32CD32] focus:border-transparent outline-none transition-all placeholder-gray-600 font-bold"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Visibilidade da Rodada</label>
-                <div className="flex items-center gap-3 bg-gray-50 p-3 h-[50px] rounded-xl border border-gray-200 mt-[1px]">
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">Visibilidade da Rodada</label>
+                <div className="flex items-center gap-3 bg-[#0A0F1E] p-3 h-[50px] rounded-xl border border-[#2A3441] mt-[1px]">
                   <input
                     type="checkbox"
                     id="isActive"
                     checked={newRound.isActive}
                     onChange={(e) => setNewRound({...newRound, isActive: e.target.checked})}
-                    className="w-5 h-5 rounded text-primary focus:ring-primary"
+                    className="w-5 h-5 rounded text-[#32CD32] focus:ring-[#32CD32] bg-[#12182B] border-[#2A3441]"
                   />
-                  <label htmlFor="isActive" className="text-sm font-bold text-gray-700 cursor-pointer select-none">
+                  <label htmlFor="isActive" className="text-xs font-black text-gray-400 uppercase tracking-widest cursor-pointer select-none">
                     Ativar para Usuários
                   </label>
                 </div>
@@ -5724,11 +5724,11 @@ const AdminRoundsPage = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-4">Jogos da Rodada (10)</label>
+              <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Jogos da Rodada (10)</label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {newRound.games.map((g, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100">
-                    <span className="text-xs font-bold text-gray-400 w-6">{i + 1}</span>
+                  <div key={i} className="flex items-center gap-3 p-3 bg-[#0A0F1E] rounded-2xl border border-[#2A3441]">
+                    <span className="text-xs font-black text-gray-400 w-6">{i + 1}</span>
                     <input 
                       placeholder="Time Mandante" 
                       required 
@@ -5738,7 +5738,7 @@ const AdminRoundsPage = () => {
                         games[i] = { ...games[i], home: e.target.value };
                         setNewRound({ ...newRound, games });
                       }}
-                      className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-200 outline-none focus:border-secondary"
+                      className="flex-1 px-3 py-2 text-sm rounded-lg bg-[#12182B] border border-[#2A3441] text-white outline-none focus:border-[#32CD32] font-bold uppercase tracking-wider"
                     />
                     <span className="text-gray-400 font-bold">x</span>
                     <input 
@@ -5750,7 +5750,7 @@ const AdminRoundsPage = () => {
                         games[i] = { ...games[i], away: e.target.value };
                         setNewRound({ ...newRound, games });
                       }}
-                      className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-200 outline-none focus:border-secondary"
+                      className="flex-1 px-3 py-2 text-sm rounded-lg bg-[#12182B] border border-[#2A3441] text-white outline-none focus:border-[#32CD32] font-bold uppercase tracking-wider"
                     />
                   </div>
                 ))}
@@ -5760,7 +5760,7 @@ const AdminRoundsPage = () => {
             <button 
               type="submit" 
               disabled={submitting}
-              className="w-full bg-primary text-white py-4 rounded-2xl font-bold text-lg hover:shadow-xl transition-all disabled:opacity-50"
+              className="w-full bg-[#32CD32] text-black py-4 rounded-xl font-black uppercase italic tracking-wider text-lg hover:scale-105 transition-all shadow-[0_0_15px_rgba(50,205,50,0.4)] disabled:opacity-50"
             >
               {submitting ? 'Criando...' : 'Criar Rodada e Abrir para Palpites'}
             </button>
@@ -5770,15 +5770,15 @@ const AdminRoundsPage = () => {
 
       <div className="space-y-6">
         {rounds.map((round) => (
-          <div key={round.id} className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden">
+          <div key={round.id} className="bg-[#12182B] rounded-[32px] border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden text-white">
             <div className="p-6 flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-xl ${round.status === 'open' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xl border ${round.status === 'open' ? 'bg-[#32CD32]/10 text-[#32CD32] border-[#32CD32]/30' : 'bg-[#1A2235] text-gray-400 border-[#2A3441]'}`}>
                   #{round.number}
                 </div>
                 <div>
-                  <h3 className="font-bold text-primary text-lg">Rodada {round.number}</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 className="font-extrabold uppercase italic tracking-wider text-white text-lg">Rodada {round.number}</h3>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">
                     {round.status === 'open' ? 'Aberta para palpites' : round.status === 'closed' ? 'Em andamento' : round.status === 'draft' ? 'Rascunho' : 'Finalizada'}
                   </p>
                 </div>
@@ -5801,16 +5801,16 @@ const AdminRoundsPage = () => {
                       });
                       setPartialResults(initialResults);
                     }}
-                    className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all"
+                    className="px-4 py-2 bg-[#1A2235] border border-[#2A3441] text-gray-300 hover:text-white hover:border-[#32CD32] rounded-xl text-sm font-black uppercase tracking-wider transition-all"
                   >
                     {editingRound?.id === round.id ? 'Fechar' : 'Gerenciar Resultados'}
                   </button>
                 )}
                 {round.status === 'open' && (
-                  <span className="bg-green-100 text-green-600 px-3 py-1 rounded-lg text-xs font-bold uppercase">Ativa</span>
+                  <span className="bg-[#32CD32]/10 text-[#32CD32] border border-[#32CD32]/30 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider">Ativa</span>
                 )}
                 {round.status === 'draft' && (
-                  <span className="bg-yellow-100 text-yellow-600 px-3 py-1 rounded-lg text-xs font-bold uppercase">Rascunho</span>
+                  <span className="bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider">Rascunho</span>
                 )}
               </div>
             </div>
@@ -5819,25 +5819,25 @@ const AdminRoundsPage = () => {
               <motion.div 
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
-                className="px-6 pb-8 border-t border-gray-50 pt-6"
+                className="px-6 pb-8 border-t border-[#2A3441] pt-6"
               >
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div>
-                    <h4 className="font-bold text-primary mb-4 flex items-center">
-                      <Edit className="w-4 h-4 mr-2" /> Inserir Resultados
+                    <h4 className="font-black uppercase italic tracking-wider text-white mb-4 flex items-center text-sm md:text-base">
+                      <Edit className="w-4 h-4 mr-2 text-[#32CD32]" /> Inserir Resultados
                     </h4>
                     <div className="space-y-3">
                       {editingRound.games.map((game: any) => (
-                        <div key={game.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                        <div key={game.id} className="flex items-center justify-between p-3 bg-[#0A0F1E] rounded-2xl border border-[#2A3441]">
                           <div className="flex-1 min-w-0 mr-4">
-                            <p className="text-sm font-bold text-primary truncate">{game.home_team} x {game.away_team}</p>
+                            <p className="text-sm font-black uppercase tracking-wider text-gray-200 truncate">{game.home_team} x {game.away_team}</p>
                           </div>
                           <div className="flex gap-1">
                             {['1', 'X', '2'].map(opt => (
                               <button
                                 key={opt}
                                 onClick={() => setPartialResults({...partialResults, [game.id]: opt})}
-                                className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${partialResults[game.id] === opt ? 'bg-secondary text-white shadow-md' : 'bg-white text-gray-400 border border-gray-100 hover:border-gray-300'}`}
+                                className={`w-10 h-10 rounded-xl text-sm font-black transition-all ${partialResults[game.id] === opt ? 'bg-[#32CD32] text-black shadow-lg scale-105' : 'bg-[#12182B] text-gray-400 border border-[#2A3441] hover:border-gray-500 hover:text-white'}`}
                               >
                                 {opt}
                               </button>
@@ -5851,28 +5851,28 @@ const AdminRoundsPage = () => {
                   <div className="flex flex-col justify-between">
                     {isAdmin && (
                       <div>
-                        <h4 className="font-bold text-primary mb-4">Ações da Rodada</h4>
+                        <h4 className="font-black uppercase italic tracking-wider text-white mb-4 text-sm md:text-base">Ações da Rodada</h4>
                         <div className="space-y-4">
-                        <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl">
-                          <p className="text-sm text-blue-800 font-medium mb-2">Resultados Parciais</p>
-                          <p className="text-xs text-blue-600 mb-4">Salve os resultados dos jogos que já terminaram para atualizar o ranking parcial em tempo real.</p>
+                        <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
+                          <p className="text-sm text-blue-300 font-bold uppercase tracking-wider mb-2">Resultados Parciais</p>
+                          <p className="text-xs text-gray-400 mb-4 font-semibold">Salve os resultados dos jogos que já terminaram para atualizar o ranking parcial em tempo real.</p>
                           <button 
                             onClick={() => handleSavePartialResults(round.id)}
                             disabled={submitting}
-                            className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-blue-700 transition-all disabled:opacity-50"
+                            className="w-full bg-blue-600 text-white py-3 rounded-xl font-black uppercase italic tracking-wider text-xs hover:scale-105 transition-all disabled:opacity-50"
                           >
-                            Salvar Parciais e Atualizar Ranking
+                            Salvar Parciais e Ranking
                           </button>
                         </div>
 
                         {round.status === 'draft' && (
-                          <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-2xl">
-                            <p className="text-sm text-yellow-800 font-medium mb-2">Ativar Rodada</p>
-                            <p className="text-xs text-yellow-600 mb-4">Torna a rodada visível para todos os usuários e permite a realização de palpites.</p>
+                          <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl">
+                            <p className="text-sm text-yellow-300 font-bold uppercase tracking-wider mb-2">Ativar Rodada</p>
+                            <p className="text-xs text-gray-400 mb-4 font-semibold">Torna a rodada visível para todos os usuários e permite a realização de palpites.</p>
                             <button 
                               onClick={() => handleActivateRound(round.id)}
                               disabled={submitting}
-                              className="w-full bg-yellow-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-yellow-700 transition-all disabled:opacity-50"
+                              className="w-full bg-yellow-600 text-black py-3 rounded-xl font-black uppercase italic tracking-wider text-xs hover:scale-105 transition-all disabled:opacity-50"
                             >
                               Ativar Rodada
                             </button>
@@ -5880,24 +5880,24 @@ const AdminRoundsPage = () => {
                         )}
 
                         {round.status !== 'finished' && (
-                          <div className="p-4 bg-red-50 border border-red-100 rounded-2xl">
-                            <p className="text-sm text-red-800 font-medium mb-2">Finalizar Rodada</p>
-                            <p className="text-xs text-red-600 mb-4">Encerra a rodada definitivamente, calcula os prêmios e distribui os saldos para os vencedores.</p>
+                          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
+                            <p className="text-sm text-red-300 font-bold uppercase tracking-wider mb-2">Finalizar Rodada</p>
+                            <p className="text-xs text-gray-400 mb-4 font-semibold">Encerra a rodada definitivamente, calcula os prêmios e distribui os saldos para os vencedores.</p>
                             
                             <div className="flex items-center gap-2 mb-4">
                               <input 
                                 type="checkbox" 
                                 id={`jackpot-${round.id}`}
-                                className="w-4 h-4 text-red-600"
+                                className="w-4 h-4 rounded text-red-500 focus:ring-red-500 border-[#2A3441] bg-[#0A0F1E]"
                                 onChange={(e) => (window as any).distributeJackpot = e.target.checked}
                               />
-                              <label htmlFor={`jackpot-${round.id}`} className="text-xs font-bold text-red-800">Distribuir Bônus Acumulado</label>
+                              <label htmlFor={`jackpot-${round.id}`} className="text-xs font-black text-red-400 uppercase tracking-widest cursor-pointer select-none">Distribuir Bônus Acumulado</label>
                             </div>
 
                             <button 
                               onClick={() => handleFinishRound(round.id, (window as any).distributeJackpot)}
                               disabled={submitting}
-                              className="w-full bg-red-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-red-700 transition-all disabled:opacity-50"
+                              className="w-full bg-red-600 text-white py-3 rounded-xl font-black uppercase italic tracking-wider text-xs hover:scale-105 transition-all disabled:opacity-50 shadow-md"
                             >
                               Finalizar e Pagar Prêmios
                             </button>
@@ -5909,7 +5909,7 @@ const AdminRoundsPage = () => {
 
                     <button 
                       onClick={() => setEditingRound(null)}
-                      className="mt-8 text-gray-400 hover:text-gray-600 text-sm font-bold underline"
+                      className="mt-8 text-gray-400 hover:text-white text-xs font-black uppercase tracking-wider transition-all hover:underline text-left"
                     >
                       Fechar Painel de Gerenciamento
                     </button>
