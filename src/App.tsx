@@ -3121,6 +3121,7 @@ const AdminDashboard = () => {
   const [userWallets, setUserWallets] = useState<any[]>([]);
   const [financials, setFinancials] = useState<any[]>([]);
   const [financialDetails, setFinancialDetails] = useState<any>({ jackpotPool: 0, prizesHistory: [], withdrawalsHistory: [] });
+  const [profitDistributions, setProfitDistributions] = useState<any[]>([]);
   const [newWithdrawal, setNewWithdrawal] = useState({ amount: '', reason: '' });
   const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
   const [newJackpotInjection, setNewJackpotInjection] = useState({ amount: '', description: '' });
@@ -3213,6 +3214,16 @@ const AdminDashboard = () => {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (res.ok) setFinancialDetails(await res.json());
+  };
+
+  const fetchProfitDistributions = async () => {
+    const res = await fetch('/api/admin/profit-distributions', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setProfitDistributions(data);
+    }
   };
 
   const handleAddWithdrawal = async (e: React.FormEvent) => {
@@ -3401,6 +3412,7 @@ const AdminDashboard = () => {
     if (activeTab === 'financial') {
       promises.push(fetchFinancials());
       promises.push(fetchFinancialDetails());
+      promises.push(fetchProfitDistributions());
     }
     if (activeTab === 'user-wallets') {
       promises.push(fetchUserWallets());
@@ -3535,10 +3547,13 @@ const AdminDashboard = () => {
   if (loading) return <div className="p-8">Carregando...</div>;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 text-white">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-        <h2 className="text-3xl font-bold text-primary">Painel Administrativo</h2>
-        <div className="flex bg-gray-100 p-1 rounded-xl overflow-x-auto max-w-full">
+        <div>
+          <h2 className="text-3xl font-black uppercase italic tracking-wider text-white">Painel Administrativo</h2>
+          <p className="text-gray-400 font-bold uppercase tracking-wider text-xs">Monitore saques, usuários, carteiras e financeiro.</p>
+        </div>
+        <div className="flex bg-[#0A0F1E] p-1.5 rounded-xl overflow-x-auto max-w-full border border-[#2A3441] shadow-inner">
           {[
             { id: 'withdrawals', label: 'Saques' },
             { id: 'users', label: 'Usuários' },
@@ -3553,7 +3568,7 @@ const AdminDashboard = () => {
             <button 
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-white text-primary shadow-sm' : 'text-gray-500'}`}
+              className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-[#32CD32] text-black shadow-md' : 'text-gray-400 hover:text-white'}`}
             >
               {tab.label}
             </button>
@@ -3562,34 +3577,34 @@ const AdminDashboard = () => {
       </div>
       
       {activeTab === 'withdrawals' && (
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-            <h3 className="font-bold text-primary">Saques Pendentes</h3>
+        <div className="bg-[#12182B] rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden">
+          <div className="p-6 border-b border-[#2A3441] bg-[#1A2235] flex justify-between items-center">
+            <h3 className="font-black uppercase italic tracking-wider text-white">Saques Pendentes</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                <tr className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-[#2A3441]">
                   <th className="px-6 py-4">Usuário</th>
                   <th className="px-6 py-4">Data Solicitação</th>
                   <th className="px-6 py-4">Valor</th>
                   <th className="px-6 py-4">Chave PIX</th>
-                  <th className="px-6 py-4">Ações</th>
+                  <th className="px-6 py-4 font-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-[#2A3441]">
                 {pendingWithdrawals.map((w) => (
-                  <tr key={w.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={w.id} className="hover:bg-[#1A2235] transition-colors">
                     <td className="px-6 py-4">
-                      <p className="font-bold text-primary">{w.user_name} ({w.user_nickname})</p>
+                      <p className="font-bold text-white">{w.user_name} ({w.user_nickname})</p>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">
+                    <td className="px-6 py-4 text-gray-300">
                       {new Date(w.created_at).toLocaleString('pt-BR')}
                     </td>
-                    <td className="px-6 py-4 font-bold text-gray-900">
+                    <td className="px-6 py-4 font-bold text-white">
                       R$ {Math.abs(w.amount).toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 font-mono text-sm text-gray-600">
+                    <td className="px-6 py-4 font-mono text-sm text-[#32CD32]">
                       {w.pix_key || '-'}
                     </td>
                     <td className="px-6 py-4">
@@ -3597,14 +3612,14 @@ const AdminDashboard = () => {
                         <div className="flex space-x-2">
                           <button
                             onClick={() => handleValidateWithdrawal(w.id, 'approve')}
-                            className="bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-colors flex items-center"
+                            className="bg-green-500/10 text-green-400 border border-green-500/20 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider hover:bg-green-500/20 transition-colors flex items-center"
                           >
                             <CheckCircle className="w-4 h-4 mr-1" />
                             Aprovar
                           </button>
                           <button
                             onClick={() => handleValidateWithdrawal(w.id, 'reject')}
-                            className="bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors flex items-center"
+                            className="bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider hover:bg-red-500/20 transition-colors flex items-center"
                           >
                             <XCircle className="w-4 h-4 mr-1" />
                             Rejeitar
@@ -3616,7 +3631,7 @@ const AdminDashboard = () => {
                 ))}
                 {pendingWithdrawals.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500 font-bold uppercase tracking-wider text-xs">
                       Nenhum saque pendente.
                     </td>
                   </tr>
@@ -3628,14 +3643,14 @@ const AdminDashboard = () => {
       )}
 
       {activeTab === 'withdrawals' && withdrawalHistory && withdrawalHistory.length > 0 && (
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mt-8">
-          <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-            <h3 className="font-bold text-primary">Histórico de Saques</h3>
+        <div className="bg-[#12182B] rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden mt-8">
+          <div className="p-6 border-b border-[#2A3441] bg-[#1A2235] flex justify-between items-center">
+            <h3 className="font-black uppercase italic tracking-wider text-white">Histórico de Saques</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                <tr className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-[#2A3441]">
                   <th className="px-6 py-4">Usuário</th>
                   <th className="px-6 py-4">Data Solicitação</th>
                   <th className="px-6 py-4">Valor</th>
@@ -3643,26 +3658,26 @@ const AdminDashboard = () => {
                   <th className="px-6 py-4">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-[#2A3441]">
                 {withdrawalHistory.map((w) => (
-                  <tr key={w.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={w.id} className="hover:bg-[#1A2235] transition-colors">
                     <td className="px-6 py-4">
-                      <p className="font-bold text-primary">{w.user_name} ({w.user_nickname})</p>
+                      <p className="font-bold text-white">{w.user_name} ({w.user_nickname})</p>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">
+                    <td className="px-6 py-4 text-gray-300">
                       {new Date(w.created_at).toLocaleString('pt-BR')}
                     </td>
-                    <td className="px-6 py-4 font-bold text-gray-900">
+                    <td className="px-6 py-4 font-bold text-white">
                       R$ {Math.abs(w.amount).toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 font-mono text-sm text-gray-600">
+                    <td className="px-6 py-4 font-mono text-sm text-[#32CD32]">
                       {w.pix_key || '-'}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        w.status === 'Aprovado' ? 'bg-green-100 text-green-700' :
-                        w.status === 'Rejeitado' ? 'bg-red-100 text-red-700' :
-                        'bg-gray-100 text-gray-700'
+                      <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border ${
+                        w.status === 'Aprovado' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                        w.status === 'Rejeitado' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                        'bg-[#1A2235] text-gray-300 border-[#2A3441]'
                       }`}>
                         {w.status}
                       </span>
@@ -3676,14 +3691,14 @@ const AdminDashboard = () => {
       )}
 
       {activeTab === 'users' && (
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-100 bg-gray-50">
-            <h3 className="font-bold text-primary">Gerenciamento de Usuários</h3>
+        <div className="bg-[#12182B] rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden">
+          <div className="p-6 border-b border-[#2A3441] bg-[#1A2235]">
+            <h3 className="font-black uppercase italic tracking-wider text-white">Gerenciamento de Usuários</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                <tr className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-[#2A3441]">
                   <th className="px-6 py-4">Nome / Nickname</th>
                   <th className="px-6 py-4">Contato</th>
                   <th className="px-6 py-4">Senha</th>
@@ -3691,38 +3706,38 @@ const AdminDashboard = () => {
                   <th className="px-6 py-4">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-[#2A3441]">
                 {users.map((u) => (
-                  <tr key={u.id}>
+                  <tr key={u.id} className="hover:bg-[#1A2235] transition-colors">
                     <td className="px-6 py-4">
-                      <p className="font-bold text-primary">{u.name}</p>
-                      <p className="text-xs text-gray-500">@{u.nickname}</p>
+                      <p className="font-bold text-white">{u.name}</p>
+                      <p className="text-xs text-[#32CD32]">@{u.nickname}</p>
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      <p>{u.email}</p>
-                      {u.phone && <p className="text-xs text-gray-500">{u.phone}</p>}
+                      <p className="text-gray-200 font-semibold">{u.email}</p>
+                      {u.phone && <p className="text-xs text-gray-400">{u.phone}</p>}
                     </td>
                     <td className="px-6 py-4">
-                      <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">{u.password}</code>
+                      <code className="bg-[#0A0F1E] border border-[#2A3441] text-gray-300 px-2.5 py-1 rounded-lg text-xs font-mono">{u.password}</code>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${u.role === 'admin' ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-600'}`}>
+                      <span className={`px-2 py-1 rounded-full text-[10px] font-black tracking-wider uppercase border ${u.role === 'admin' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 'bg-[#1A2235] text-gray-400 border-[#2A3441]'}`}>
                         {u.role}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex space-x-2">
+                      <div className="flex space-x-3">
                         {isAdmin && (
                           <button 
                             onClick={() => setEditingUser(u)}
-                            className="text-blue-600 hover:underline text-xs font-bold"
+                            className="text-blue-400 hover:text-blue-300 hover:underline text-xs font-bold uppercase tracking-wider"
                           >
                             Editar
                           </button>
                         )}
                         <a 
                           href={`mailto:${u.email}`}
-                          className="text-green-600 hover:underline text-xs font-bold"
+                          className="text-green-400 hover:text-green-300 hover:underline text-xs font-bold uppercase tracking-wider"
                         >
                           E-mail
                         </a>
@@ -3731,7 +3746,7 @@ const AdminDashboard = () => {
                             href={`https://wa.me/55${u.phone.replace(/\D/g, '')}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-green-500 hover:underline text-xs font-bold"
+                            className="text-[#32CD32] hover:underline text-xs font-bold uppercase tracking-wider"
                           >
                             WhatsApp
                           </a>
@@ -3739,7 +3754,7 @@ const AdminDashboard = () => {
                         {isAdmin && (
                           <button 
                             onClick={() => handleDeleteUser(u.id)}
-                            className="text-red-600 hover:underline text-xs font-bold"
+                            className="text-red-400 hover:text-red-300 hover:underline text-xs font-bold uppercase tracking-wider"
                           >
                             Excluir
                           </button>
@@ -3755,28 +3770,28 @@ const AdminDashboard = () => {
       )}
 
       {activeTab === 'referrals' && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-[#12182B] p-8 rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)]">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-            <h3 className="text-xl font-bold text-primary">Monitoramento de Indicações</h3>
+            <h3 className="text-xl font-black uppercase italic tracking-wider text-[#32CD32]">Monitoramento de Indicações</h3>
             <input
               type="text"
               placeholder="Filtrar por indicador..."
               value={referralFilter}
               onChange={(e) => setReferralFilter(e.target.value)}
-              className="px-4 py-2 bg-gray-100 border-none rounded-xl text-sm w-full md:w-64 focus:ring-2 focus:ring-secondary outline-none"
+              className="px-4 py-3 bg-[#0A0F1E] border border-[#2A3441] text-white rounded-xl text-sm w-full md:w-64 focus:ring-2 focus:ring-[#32CD32] outline-none transition-all placeholder-gray-600 font-bold"
             />
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="pb-4 font-bold text-gray-500 uppercase text-xs tracking-wider">Indicador</th>
-                  <th className="pb-4 font-bold text-gray-500 uppercase text-xs tracking-wider">Indicado</th>
-                  <th className="pb-4 font-bold text-gray-500 uppercase text-xs tracking-wider">Data</th>
-                  <th className="pb-4 font-bold text-gray-500 uppercase text-xs tracking-wider text-center">Bônus</th>
+                <tr className="border-b border-[#2A3441]">
+                  <th className="pb-4 font-black text-gray-400 uppercase text-xs tracking-wider">Indicador</th>
+                  <th className="pb-4 font-black text-gray-400 uppercase text-xs tracking-wider">Indicado</th>
+                  <th className="pb-4 font-black text-gray-400 uppercase text-xs tracking-wider">Data</th>
+                  <th className="pb-4 font-black text-gray-400 uppercase text-xs tracking-wider text-center">Bônus</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-[#2A3441]">
                 {referrals.filter(ref => {
                   if (!referralFilter) return true;
                   const search = referralFilter.toLowerCase();
@@ -3784,23 +3799,23 @@ const AdminDashboard = () => {
                   const referrerEmail = ref.referrer?.email || '';
                   return referrerName.toLowerCase().includes(search) || referrerEmail.toLowerCase().includes(search);
                 }).map((ref: any) => (
-                  <tr key={ref.id}>
+                  <tr key={ref.id} className="hover:bg-[#1A2235] transition-colors">
                     <td className="py-4">
-                      <div className="font-bold text-gray-900">{ref.referrer?.nickname || ref.referrer?.name || 'Desconhecido'}</div>
-                      <div className="text-xs text-gray-500">{ref.referrer?.email || '-'}</div>
+                      <div className="font-bold text-white">{ref.referrer?.nickname || ref.referrer?.name || 'Desconhecido'}</div>
+                      <div className="text-xs text-gray-400">{ref.referrer?.email || '-'}</div>
                     </td>
                     <td className="py-4">
-                      <div className="font-bold text-gray-900">{ref.referred?.nickname || ref.referred?.name || 'Desconhecido'}</div>
-                      <div className="text-xs text-gray-500">{ref.referred?.email || '-'}</div>
+                      <div className="font-bold text-white">{ref.referred?.nickname || ref.referred?.name || 'Desconhecido'}</div>
+                      <div className="text-xs text-gray-400">{ref.referred?.email || '-'}</div>
                     </td>
-                    <td className="py-4 text-sm text-gray-600">
+                    <td className="py-4 text-sm text-gray-300">
                       {new Date(ref.created_at).toLocaleDateString('pt-BR')}
                     </td>
                     <td className="py-4 text-center">
                       {ref.bonus_paid ? (
-                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">Pago (R$ {Number(ref.bonus_amount).toFixed(2)})</span>
+                        <span className="bg-green-500/10 text-green-400 border border-green-500/20 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">Pago (R$ {Number(ref.bonus_amount).toFixed(2)})</span>
                       ) : (
-                        <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">Pendente</span>
+                        <span className="bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">Pendente</span>
                       )}
                     </td>
                   </tr>
@@ -3812,48 +3827,48 @@ const AdminDashboard = () => {
       )}
 
       {activeTab === 'lucky-numbers' && (
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-            <h3 className="font-bold text-primary">Controle de Números da Sorte (Sorteio M15)</h3>
-            <div className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-xs font-bold">
+        <div className="bg-[#12182B] rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden">
+          <div className="p-6 border-b border-[#2A3441] bg-[#1A2235] flex justify-between items-center">
+            <h3 className="font-black uppercase italic tracking-wider text-white">Controle de Sorteio</h3>
+            <div className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider">
               Total Gerado: {allLuckyNumbers.length}
             </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                <tr className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-[#2A3441]">
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Usuário</th>
-                  <th className="px-6 py-4">Número da Sorte</th>
+                  <th className="px-6 py-4 font-mono">Número da Sorte</th>
                   <th className="px-6 py-4">Data/Hora</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-[#2A3441]">
                 {allLuckyNumbers.map((num) => (
-                  <tr key={num.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={num.id} className="hover:bg-[#1A2235] transition-colors">
                     <td className="px-6 py-4">
-                      <span className="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                      <span className="w-8 h-8 bg-[#32CD32]/10 text-[#32CD32] border border-[#32CD32]/30 rounded-full flex items-center justify-center">
                         <CheckCircle className="w-5 h-5" />
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-bold text-primary">{num.users?.name || 'Usuário Deletado'}</p>
-                      <p className="text-xs text-gray-500">@{num.users?.nickname}</p>
+                      <p className="font-bold text-white">{num.users?.name || 'Usuário Deletado'}</p>
+                      <p className="text-xs text-gray-400">@{num.users?.nickname}</p>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="bg-primary text-white px-3 py-1 rounded-lg font-mono font-bold text-lg">
+                      <span className="bg-[#32CD32] text-black px-3 py-1 rounded-lg font-mono font-black text-lg shadow-[0_0_12px_rgba(50,205,50,0.4)]">
                         {num.number}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-6 py-4 text-sm text-gray-300">
                       {new Date(num.created_at).toLocaleString('pt-BR')}
                     </td>
                   </tr>
                 ))}
                 {allLuckyNumbers.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-gray-500 italic">
+                    <td colSpan={4} className="px-6 py-12 text-center text-gray-500 font-bold uppercase tracking-wider text-xs italic">
                       Nenhum número da sorte gerado ainda.
                     </td>
                   </tr>
@@ -3865,26 +3880,26 @@ const AdminDashboard = () => {
       )}
 
       {activeTab === 'notifications' && (
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-            <h3 className="font-bold text-primary">Alertas e Solicitações</h3>
-            <Bell className="w-5 h-5 text-secondary" />
+        <div className="bg-[#12182B] rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden">
+          <div className="p-6 border-b border-[#2A3441] bg-[#1A2235] flex justify-between items-center">
+            <h3 className="font-black uppercase italic tracking-wider text-white">Alertas e Solicitações</h3>
+            <Bell className="w-5 h-5 text-[#32CD32] animate-bounce" />
           </div>
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-[#2A3441]">
             {adminNotifications.length === 0 ? (
-              <div className="p-12 text-center text-gray-400 italic">
+              <div className="p-12 text-center text-gray-500 font-bold uppercase tracking-wider text-xs italic">
                 Nenhum alerta pendente.
               </div>
             ) : (
               adminNotifications.map((n: any) => (
-                <div key={n.id} className="p-6 hover:bg-gray-50 transition-colors">
+                <div key={n.id} className="p-6 hover:bg-[#1A2235] transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        n.type === 'forgot_password' ? 'bg-orange-100 text-orange-600' : 
-                        n.type === 'withdrawal_request' ? 'bg-red-100 text-red-600' :
-                        (n.type === 'deposit_request' || n.type === 'deposit_pending') ? 'bg-green-100 text-green-600' :
-                        'bg-blue-100 text-blue-600'
+                        n.type === 'forgot_password' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 
+                        n.type === 'withdrawal_request' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                        (n.type === 'deposit_request' || n.type === 'deposit_pending') ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
+                        'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                       }`}>
                         {n.type === 'forgot_password' ? <AlertCircle className="w-5 h-5" /> : 
                          n.type === 'withdrawal_request' ? <ArrowUpCircle className="w-5 h-5" /> :
@@ -3892,18 +3907,18 @@ const AdminDashboard = () => {
                          <Bell className="w-5 h-5" />}
                       </div>
                       <div>
-                        <p className="font-bold text-gray-900">{n.title || n.message}</p>
-                        {n.title && <p className="text-sm text-gray-600 mt-0.5">{n.message}</p>}
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="font-bold text-white">{n.title || n.message}</p>
+                        {n.title && <p className="text-sm text-gray-300 mt-0.5">{n.message}</p>}
+                        <p className="text-xs text-gray-500 mt-1">
                           {formatDate(n.created_at || n.date, 'dd/MM/yyyy HH:mm')}
                         </p>
                         
                         <div className="mt-4 flex flex-wrap gap-2">
-                          {n.type === 'forgot_password' && (
+                           {n.type === 'forgot_password' && (
                             <>
                               <a 
                                 href={`mailto:${n.user_email}?subject=Recuperação de Senha - Bolão10&body=Olá ${n.user_name}, recebemos sua solicitação de recuperação de senha.`}
-                                className="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors flex items-center"
+                                className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider hover:bg-blue-500/20 transition-all flex items-center"
                               >
                                 <Mail className="w-3.5 h-3.5 mr-1.5" /> Enviar E-mail
                               </a>
@@ -3912,7 +3927,7 @@ const AdminDashboard = () => {
                                   href={`https://wa.me/55${n.user_phone.replace(/\D/g, '')}?text=Olá ${n.user_name}, recebemos sua solicitação de recuperação de senha no Bolão10.`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="bg-green-50 text-green-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-green-100 transition-colors flex items-center"
+                                  className="bg-[#32CD32]/10 text-[#32CD32] border border-[#32CD32]/30 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider hover:bg-[#32CD32]/20 transition-all flex items-center"
                                 >
                                   <MessageCircle className="w-3.5 h-3.5 mr-1.5" /> Enviar WhatsApp
                                 </a>
@@ -3923,7 +3938,7 @@ const AdminDashboard = () => {
                           {n.type === 'withdrawal_request' && (
                             <button 
                               onClick={() => setActiveTab('withdrawals')}
-                              className="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors flex items-center"
+                              className="bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider hover:bg-red-500/20 transition-all flex items-center"
                             >
                               <ArrowUpCircle className="w-3.5 h-3.5 mr-1.5" /> Ver Pedidos de Saque
                             </button>
@@ -3932,7 +3947,7 @@ const AdminDashboard = () => {
                           {n.type === 'deposit_request' && (
                             <button 
                               onClick={() => setActiveTab('user-wallets')}
-                              className="bg-green-50 text-green-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-green-100 transition-colors flex items-center"
+                              className="bg-[#32CD32]/10 text-[#32CD32] border border-[#32CD32]/20 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider hover:bg-[#32CD32]/20 transition-all flex items-center"
                             >
                               <ArrowDownCircle className="w-3.5 h-3.5 mr-1.5" /> Validar Depósitos
                             </button>
@@ -3941,7 +3956,7 @@ const AdminDashboard = () => {
                           {n.type === 'deposit_pending' && (
                             <button 
                               onClick={() => setActiveTab('user-wallets')}
-                              className="bg-green-50 text-green-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-green-100 transition-colors flex items-center"
+                              className="bg-[#32CD32]/10 text-[#32CD32] border border-[#32CD32]/20 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider hover:bg-[#32CD32]/20 transition-all flex items-center"
                             >
                               <ArrowDownCircle className="w-3.5 h-3.5 mr-1.5" /> Ver Carteiras
                             </button>
@@ -3952,7 +3967,7 @@ const AdminDashboard = () => {
                               href={`https://wa.me/55${n.user_phone.replace(/\D/g, '')}?text=Olá ${n.user_name}, sobre seu pedido de ${n.type === 'withdrawal_request' ? 'saque' : 'depósito'} no Bolão10...`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="bg-green-50 text-green-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-green-100 transition-colors flex items-center"
+                              className="bg-[#32CD32]/10 text-[#32CD32] border border-[#32CD32]/20 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider hover:bg-[#32CD32]/20 transition-all flex items-center"
                             >
                               <MessageCircle className="w-3.5 h-3.5 mr-1.5" /> Contatar Usuário
                             </a>
@@ -3972,7 +3987,7 @@ const AdminDashboard = () => {
                           console.error('Error deleting notification:', err);
                         }
                       }}
-                      className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                      className="text-gray-500 hover:text-red-400 transition-colors p-1"
                       title="Remover alerta"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -3989,37 +4004,37 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {isAdmin && (
             <div className="lg:col-span-1">
-              <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm sticky top-8">
-                <h3 className="text-xl font-bold text-primary mb-6">Enviar Notificação</h3>
+              <div className="bg-[#12182B] p-8 rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] sticky top-8 text-white">
+                <h3 className="text-xl font-black uppercase italic tracking-wider text-[#32CD32] mb-6">Enviar Notificação</h3>
                 <form onSubmit={handleSendNotification} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Título</label>
+                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">Título</label>
                     <input 
                       type="text" 
                       required 
                       value={notificationForm.title}
                       onChange={(e) => setNotificationForm({...notificationForm, title: e.target.value})}
-                      className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                      className="w-full px-4 py-3 bg-[#0A0F1E] border border-[#2A3441] text-white rounded-xl focus:ring-2 focus:ring-[#32CD32] outline-none transition-all placeholder-gray-600 font-bold"
                       placeholder="Ex: Nova Rodada Aberta!"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Mensagem</label>
+                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">Mensagem</label>
                     <textarea 
                       required 
                       rows={4}
                       value={notificationForm.message}
                       onChange={(e) => setNotificationForm({...notificationForm, message: e.target.value})}
-                      className="w-full px-4 py-2 rounded-xl border border-gray-200 resize-none"
+                      className="w-full px-4 py-3 bg-[#0A0F1E] border border-[#2A3441] text-white rounded-xl focus:ring-2 focus:ring-[#32CD32] outline-none transition-all placeholder-gray-600 font-bold resize-none"
                       placeholder="Digite o conteúdo da mensagem..."
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo de Alerta</label>
+                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">Tipo de Alerta</label>
                     <select 
                       value={notificationForm.type}
                       onChange={(e) => setNotificationForm({...notificationForm, type: e.target.value})}
-                      className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                      className="w-full px-4 py-3 bg-[#0A0F1E] border border-[#2A3441] text-white rounded-xl focus:ring-2 focus:ring-[#32CD32] outline-none transition-all font-bold"
                     >
                       <option value="info">ℹ️ Informação (Azul)</option>
                       <option value="success">✅ Sucesso (Verde)</option>
@@ -4028,11 +4043,11 @@ const AdminDashboard = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Destinatário</label>
+                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">Destinatário</label>
                     <select 
                       value={notificationForm.target_type}
                       onChange={(e) => setNotificationForm({...notificationForm, target_type: e.target.value})}
-                      className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                      className="w-full px-4 py-3 bg-[#0A0F1E] border border-[#2A3441] text-white rounded-xl focus:ring-2 focus:ring-[#32CD32] outline-none transition-all font-bold"
                     >
                       <option value="all">Todos os Usuários</option>
                       <option value="individual">Usuário Específico</option>
@@ -4040,12 +4055,12 @@ const AdminDashboard = () => {
                   </div>
                   {notificationForm.target_type === 'individual' && (
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Selecionar Usuário</label>
+                      <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">Selecionar Usuário</label>
                       <select 
                         required
                         value={notificationForm.user_id}
                         onChange={(e) => setNotificationForm({...notificationForm, user_id: e.target.value})}
-                        className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                        className="w-full px-4 py-3 bg-[#0A0F1E] border border-[#2A3441] text-white rounded-xl focus:ring-2 focus:ring-[#32CD32] outline-none transition-all font-bold"
                       >
                         <option value="">Selecione um usuário...</option>
                         {users.map(u => (
@@ -4057,7 +4072,7 @@ const AdminDashboard = () => {
                   <button 
                     type="submit" 
                     disabled={sendingNotification}
-                    className="w-full bg-primary text-white py-3 rounded-xl font-bold mt-4 hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center"
+                    className="w-full bg-[#32CD32] text-black py-4 rounded-xl font-black uppercase italic tracking-wider text-sm hover:scale-105 transition-all shadow-[0_0_15px_rgba(50,205,50,0.4)] disabled:opacity-50 flex items-center justify-center mt-4"
                   >
                     {sendingNotification ? 'Enviando...' : (
                       <>
@@ -4071,35 +4086,35 @@ const AdminDashboard = () => {
           )}
           
           <div className={isAdmin ? "lg:col-span-2" : "lg:col-span-3"}>
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-100 bg-gray-50">
-                <h3 className="font-bold text-primary">Histórico de Mensagens Enviadas</h3>
+            <div className="bg-[#12182B] rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden text-white">
+              <div className="p-6 border-b border-[#2A3441] bg-[#1A2235]">
+                <h3 className="font-black uppercase italic tracking-wider text-[#32CD32]">Histórico de Mensagens</h3>
               </div>
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-[#2A3441]">
                 {sentNotifications.length === 0 ? (
-                  <div className="p-12 text-center text-gray-400 italic">
+                  <div className="p-12 text-center text-gray-500 font-bold uppercase tracking-wider text-xs italic">
                     Nenhuma mensagem enviada ainda.
                   </div>
                 ) : (
                   sentNotifications.map((n) => (
-                    <div key={n.id} className="p-6 hover:bg-gray-50 transition-colors group">
+                    <div key={n.id} className="p-6 hover:bg-[#1A2235] transition-colors group">
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex items-center">
                           <span className={`w-2 h-2 rounded-full mr-2 ${
-                            n.type === 'success' ? 'bg-green-500' : 
+                            n.type === 'success' ? 'bg-green-500 animate-pulse' : 
                             n.type === 'warning' ? 'bg-yellow-500' : 
                             (n.type === 'alert' || n.type === 'error') ? 'bg-red-500' : 'bg-blue-500'
                           }`} />
-                          <h4 className="font-bold text-primary">{n.title}</h4>
+                          <h4 className="font-bold text-white">{n.title}</h4>
                         </div>
                         <div className="flex items-center space-x-3">
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-gray-400 font-bold font-mono">
                             {formatDate(n.created_at, 'dd/MM/yyyy HH:mm')}
                           </span>
                           {isAdmin && (
                             <button 
                               onClick={() => handleDeleteNotification(n.id)}
-                              className="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                              className="text-gray-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 p-1"
                               title="Excluir mensagem"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -4107,13 +4122,13 @@ const AdminDashboard = () => {
                           )}
                         </div>
                       </div>
-                      <p className="text-sm text-gray-600 mb-3">{n.message}</p>
-                      <div className="flex items-center text-[10px] font-bold uppercase tracking-wider">
-                        <span className="text-gray-400 mr-2">Para:</span>
+                      <p className="text-sm text-gray-300 mb-3 font-medium">{n.message}</p>
+                      <div className="flex items-center text-[10px] font-black uppercase tracking-wider">
+                        <span className="text-gray-500 mr-2">Para:</span>
                         {n.target_type === 'all' ? (
-                          <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded">Todos</span>
+                          <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded">Todos</span>
                         ) : (
-                          <span className="bg-purple-50 text-purple-600 px-2 py-0.5 rounded">
+                          <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded">
                             Individual (ID: {n.user_id})
                           </span>
                         )}
@@ -4135,75 +4150,75 @@ const AdminDashboard = () => {
         const activeUsersCount = userWallets.filter(uw => uw.balance > 0).length;
 
         return (
-          <div className="space-y-8">
+          <div className="space-y-8 text-white">
             {/* Summary Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-              <div className="bg-white p-6 rounded-3xl border-l-4 border-primary shadow-sm flex justify-between items-center">
+              <div className="bg-[#12182B] p-6 rounded-3xl border border-[#2A3441] border-l-4 border-l-[#32CD32] shadow-[0_0_15px_rgba(0,0,0,0.5)] flex justify-between items-center text-white">
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase mb-1">BANCO Bolão 10 (Total em Carteiras)</p>
-                  <p className="text-2xl font-bold text-primary">R$ {totalBalance.toFixed(2)}</p>
+                  <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1">BANCO Bolão 10</p>
+                  <p className="text-2xl font-black text-white">R$ {totalBalance.toFixed(2)}</p>
                 </div>
-                <div className="w-12 h-12 bg-blue-50 text-primary rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#1A2235] text-[#32CD32] rounded-full flex items-center justify-center">
                   <Landmark className="w-6 h-6" />
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border-l-4 border-blue-500 shadow-sm flex justify-between items-center">
+              <div className="bg-[#12182B] p-6 rounded-3xl border border-[#2A3441] border-l-4 border-l-blue-500 shadow-[0_0_15px_rgba(0,0,0,0.5)] flex justify-between items-center text-white">
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase mb-1">Total Depositado</p>
-                  <p className="text-2xl font-bold text-primary">R$ {totalDeposited.toFixed(2)}</p>
+                  <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Total Depositado</p>
+                  <p className="text-2xl font-black text-blue-400">R$ {totalDeposited.toFixed(2)}</p>
                 </div>
-                <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#1A2235] text-blue-400 rounded-full flex items-center justify-center">
                   <TrendingUp className="w-6 h-6" />
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border-l-4 border-purple-500 shadow-sm flex justify-between items-center">
+              <div className="bg-[#12182B] p-6 rounded-3xl border border-[#2A3441] border-l-4 border-l-purple-500 shadow-[0_0_15px_rgba(0,0,0,0.5)] flex justify-between items-center text-white">
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase mb-1">Total de Prêmios</p>
-                  <p className="text-2xl font-bold text-primary">R$ {totalWinnings.toFixed(2)}</p>
+                  <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Total de Prêmios</p>
+                  <p className="text-2xl font-black text-purple-400">R$ {totalWinnings.toFixed(2)}</p>
                 </div>
-                <div className="w-12 h-12 bg-purple-50 text-purple-500 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#1A2235] text-purple-400 rounded-full flex items-center justify-center">
                   <Gift className="w-6 h-6" />
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border-l-4 border-red-500 shadow-sm flex justify-between items-center">
+              <div className="bg-[#12182B] p-6 rounded-3xl border border-[#2A3441] border-l-4 border-l-red-500 shadow-[0_0_15px_rgba(0,0,0,0.5)] flex justify-between items-center text-white">
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase mb-1">Total Sacado</p>
-                  <p className="text-2xl font-bold text-red-600">R$ {totalWithdrawn.toFixed(2)}</p>
+                  <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Total Sacado</p>
+                  <p className="text-2xl font-black text-red-500">R$ {totalWithdrawn.toFixed(2)}</p>
                 </div>
-                <div className="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#1A2235] text-red-500 rounded-full flex items-center justify-center">
                   <TrendingDown className="w-6 h-6" />
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border-l-4 border-orange-500 shadow-sm flex justify-between items-center">
+              <div className="bg-[#12182B] p-6 rounded-3xl border border-[#2A3441] border-l-4 border-l-orange-500 shadow-[0_0_15px_rgba(0,0,0,0.5)] flex justify-between items-center text-white">
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase mb-1">Usuários com Saldo</p>
-                  <p className="text-2xl font-bold text-orange-600">{activeUsersCount}</p>
+                  <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Usuários Ativos</p>
+                  <p className="text-2xl font-black text-orange-400">{activeUsersCount}</p>
                 </div>
-                <div className="w-12 h-12 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#1A2235] text-orange-400 rounded-full flex items-center justify-center">
                   <Users className="w-6 h-6" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center flex-wrap gap-4">
-                <h3 className="font-bold text-primary flex items-center gap-2">
+            <div className="bg-[#12182B] rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden">
+              <div className="p-6 border-b border-[#2A3441] bg-[#1A2235] flex justify-between items-center flex-wrap gap-4">
+                <h3 className="font-black uppercase italic tracking-wider text-[#32CD32] flex items-center gap-2">
                   <Clock className="w-5 h-5 text-yellow-500" />
                   Validação de Depósitos
                 </h3>
                 <div className="flex items-center gap-3">
                   <button 
                     onClick={handleDownloadPagBankLogs}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors font-semibold text-sm cursor-pointer border-none outline-none"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-xl hover:bg-blue-500/20 transition-all font-black text-xs uppercase tracking-wider cursor-pointer outline-none"
                   >
                     <Download className="w-4 h-4" />
                     Baixar Log PagBank
                   </button>
-                  <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">
+                  <span className="bg-yellow-500/10 text-yellow-500 border border-yellow-500/25 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider">
                     {pendingDeposits.length} Pendentes
                   </span>
                 </div>
@@ -4211,7 +4226,7 @@ const AdminDashboard = () => {
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                    <tr className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-[#2A3441]">
                       <th className="px-6 py-4">Usuário</th>
                       <th className="px-6 py-4">Data</th>
                       <th className="px-6 py-4">Valor</th>
@@ -4219,34 +4234,34 @@ const AdminDashboard = () => {
                       <th className="px-6 py-4">Ações</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-[#2A3441]">
                     {pendingDeposits.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-6 py-8 text-center text-gray-400 italic">Nenhum depósito pendente de validação.</td>
+                        <td colSpan={5} className="px-6 py-8 text-center text-gray-500 font-bold uppercase tracking-wider text-xs italic">Nenhum depósito pendente de validação.</td>
                       </tr>
                     ) : (
                       pendingDeposits.map((d) => (
-                        <tr key={d.id} className="hover:bg-gray-50 transition-colors">
+                        <tr key={d.id} className="hover:bg-[#1A2235] transition-colors">
                           <td className="px-6 py-4">
-                            <p className="font-bold text-primary">{d.user_name} ({d.user_nickname})</p>
-                            <p className="text-xs text-gray-500">{d.user_email}</p>
+                            <p className="font-bold text-white">{d.user_name} ({d.user_nickname})</p>
+                            <p className="text-xs text-gray-400">{d.user_email}</p>
                           </td>
-                          <td className="px-6 py-4 text-gray-600 text-sm">
+                          <td className="px-6 py-4 text-gray-300 text-sm">
                             {new Date(d.created_at).toLocaleString('pt-BR')}
                           </td>
-                          <td className="px-6 py-4 font-bold text-green-600">
+                          <td className="px-6 py-4 font-bold text-[#32CD32]">
                             R$ {d.amount.toFixed(2)}
                           </td>
                           <td className="px-6 py-4">
                             {d.proof_url ? (
                               <button 
                                 onClick={() => setViewingProof(d.proof_url)}
-                                className="text-blue-500 hover:text-blue-700 flex items-center gap-1 text-sm font-bold"
+                                className="text-blue-400 hover:text-blue-300 flex items-center gap-1 text-sm font-black uppercase tracking-wider"
                               >
                                 <Eye className="w-4 h-4" /> Ver Comprovante
                               </button>
                             ) : (
-                              <span className="text-gray-400 text-xs italic">Sem comprovante</span>
+                              <span className="text-gray-500 text-xs italic">Sem comprovante</span>
                             )}
                           </td>
                           <td className="px-6 py-4">
@@ -4254,14 +4269,14 @@ const AdminDashboard = () => {
                               <div className="flex items-center gap-2">
                                 <button 
                                   onClick={() => handleValidateDeposit(d.id, 'approved')}
-                                  className="p-2 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-colors"
+                                  className="p-2 bg-green-500/10 text-green-400 border border-green-500/20 rounded-xl hover:bg-green-500/20 transition-all"
                                   title="Aprovar"
                                 >
                                   <CheckCircle className="w-5 h-5" />
                                 </button>
                                 <button 
                                   onClick={() => handleValidateDeposit(d.id, 'rejected')}
-                                  className="p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
+                                  className="p-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all"
                                   title="Rejeitar"
                                 >
                                   <XCircle className="w-5 h-5" />
@@ -4277,10 +4292,10 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-sm overflow-hidden border border-gray-100">
-              <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <h3 className="text-xl font-bold text-primary flex items-center gap-2">
-                  <Wallet className="w-6 h-6 text-blue-500" />
+            <div className="bg-[#12182B] rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden">
+              <div className="p-6 border-b border-[#2A3441] flex flex-col sm:flex-row justify-between items-center gap-4">
+                <h3 className="text-xl font-black uppercase italic tracking-wider text-white flex items-center gap-2">
+                  <Wallet className="w-6 h-6 text-[#32CD32]" />
                   Carteiras dos Usuários
                 </h3>
                 <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -4290,11 +4305,11 @@ const AdminDashboard = () => {
                       placeholder="Buscar por nome ou email..." 
                       value={walletSearch}
                       onChange={(e) => setWalletSearch(e.target.value)}
-                      className="w-full sm:w-64 pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary outline-none"
+                      className="w-full sm:w-64 pl-10 pr-4 py-3 bg-[#0A0F1E] border border-[#2A3441] text-white rounded-xl text-sm focus:ring-2 focus:ring-[#32CD32] outline-none transition-all placeholder-gray-600 font-bold"
                     />
-                    <Users className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <Users className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   </div>
-                  <button onClick={() => { fetchUserWallets(); fetchAllDeposits(); }} className="text-sm text-blue-500 hover:underline shrink-0">
+                  <button onClick={() => { fetchUserWallets(); fetchAllDeposits(); }} className="text-xs font-black uppercase tracking-wider text-blue-400 hover:text-blue-300">
                     Atualizar
                   </button>
                 </div>
@@ -4302,17 +4317,17 @@ const AdminDashboard = () => {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-                      <th className="px-6 py-4 font-semibold">Usuário</th>
-                      <th className="px-6 py-4 font-semibold">Saldo Atual</th>
-                      <th className="px-6 py-4 font-semibold">Total Depositado</th>
-                      <th className="px-6 py-4 font-semibold">Total Ganho</th>
-                      <th className="px-6 py-4 font-semibold">Saques</th>
-                      <th className="px-6 py-4 font-semibold">Histórico</th>
-                      <th className="px-6 py-4 font-semibold">Ações</th>
+                    <tr className="bg-[#1A2235] text-gray-400 text-xs font-black uppercase tracking-widest border-b border-[#2A3441]">
+                      <th className="px-6 py-4">Usuário</th>
+                      <th className="px-6 py-4">Saldo Atual</th>
+                      <th className="px-6 py-4">Total Depositado</th>
+                      <th className="px-6 py-4">Total Ganho</th>
+                      <th className="px-6 py-4">Saques</th>
+                      <th className="px-6 py-4">Histórico</th>
+                      <th className="px-6 py-4">Ações</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-[#2A3441]">
                     {(() => {
                       const filtered = userWallets.filter((uw: any) => 
                         uw.user.name.toLowerCase().includes(walletSearch.toLowerCase()) ||
@@ -4322,30 +4337,30 @@ const AdminDashboard = () => {
                       if (filtered.length === 0) {
                         return (
                           <tr>
-                            <td colSpan={7} className="px-6 py-8 text-center text-gray-400">Nenhum usuário encontrado.</td>
+                            <td colSpan={7} className="px-6 py-8 text-center text-gray-500 font-bold uppercase tracking-wider text-xs">Nenhum usuário encontrado.</td>
                           </tr>
                         );
                       }
 
                       return filtered.map((uw: any) => (
-                        <tr key={uw.user.id} className="hover:bg-gray-50 transition-colors">
+                        <tr key={uw.user.id} className="hover:bg-[#1A2235] transition-colors text-gray-200">
                           <td className="px-6 py-4">
-                            <p className="font-bold text-primary">{uw.user.name}</p>
-                            <p className="text-xs text-gray-500">{uw.user.email}</p>
-                            {uw.user.nickname && <p className="text-xs text-blue-500">@{uw.user.nickname}</p>}
+                            <p className="font-bold text-white">{uw.user.name}</p>
+                            <p className="text-xs text-gray-400">{uw.user.email}</p>
+                            {uw.user.nickname && <p className="text-xs text-[#32CD32]">@{uw.user.nickname}</p>}
                           </td>
                           <td className="px-6 py-4">
-                            <span className={`font-bold ${uw.balance > 0 ? 'text-green-600' : 'text-gray-400'}`}>
+                            <span className={`font-bold ${uw.balance > 0 ? 'text-[#32CD32]' : 'text-gray-500'}`}>
                               R$ {uw.balance.toFixed(2)}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-gray-600">R$ {uw.totalDeposited.toFixed(2)}</td>
-                          <td className="px-6 py-4 text-blue-600">R$ {uw.totalWinnings.toFixed(2)}</td>
-                          <td className="px-6 py-4 text-red-500">R$ {uw.totalWithdrawn.toFixed(2)}</td>
+                          <td className="px-6 py-4 text-gray-300">R$ {uw.totalDeposited.toFixed(2)}</td>
+                          <td className="px-6 py-4 text-blue-400">R$ {uw.totalWinnings.toFixed(2)}</td>
+                          <td className="px-6 py-4 text-red-400">R$ {uw.totalWithdrawn.toFixed(2)}</td>
                           <td className="px-6 py-4">
                             <button 
                               onClick={() => setViewingWalletHistory(uw)}
-                              className="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-primary transition-colors bg-gray-100 px-3 py-1.5 rounded-lg"
+                              className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-gray-300 hover:text-white transition-colors bg-[#1A2235] border border-[#2A3441] px-3 py-2 rounded-lg"
                             >
                               <History className="w-3.5 h-3.5" />
                               Ver Extrato ({uw.deposits.length})
@@ -4358,7 +4373,7 @@ const AdminDashboard = () => {
                                   setManualDepositForm({ ...manualDepositForm, userId: uw.user.id });
                                   setShowManualDepositModal(true);
                                 }}
-                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-bold hover:bg-green-100 transition-colors"
+                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-400 border border-green-500/20 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-green-500/20 transition-all"
                                 title="Depósito Manual"
                               >
                                 <PlusCircle className="w-3.5 h-3.5" />
@@ -4369,7 +4384,7 @@ const AdminDashboard = () => {
                                   setManualWithdrawForm({ ...manualWithdrawForm, userId: uw.user.id });
                                   setShowManualWithdrawModal(true);
                                 }}
-                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors"
+                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-red-500/20 transition-all"
                                 title="Retirada Manual"
                               >
                                 <MinusCircle className="w-3.5 h-3.5" />
@@ -4385,17 +4400,17 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                <h3 className="font-bold text-primary flex items-center gap-2">
-                  <History className="w-5 h-5 text-purple-500" />
-                  Histórico Recente de Depósitos (PIX / Manual)
+            <div className="bg-[#12182B] rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden">
+              <div className="p-6 border-b border-[#2A3441] bg-[#1A2235] flex justify-between items-center">
+                <h3 className="font-black uppercase italic tracking-wider text-white flex items-center gap-2">
+                  <History className="w-5 h-5 text-purple-400" />
+                  Histórico de Depósitos
                 </h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                    <tr className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-[#2A3441]">
                       <th className="px-6 py-4">Usuário</th>
                       <th className="px-6 py-4">Data</th>
                       <th className="px-6 py-4">Valor</th>
@@ -4403,34 +4418,34 @@ const AdminDashboard = () => {
                       <th className="px-6 py-4">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-[#2A3441]">
                     {allDeposits.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-6 py-8 text-center text-gray-400 italic">Nenhum depósito encontrado.</td>
+                        <td colSpan={5} className="px-6 py-8 text-center text-gray-500 font-bold uppercase tracking-wider text-xs italic">Nenhum depósito encontrado.</td>
                       </tr>
                     ) : (
                       allDeposits.slice(0, 50).map((d) => (
-                        <tr key={d.id} className="hover:bg-gray-50 transition-colors">
+                        <tr key={d.id} className="hover:bg-[#1A2235] transition-colors">
                           <td className="px-6 py-4">
-                            <p className="font-bold text-primary">{d.user_name} ({d.user_nickname})</p>
-                            <p className="text-xs text-gray-500">{d.user_email}</p>
+                            <p className="font-bold text-white">{d.user_name} ({d.user_nickname})</p>
+                            <p className="text-xs text-gray-400">{d.user_email}</p>
                           </td>
-                          <td className="px-6 py-4 text-gray-600 text-sm">
+                          <td className="px-6 py-4 text-gray-300 text-sm font-mono">
                             {new Date(d.created_at).toLocaleString('pt-BR')}
                           </td>
-                          <td className="px-6 py-4 font-bold text-gray-900 text-sm">
+                          <td className="px-6 py-4 font-bold text-white text-sm">
                             R$ {d.amount.toFixed(2)}
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-xs font-medium text-gray-500 uppercase">
+                            <span className="text-xs font-black uppercase text-[#32CD32]">
                               {d.payment_method === 'pix' ? 'PIX' : d.payment_method === 'credit_card' ? 'Cartão' : 'Manual'}
                             </span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                              d.status === 'approved' ? 'bg-green-100 text-green-700' : 
-                              d.status === 'rejected' ? 'bg-red-100 text-red-700' : 
-                              'bg-yellow-100 text-yellow-700'
+                            <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase border ${
+                              d.status === 'approved' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 
+                              d.status === 'rejected' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 
+                              'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
                             }`}>
                               {d.status === 'approved' ? 'Aprovado' : d.status === 'rejected' ? 'Rejeitado' : 'Pendente'}
                             </span>
@@ -4451,72 +4466,230 @@ const AdminDashboard = () => {
         const totalWithdrawals = financialDetails.withdrawalsHistory.reduce((acc: number, w: any) => acc + w.amount, 0);
         const caixa = totalAdminFee - totalWithdrawals;
 
+        const handleDownloadProfitPDF = async () => {
+          try {
+            const { jsPDF } = await import('jspdf');
+            const { default: autoTable } = await import('jspdf-autotable');
+
+            const doc = new jsPDF();
+
+            // Background header panel
+            doc.setFillColor(18, 24, 43);
+            doc.rect(0, 0, doc.internal.pageSize.width, 35, 'F');
+
+            // Document branding
+            doc.setTextColor(255, 255, 255);
+            doc.setFont('Helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.text("BOLAO10 - RELATORIO DE DISTRIBUICAO DE LUCROS", 14, 20);
+
+            doc.setFontSize(9);
+            doc.setFont('Helvetica', 'normal');
+            doc.text(`Data de Emissao: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`, 14, 28);
+
+            // Summary math
+            const totalAdminSum = profitDistributions.reduce((acc, log) => acc + (log.total_admin_fee || 0), 0);
+            const pauloSum = profitDistributions.reduce((acc, log) => acc + (log.paulo_share || 0), 0);
+            const jairoSum = profitDistributions.reduce((acc, log) => acc + (log.jairo_share || 0), 0);
+            const igorSum = profitDistributions.reduce((acc, log) => acc + (log.igor_share || 0), 0);
+
+            // Subtitle metadata
+            doc.setTextColor(30, 41, 59);
+            doc.setFont('Helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text("Resumo de Distribuicao de Lucros por Socio:", 14, 48);
+
+            doc.setFont('Helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.text(`- Paulo Rezende (50%): R$ ${pauloSum.toFixed(2)}`, 14, 55);
+            doc.text(`- Jairo Lourenco (25%): R$ ${jairoSum.toFixed(2)}`, 14, 61);
+            doc.text(`- Igor (25%): R$ ${igorSum.toFixed(2)}`, 14, 67);
+            doc.text(`- Total Taxa Adm Acumulada (20%): R$ ${totalAdminSum.toFixed(2)}`, 110, 55);
+
+            // Divider Rule Line
+            doc.setDrawColor(226, 232, 240);
+            doc.line(14, 73, doc.internal.pageSize.width - 14, 73);
+
+            doc.setFont('Helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text("Historico Analitico das Rodadas e Splits:", 14, 82);
+
+            // Build analytical table body
+            const tableHeaders = [
+              ["ID", "Rodada", "Finalizacao", "Receita Total", "Taxa Admin (20%)", "Paulo (50%)", "Jairo (25%)", "Igor (25%)"]
+            ];
+
+            const tableBody = profitDistributions.map((log: any) => {
+              const totalCollected = log.total_admin_fee ? (log.total_admin_fee / 0.20) : 0.00;
+              return [
+                log.id || `PD-${log.round_id}`,
+                `Rodada #${log.round_number}`,
+                new Date(log.created_at).toLocaleDateString('pt-BR'),
+                `R$ ${totalCollected.toFixed(2)}`,
+                `R$ ${Number(log.total_admin_fee || 0).toFixed(2)}`,
+                `R$ ${Number(log.paulo_share || 0).toFixed(2)}`,
+                `R$ ${Number(log.jairo_share || 0).toFixed(2)}`,
+                `R$ ${Number(log.igor_share || 0).toFixed(2)}`
+              ];
+            });
+
+            autoTable(doc, {
+              startY: 88,
+              head: tableHeaders,
+              body: tableBody,
+              theme: 'striped',
+              headStyles: {
+                fillColor: [26, 34, 53],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: 9
+              },
+              columnStyles: {
+                0: { cellWidth: 15 },
+                1: { cellWidth: 25 },
+                2: { cellWidth: 25 },
+                3: { cellWidth: 32 },
+                4: { cellWidth: 30 },
+                5: { cellWidth: 20 },
+                6: { cellWidth: 20 },
+                7: { cellWidth: 20 }
+              },
+              styles: {
+                fontSize: 8,
+                cellPadding: 3
+              }
+            });
+
+            doc.save(`bolao10-historico-lucros-${new Date().toISOString().slice(0, 10)}.pdf`);
+          } catch (pdfErr) {
+            console.error("Failed to generate PDF:", pdfErr);
+            alert("Erro ao exportar PDF. Consulte os logs.");
+          }
+        };
+
         return (
-          <div className="space-y-8">
+          <div className="space-y-8 text-white">
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-              <div className="bg-white p-6 rounded-3xl border-l-4 border-blue-500 shadow-sm flex justify-between items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-[#12182B] p-6 rounded-3xl border border-[#2A3441] border-l-4 border-l-blue-500 shadow-[0_0_15px_rgba(0,0,0,0.5)] flex justify-between items-center text-white">
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase mb-1">Total Arrecadação</p>
-                  <p className="text-2xl font-bold text-primary">R$ {financials.reduce((acc, f) => acc + (f.total_collected || 0), 0).toFixed(2)}</p>
+                  <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Total Arrecadação</p>
+                  <p className="text-2xl font-black text-blue-400">R$ {financials.reduce((acc, f) => acc + (f.total_collected || 0), 0).toFixed(2)}</p>
                 </div>
-                <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#1A2235] text-blue-400 rounded-full flex items-center justify-center">
                   <TrendingUp className="w-6 h-6" />
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border-l-4 border-green-500 shadow-sm flex justify-between items-center">
+              <div className="bg-[#12182B] p-6 rounded-3xl border border-[#2A3441] border-l-4 border-l-[#32CD32] shadow-[0_0_15px_rgba(0,0,0,0.5)] flex justify-between items-center text-white">
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase mb-1">Valor Distribuído (75%)</p>
-                  <p className="text-2xl font-bold text-primary">R$ {financials.reduce((acc, f) => acc + (f.winners_prize || 0), 0).toFixed(2)}</p>
+                  <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Valor Distribuído (75%)</p>
+                  <p className="text-2xl font-black text-[#32CD32]">R$ {financials.reduce((acc, f) => acc + (f.winners_prize || 0), 0).toFixed(2)}</p>
                 </div>
-                <div className="w-12 h-12 bg-green-50 text-green-500 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#1A2235] text-[#32CD32] rounded-full flex items-center justify-center">
                   <Gift className="w-6 h-6" />
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border-l-4 border-gray-800 shadow-sm flex justify-between items-center">
+              <div className="bg-[#12182B] p-6 rounded-3xl border border-[#2A3441] border-l-4 border-l-gray-500 shadow-[0_0_15px_rgba(0,0,0,0.5)] flex justify-between items-center text-white">
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase mb-1">Taxa Admin (20%)</p>
-                  <p className="text-2xl font-bold text-primary">R$ {totalAdminFee.toFixed(2)}</p>
+                  <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Taxa Admin (20%)</p>
+                  <p className="text-2xl font-black text-gray-300">R$ {totalAdminFee.toFixed(2)}</p>
                 </div>
-                <div className="w-12 h-12 bg-gray-50 text-gray-800 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#1A2235] text-gray-400 rounded-full flex items-center justify-center">
                   <Wallet className="w-6 h-6" />
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border-l-4 border-orange-500 shadow-sm flex justify-between items-center">
+              <div className="bg-[#12182B] p-6 rounded-3xl border border-[#2A3441] border-l-4 border-l-purple-500 shadow-[0_0_15px_rgba(0,0,0,0.5)] flex justify-between items-center text-white">
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase mb-1">Caixa (Disponível)</p>
-                  <p className="text-2xl font-bold text-orange-600">R$ {caixa.toFixed(2)}</p>
+                  <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Bônus Acumulado</p>
+                  <p className="text-2xl font-black text-purple-400">R$ {financialDetails.jackpotPool.toFixed(2)}</p>
                 </div>
-                <div className="w-12 h-12 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center">
-                  <DollarSign className="w-6 h-6" />
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-3xl border-l-4 border-purple-500 shadow-sm flex justify-between items-center">
-                <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase mb-1">Bônus Acumulado Atual</p>
-                  <p className="text-2xl font-bold text-purple-600">R$ {financialDetails.jackpotPool.toFixed(2)}</p>
-                </div>
-                <div className="w-12 h-12 bg-purple-50 text-purple-500 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#1A2235] text-purple-400 rounded-full flex items-center justify-center">
                   <DollarSign className="w-6 h-6" />
                 </div>
               </div>
             </div>
 
+            {/* Sociedade & Split Section */}
+            <div className="bg-[#12182B] rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden">
+              <div className="p-6 border-b border-[#2A3441] bg-[#1A2235] flex justify-between items-center">
+                <h3 className="font-black uppercase italic tracking-wider text-orange-400 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-orange-400 animate-pulse" />
+                  SOCIEDADE & SPLIT
+                </h3>
+              </div>
+              
+              <div className="p-6">
+                <p className="text-sm text-gray-400 font-medium mb-6 leading-relaxed">
+                  Divisão automática e em tempo real sobre a Taxa de Administração de 20% recolhida no momento do fechamento bi-semanal. Os fundos são transferidos de forma imediata à carteira virtual de cada sócio.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Paulo Rezende Card */}
+                  <div className="bg-[#1A2235]/60 border border-[#2A3441] rounded-2xl p-5 flex flex-col justify-between hover:border-orange-500/40 transition-all duration-300 relative overflow-hidden backdrop-blur-md">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl pointer-events-none" />
+                    <div>
+                      <span className="text-xs font-black text-orange-400 uppercase tracking-widest bg-orange-500/10 px-2 py-1 rounded-md">Paulo Rezende</span>
+                      <h4 className="text-3xl font-black text-white mt-3 italic">50% <span className="text-xs text-gray-400 not-italic font-medium">do split</span></h4>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-[#2A3441]">
+                      <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block">Total Recebido</span>
+                      <span className="text-lg font-black text-[#32CD32] block">R$ {profitDistributions.reduce((acc, log) => acc + (log.paulo_share || 0), 0).toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  {/* Jairo Lourenço Card */}
+                  <div className="bg-[#1A2235]/60 border border-[#2A3441] rounded-2xl p-5 flex flex-col justify-between hover:border-orange-500/40 transition-all duration-300 relative overflow-hidden backdrop-blur-md">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
+                    <div>
+                      <span className="text-xs font-black text-blue-400 uppercase tracking-widest bg-blue-500/10 px-2 py-1 rounded-md">Jairo Lourenço</span>
+                      <h4 className="text-3xl font-black text-white mt-3 italic">25% <span className="text-xs text-gray-400 not-italic font-medium">do split</span></h4>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-[#2A3441]">
+                      <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block">Total Recebido</span>
+                      <span className="text-lg font-black text-[#32CD32] block">R$ {profitDistributions.reduce((acc, log) => acc + (log.jairo_share || 0), 0).toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  {/* Igor Card */}
+                  <div className="bg-[#1A2235]/60 border border-[#2A3441] rounded-2xl p-5 flex flex-col justify-between hover:border-orange-500/40 transition-all duration-300 relative overflow-hidden backdrop-blur-md">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
+                    <div>
+                      <span className="text-xs font-black text-purple-400 uppercase tracking-widest bg-purple-500/10 px-2 py-1 rounded-md">Igor</span>
+                      <h4 className="text-3xl font-black text-white mt-3 italic">25% <span className="text-xs text-gray-400 not-italic font-medium">do split</span></h4>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-[#2A3441]">
+                      <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block">Total Recebido</span>
+                      <span className="text-lg font-black text-[#32CD32] block">R$ {profitDistributions.reduce((acc, log) => acc + (log.igor_share || 0), 0).toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-start">
+                  <button
+                    onClick={handleDownloadProfitPDF}
+                    className="flex items-center gap-2 bg-transparent hover:bg-white/10 text-white font-black uppercase tracking-wider text-xs py-3 px-6 rounded-xl border border-gray-500/60 hover:border-white transition-all duration-300 shadow-md cursor-pointer"
+                  >
+                    <Download className="w-4 h-4 text-gray-400" />
+                    Baixar Histórico de Lucros (PDF)
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Jackpot Injection Form */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                <h3 className="font-bold text-primary flex items-center gap-2">
-                  <Gift className="w-5 h-5 text-purple-500" />
+            <div className="bg-[#12182B] rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden">
+              <div className="p-6 border-b border-[#2A3441] bg-[#1A2235] flex justify-between items-center">
+                <h3 className="font-black uppercase italic tracking-wider text-[#32CD32] flex items-center gap-2">
+                  <Gift className="w-5 h-5 text-purple-400" />
                   Injetar Patrocínio no Bônus (Jackpot)
                 </h3>
                 {isAdmin && (
                   <button 
                     onClick={() => setShowJackpotForm(!showJackpotForm)}
-                    className="text-xs bg-purple-600 text-white px-4 py-1.5 rounded-full hover:bg-purple-700 transition-colors font-bold shadow-sm"
+                    className="text-xs bg-purple-600 border border-purple-500/30 text-white px-4 py-2 rounded-full hover:bg-purple-700 transition-all font-black uppercase tracking-wider shadow-md"
                   >
                     {showJackpotForm ? 'Cancelar' : '+ Injetar Bônus'}
                   </button>
@@ -4524,34 +4697,34 @@ const AdminDashboard = () => {
               </div>
               
               {showJackpotForm && (
-                <div className="p-6 bg-purple-50 border-b border-gray-100">
+                <div className="p-6 bg-[#1A2235] border-b border-[#2A3441]">
                   <form onSubmit={handleInjectJackpot} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Valor do Patrocínio (R$)</label>
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Valor do Patrocínio (R$)</label>
                         <input 
                           type="number" 
                           step="0.01"
                           required
                           value={newJackpotInjection.amount}
                           onChange={(e) => setNewJackpotInjection({...newJackpotInjection, amount: e.target.value})}
-                          className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
+                          className="w-full bg-[#0A0F1E] border border-[#2A3441] rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-500 outline-none text-white font-bold"
                           placeholder="Ex: 100.00"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Descrição / Patrocinador</label>
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Descrição / Patrocinador</label>
                         <input 
                           type="text" 
                           required
                           value={newJackpotInjection.description}
                           onChange={(e) => setNewJackpotInjection({...newJackpotInjection, description: e.target.value})}
-                          className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
+                          className="w-full bg-[#0A0F1E] border border-[#2A3441] rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-500 outline-none text-white font-bold"
                           placeholder="Ex: Patrocínio NavalTech"
                         />
                       </div>
                     </div>
-                    <button type="submit" className="w-full bg-purple-600 text-white font-bold py-2.5 rounded-xl hover:bg-purple-700 transition-colors shadow-md flex items-center justify-center gap-2">
+                    <button type="submit" className="w-full bg-purple-600 text-white font-black uppercase tracking-wider py-3 rounded-xl hover:bg-purple-700 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer border-none text-xs">
                       <TrendingUp className="w-4 h-4" /> Confirmar Injeção de Bônus
                     </button>
                   </form>
@@ -4561,33 +4734,33 @@ const AdminDashboard = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Prizes History */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                <h3 className="font-bold text-primary">Prêmios Pagos</h3>
-                <Gift className="w-5 h-5 text-green-500" />
+            <div className="bg-[#12182B] rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden">
+              <div className="p-6 border-b border-[#2A3441] bg-[#1A2235] flex justify-between items-center">
+                <h3 className="font-black uppercase italic tracking-wider text-[#32CD32]">Prêmios Pagos</h3>
+                <Gift className="w-5 h-5 text-green-400" />
               </div>
               <div className="overflow-x-auto max-h-[400px]">
                 <table className="w-full text-left">
-                  <thead className="sticky top-0 bg-white shadow-sm z-10">
-                    <tr className="text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                  <thead className="sticky top-0 bg-[#12182B] shadow-sm z-10">
+                    <tr className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-[#2A3441]">
                       <th className="px-6 py-4">Rodada</th>
                       <th className="px-6 py-4">Usuário</th>
                       <th className="px-6 py-4">Valor</th>
                       <th className="px-6 py-4">Data</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-[#2A3441]">
                     {financialDetails.prizesHistory.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="px-6 py-8 text-center text-gray-400 italic">Nenhum prêmio registrado ainda.</td>
+                        <td colSpan={4} className="px-6 py-8 text-center text-gray-500 font-bold uppercase tracking-wider text-xs italic">Nenhum prêmio registrado ainda.</td>
                       </tr>
                     ) : (
                       financialDetails.prizesHistory.map((p: any, idx: number) => (
-                        <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 font-bold text-primary">#{p.round_number}</td>
-                          <td className="px-6 py-4 text-sm text-gray-900">{p.winner_name}</td>
-                          <td className="px-6 py-4 text-sm font-bold text-green-600">R$ {p.amount.toFixed(2)}</td>
-                          <td className="px-6 py-4 text-xs text-gray-500">{formatDate(p.date, 'dd/MM/yy HH:mm')}</td>
+                        <tr key={idx} className="hover:bg-[#1A2235] transition-colors">
+                          <td className="px-6 py-4 font-bold text-[#32CD32]">#{p.round_number}</td>
+                          <td className="px-6 py-4 text-sm text-gray-200 font-semibold">{p.winner_name}</td>
+                          <td className="px-6 py-4 text-sm font-bold text-[#32CD32]">R$ {p.amount.toFixed(2)}</td>
+                          <td className="px-6 py-4 text-xs text-gray-400 font-mono">{formatDate(p.date, 'dd/MM/yy HH:mm')}</td>
                         </tr>
                       ))
                     )}
@@ -4597,13 +4770,13 @@ const AdminDashboard = () => {
             </div>
 
             {/* Withdrawals */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-              <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                <h3 className="font-bold text-primary">Saques Administrativos</h3>
+            <div className="bg-[#12182B] rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col">
+              <div className="p-6 border-b border-[#2A3441] bg-[#1A2235] flex justify-between items-center">
+                <h3 className="font-black uppercase italic tracking-wider text-white">Saques Administrativos</h3>
                 {isAdmin && (
                   <button 
                     onClick={() => setShowWithdrawalForm(!showWithdrawalForm)}
-                    className="text-xs bg-primary text-white px-3 py-1 rounded-full hover:bg-secondary transition-colors"
+                    className="text-xs bg-blue-600 border border-blue-500/30 text-white px-3 py-2 rounded-full hover:bg-blue-700 transition-all font-black uppercase tracking-wider cursor-pointer"
                   >
                     {showWithdrawalForm ? 'Cancelar' : '+ Novo Saque'}
                   </button>
@@ -4611,34 +4784,34 @@ const AdminDashboard = () => {
               </div>
               
               {showWithdrawalForm && (
-                <div className="p-6 bg-gray-50 border-b border-gray-100">
+                <div className="p-6 bg-[#1A2235] border-b border-[#2A3441]">
                   <form onSubmit={handleAddWithdrawal} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Valor (R$)</label>
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Valor (R$)</label>
                         <input 
                           type="number" 
                           step="0.01"
                           required
                           value={newWithdrawal.amount}
                           onChange={(e) => setNewWithdrawal({...newWithdrawal, amount: e.target.value})}
-                          className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                          className="w-full bg-[#0A0F1E] border border-[#2A3441] rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-white font-bold"
                           placeholder="0.00"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Motivo / Descrição</label>
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Motivo / Descrição</label>
                         <input 
                           type="text" 
                           required
                           value={newWithdrawal.reason}
                           onChange={(e) => setNewWithdrawal({...newWithdrawal, reason: e.target.value})}
-                          className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                          className="w-full bg-[#0A0F1E] border border-[#2A3441] rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-white font-bold"
                           placeholder="Ex: Pagamento servidor"
                         />
                       </div>
                     </div>
-                    <button type="submit" className="w-full bg-primary text-white font-bold py-2 rounded-xl hover:bg-secondary transition-colors shadow-md">
+                    <button type="submit" className="w-full bg-[#32CD32] uppercase font-black tracking-wider text-black text-xs py-3 rounded-xl hover:bg-green-400 transition-colors shadow-md border-none cursor-pointer">
                       Confirmar Saque
                     </button>
                   </form>
@@ -4647,24 +4820,24 @@ const AdminDashboard = () => {
 
               <div className="overflow-x-auto flex-1 max-h-[400px]">
                 <table className="w-full text-left">
-                  <thead className="sticky top-0 bg-white shadow-sm z-10">
-                    <tr className="text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                  <thead className="sticky top-0 bg-[#12182B] shadow-sm z-10">
+                    <tr className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-[#2A3441]">
                       <th className="px-6 py-4">Data</th>
                       <th className="px-6 py-4">Motivo</th>
                       <th className="px-6 py-4">Valor</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-[#2A3441]">
                     {financialDetails.withdrawalsHistory.length === 0 ? (
                       <tr>
-                        <td colSpan={3} className="px-6 py-8 text-center text-gray-400 italic">Nenhum saque registrado ainda.</td>
+                        <td colSpan={3} className="px-6 py-8 text-center text-gray-500 font-bold uppercase tracking-wider text-xs italic">Nenhum saque registrado ainda.</td>
                       </tr>
                     ) : (
                       financialDetails.withdrawalsHistory.map((w: any, idx: number) => (
-                        <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 text-xs text-gray-500">{formatDate(w.date, 'dd/MM/yy HH:mm')}</td>
-                          <td className="px-6 py-4 text-sm text-gray-900">{w.reason}</td>
-                          <td className="px-6 py-4 text-sm font-bold text-red-600">- R$ {w.amount.toFixed(2)}</td>
+                        <tr key={idx} className="hover:bg-[#1A2235] transition-colors">
+                          <td className="px-6 py-4 text-xs text-gray-400 font-mono">{formatDate(w.date, 'dd/MM/yy HH:mm')}</td>
+                          <td className="px-6 py-4 text-sm text-gray-200 font-semibold">{w.reason}</td>
+                          <td className="px-6 py-4 text-sm font-bold text-red-400">- R$ {w.amount.toFixed(2)}</td>
                         </tr>
                       ))
                     )}
@@ -4675,14 +4848,14 @@ const AdminDashboard = () => {
           </div>
 
           {/* Table */}
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-gray-100 bg-gray-50">
-              <h3 className="font-bold text-primary">Histórico por Rodada</h3>
+          <div className="bg-[#12182B] rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden">
+            <div className="p-6 border-b border-[#2A3441] bg-[#1A2235]">
+              <h3 className="font-black uppercase italic tracking-wider text-white">Histórico por Rodada</h3>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                  <tr className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-[#2A3441]">
                     <th className="px-6 py-4">Rodada</th>
                     <th className="px-6 py-4">Arrecadação (R$)</th>
                     <th className="px-6 py-4">Distribuído (75%)</th>
@@ -4691,15 +4864,15 @@ const AdminDashboard = () => {
                     <th className="px-6 py-4">Vencedores</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-[#2A3441]">
                   {financials.map((f) => (
-                    <tr key={f.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 font-bold text-primary">#{f.number}</td>
-                      <td className="px-6 py-4 text-sm font-medium text-blue-600">R$ {f.total_collected?.toFixed(2) || '0.00'}</td>
-                      <td className="px-6 py-4 text-sm text-green-600 font-bold">R$ {f.winners_prize?.toFixed(2) || '0.00'}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 font-bold">R$ {f.admin_fee_collected?.toFixed(2) || '0.00'}</td>
-                      <td className="px-6 py-4 text-sm text-purple-600 font-bold">R$ {f.jackpot_contribution?.toFixed(2) || '0.00'}</td>
-                      <td className="px-6 py-4 text-xs text-gray-500 max-w-[200px] truncate" title={f.winners_names}>{f.winners_names || '-'}</td>
+                    <tr key={f.id} className="hover:bg-[#1A2235] transition-colors">
+                      <td className="px-6 py-4 font-bold text-[#32CD32]">#{f.number}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-blue-400 font-mono">R$ {f.total_collected?.toFixed(2) || '0.00'}</td>
+                      <td className="px-6 py-4 text-sm text-[#32CD32] font-bold font-mono">R$ {f.winners_prize?.toFixed(2) || '0.00'}</td>
+                      <td className="px-6 py-4 text-sm text-gray-300 font-bold font-mono">R$ {f.admin_fee_collected?.toFixed(2) || '0.00'}</td>
+                      <td className="px-6 py-4 text-sm text-purple-400 font-bold font-mono">R$ {f.jackpot_contribution?.toFixed(2) || '0.00'}</td>
+                      <td className="px-6 py-4 text-xs text-gray-400 max-w-[200px] truncate font-semibold" title={f.winners_names}>{f.winners_names || '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -4711,15 +4884,15 @@ const AdminDashboard = () => {
       })()}
 
       {activeTab === 'history' && (
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-            <h3 className="font-bold text-primary">Histórico Completo de Rodadas</h3>
-            <History className="w-5 h-5 text-primary" />
+        <div className="bg-[#12182B] rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-hidden text-white">
+          <div className="p-6 border-b border-[#2A3441] bg-[#1A2235] flex justify-between items-center">
+            <h3 className="font-black uppercase italic tracking-wider text-white">Histórico Completo de Rodadas</h3>
+            <History className="w-5 h-5 text-[#32CD32]" />
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                <tr className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-[#2A3441]">
                   <th className="px-6 py-4">Rodada</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Início</th>
@@ -4728,30 +4901,30 @@ const AdminDashboard = () => {
                   <th className="px-6 py-4">Vencedores</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-[#2A3441]">
                 {roundHistory.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-gray-400 italic">Nenhuma rodada encontrada.</td>
+                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500 font-bold uppercase tracking-wider text-xs italic">Nenhuma rodada encontrada.</td>
                   </tr>
                 ) : (
                   roundHistory.map((r) => (
-                    <tr key={r.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 font-bold text-primary">#{r.number}</td>
+                    <tr key={r.id} className="hover:bg-[#1A2235] transition-colors">
+                      <td className="px-6 py-4 font-bold text-white">#{r.number}</td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${r.status === 'open' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-black uppercase border ${r.status === 'open' ? 'bg-[#32CD32]/10 text-[#32CD32] border-[#32CD32]/20' : 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
                           {r.status === 'open' ? 'Aberta' : 'Finalizada'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm text-gray-300 font-mono">
                         {formatDate(r.start_time, 'dd/MM/yyyy HH:mm')}
                       </td>
-                      <td className="px-6 py-4 text-sm font-medium text-blue-600">
+                      <td className="px-6 py-4 text-sm font-medium text-blue-400 font-mono">
                         R$ {r.total_collected?.toFixed(2) || '0.00'}
                       </td>
-                      <td className="px-6 py-4 text-sm font-bold text-green-600">
+                      <td className="px-6 py-4 text-sm font-bold text-[#32CD32] font-mono">
                         R$ {r.winners_prize?.toFixed(2) || '0.00'}
                       </td>
-                      <td className="px-6 py-4 text-xs text-gray-500 max-w-[300px] truncate" title={r.winners_names}>
+                      <td className="px-6 py-4 text-xs text-gray-400 max-w-[300px] truncate font-semibold" title={r.winners_names}>
                         {r.winners_names || '-'}
                       </td>
                     </tr>
@@ -4765,30 +4938,30 @@ const AdminDashboard = () => {
 
       {/* Edit User Modal */}
       {editingUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full">
-            <h3 className="text-xl font-bold mb-6">Editar Usuário</h3>
+        <div className="fixed inset-0 bg-[#02050A] bg-opacity-80 flex items-center justify-center p-4 z-[60] backdrop-blur-sm">
+          <div className="bg-[#12182B] border border-[#2A3441] rounded-3xl p-8 max-w-md w-full text-white shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+            <h3 className="text-xl font-black uppercase italic tracking-wider text-[#32CD32] mb-6">Editar Usuário</h3>
             <form onSubmit={handleUpdateUser} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Nome</label>
                 <input 
                   type="text" 
                   value={editingUser.name}
                   onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                  className="w-full px-4 py-3 rounded-xl border border-[#2A3441] bg-[#0A0F1E] text-white focus:ring-2 focus:ring-[#32CD32] outline-none font-bold"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nickname</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Nickname</label>
                 <input 
                   type="text" 
                   value={editingUser.nickname}
                   onChange={(e) => setEditingUser({...editingUser, nickname: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                  className="w-full px-4 py-3 rounded-xl border border-[#2A3441] bg-[#0A0F1E] text-white focus:ring-2 focus:ring-[#32CD32] outline-none font-bold"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Telefone</label>
                 <input 
                   type="tel" 
                   value={editingUser.phone || ''}
@@ -4799,34 +4972,34 @@ const AdminDashboard = () => {
                     if (value.length > 10) value = `${value.slice(0, 10)}-${value.slice(10)}`;
                     setEditingUser({...editingUser, phone: value});
                   }}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                  className="w-full px-4 py-3 rounded-xl border border-[#2A3441] bg-[#0A0F1E] text-white focus:ring-2 focus:ring-[#32CD32] outline-none font-mono font-bold"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Role</label>
                 <select 
                   value={editingUser.role}
                   onChange={(e) => setEditingUser({...editingUser, role: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                  className="w-full px-4 py-3 rounded-xl border border-[#2A3441] bg-[#0A0F1E] text-white focus:ring-2 focus:ring-[#32CD32] outline-none font-bold cursor-pointer"
                 >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                  <option value="auditor">Auditor</option>
+                  <option value="user" className="bg-[#12182B]">User</option>
+                  <option value="admin" className="bg-[#12182B]">Admin</option>
+                  <option value="auditor" className="bg-[#12182B]">Auditor</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Senha</label>
                 <input 
                   type="text" 
                   value={editingUser.password || ''}
                   onChange={(e) => setEditingUser({...editingUser, password: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                  className="w-full px-4 py-3 rounded-xl border border-[#2A3441] bg-[#0A0F1E] text-white focus:ring-2 focus:ring-[#32CD32] outline-none font-bold"
                   placeholder="Senha do usuário"
                 />
               </div>
               <div className="flex gap-4 pt-4">
-                <button type="button" onClick={() => setEditingUser(null)} className="flex-1 py-2 bg-gray-100 rounded-xl">Cancelar</button>
-                <button type="submit" className="flex-1 py-2 bg-primary text-white rounded-xl font-bold">Salvar</button>
+                <button type="button" onClick={() => setEditingUser(null)} className="flex-1 py-3 bg-[#1A2235] hover:bg-[#2A3441] transition-colors rounded-xl border border-[#2A3441] text-xs font-black uppercase tracking-wider cursor-pointer text-white">Cancelar</button>
+                <button type="submit" className="flex-1 py-3 bg-[#32CD32] hover:bg-green-400 transition-colors text-black rounded-xl text-xs font-black uppercase tracking-wider cursor-pointer">Salvar</button>
               </div>
             </form>
           </div>
@@ -4835,33 +5008,33 @@ const AdminDashboard = () => {
 
       {/* Manual Deposit Modal */}
       {showManualDepositModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full">
-            <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-              <PlusCircle className="w-6 h-6 text-green-500" />
+        <div className="fixed inset-0 bg-[#02050A] bg-opacity-80 flex items-center justify-center p-4 z-[60] backdrop-blur-sm">
+          <div className="bg-[#12182B] border border-[#2A3441] rounded-3xl p-8 max-w-md w-full text-white shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+            <h3 className="text-xl font-black uppercase italic tracking-wider text-[#32CD32] mb-6 flex items-center gap-2">
+              <PlusCircle className="w-6 h-6 text-[#32CD32]" />
               Depósito Manual
             </h3>
             <form onSubmit={handleManualDeposit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Valor (R$)</label>
                 <input 
                   type="number" 
                   step="0.01"
                   required
                   value={manualDepositForm.amount}
                   onChange={(e) => setManualDepositForm({...manualDepositForm, amount: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none"
+                  className="w-full px-4 py-3 rounded-xl border border-[#2A3441] bg-[#0A0F1E] text-white focus:ring-2 focus:ring-[#32CD32] outline-none font-bold"
                   placeholder="0.00"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Motivo / Descrição</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Motivo / Descrição</label>
                 <input 
                   type="text" 
                   required
                   value={manualDepositForm.description}
                   onChange={(e) => setManualDepositForm({...manualDepositForm, description: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none"
+                  className="w-full px-4 py-3 rounded-xl border border-[#2A3441] bg-[#0A0F1E] text-white focus:ring-2 focus:ring-[#32CD32] outline-none font-bold"
                   placeholder="Ex: Pagamento via PIX direto"
                 />
               </div>
@@ -4869,13 +5042,13 @@ const AdminDashboard = () => {
                 <button 
                   type="button" 
                   onClick={() => setShowManualDepositModal(false)} 
-                  className="flex-1 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                  className="flex-1 py-3 bg-[#1A2235] hover:bg-gray-800 transition-colors rounded-xl text-xs font-black uppercase tracking-wider text-white border border-[#2A3441] cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit" 
-                  className="flex-1 py-2 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-colors shadow-md"
+                  className="flex-1 py-3 bg-[#32CD32] text-black rounded-xl font-black text-xs uppercase tracking-wider hover:bg-green-400 transition-colors shadow-md cursor-pointer border-none"
                 >
                   Confirmar Depósito
                 </button>
@@ -4887,36 +5060,36 @@ const AdminDashboard = () => {
 
       {/* Manual Withdrawal Modal */}
       {showManualWithdrawModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full">
+        <div className="fixed inset-0 bg-[#02050A] bg-opacity-80 flex items-center justify-center p-4 z-[60] backdrop-blur-sm">
+          <div className="bg-[#12182B] border border-[#2A3441] rounded-[32px] p-8 max-w-md w-full shadow-[0_0_30px_rgba(0,0,0,0.8)] text-white">
             <div className="flex items-center gap-2 mb-2">
               <MinusCircle className="w-6 h-6 text-red-500" />
-              <h3 className="text-xl font-bold">Retirada Manual de Saldo</h3>
+              <h3 className="text-xl font-black uppercase italic tracking-wider text-white">Retirada Manual</h3>
             </div>
-            <p className="text-xs text-red-600 mb-6 font-medium bg-red-50 p-3 rounded-xl border border-red-100">
+            <p className="text-xs text-red-400 mb-6 font-semibold bg-red-500/10 p-3 rounded-xl border border-red-500/20">
               Atenção: O valor inserido será subtraído do saldo disponível do usuário.
             </p>
             <form onSubmit={handleManualWithdraw} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Valor (R$)</label>
                 <input 
                   type="number" 
                   step="0.01"
                   required
                   value={manualWithdrawForm.amount}
                   onChange={(e) => setManualWithdrawForm({...manualWithdrawForm, amount: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-500 outline-none"
+                  className="w-full px-4 py-3 rounded-xl border border-[#2A3441] bg-[#0A0F1E] text-white focus:ring-2 focus:ring-red-500 outline-none font-bold placeholder-gray-600"
                   placeholder="0.00"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Motivo / Descrição</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Motivo / Descrição</label>
                 <input 
                   type="text" 
                   required
                   value={manualWithdrawForm.description}
                   onChange={(e) => setManualWithdrawForm({...manualWithdrawForm, description: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-500 outline-none"
+                  className="w-full px-4 py-3 rounded-xl border border-[#2A3441] bg-[#0A0F1E] text-white focus:ring-2 focus:ring-red-500 outline-none font-bold placeholder-gray-600"
                   placeholder="Ex: Correção de erro / Estorno"
                 />
               </div>
@@ -4924,68 +5097,13 @@ const AdminDashboard = () => {
                 <button 
                   type="button" 
                   onClick={() => setShowManualWithdrawModal(false)} 
-                  className="flex-1 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                  className="flex-1 py-3 bg-[#1A2235] border border-[#2A3441] text-white rounded-xl hover:bg-gray-800 transition-colors text-xs font-black uppercase tracking-wider cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit" 
-                  className="flex-1 py-2 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors shadow-md"
-                >
-                  Confirmar Retirada
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Manual Withdrawal Modal */}
-      {showManualWithdrawModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
-          <div className="bg-white rounded-[32px] p-8 max-w-md w-full shadow-2xl">
-            <div className="flex items-center gap-2 mb-2">
-              <MinusCircle className="w-6 h-6 text-red-500" />
-              <h3 className="text-xl font-bold">Retirada Manual</h3>
-            </div>
-            <p className="text-xs text-red-600 mb-6 font-medium bg-red-50 p-3 rounded-xl border border-red-100">
-              Atenção: O valor inserido será subtraído do saldo disponível do usuário.
-            </p>
-            <form onSubmit={handleManualWithdraw} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
-                <input 
-                  type="number" 
-                  step="0.01"
-                  required
-                  value={manualWithdrawForm.amount}
-                  onChange={(e) => setManualWithdrawForm({...manualWithdrawForm, amount: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-500 outline-none"
-                  placeholder="0.00"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Motivo / Descrição</label>
-                <input 
-                  type="text" 
-                  required
-                  value={manualWithdrawForm.description}
-                  onChange={(e) => setManualWithdrawForm({...manualWithdrawForm, description: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-500 outline-none"
-                  placeholder="Ex: Correção de erro / Estorno"
-                />
-              </div>
-              <div className="flex gap-4 pt-4">
-                <button 
-                  type="button" 
-                  onClick={() => setShowManualWithdrawModal(false)} 
-                  className="flex-1 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button 
-                  type="submit" 
-                  className="flex-1 py-2 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors shadow-md"
+                  className="flex-1 py-3 bg-red-600 text-white rounded-xl font-black text-xs uppercase tracking-wider hover:bg-red-700 transition-colors shadow-md cursor-pointer border-none"
                 >
                   Confirmar Retirada
                 </button>
@@ -4997,19 +5115,19 @@ const AdminDashboard = () => {
 
       {/* Wallet History Modal */}
       {viewingWalletHistory && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
-          <div className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 bg-[#02050A] bg-opacity-80 flex items-center justify-center p-4 z-[60] backdrop-blur-sm">
+          <div className="bg-[#12182B] border border-[#2A3441] rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] flex flex-col text-white shadow-[0_0_30px_rgba(0,0,0,0.8)]">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h3 className="text-xl font-bold text-primary flex items-center gap-2">
-                  <History className="w-6 h-6 text-blue-500" />
+                <h3 className="text-xl font-black uppercase italic tracking-wider text-[#32CD32] flex items-center gap-2">
+                  <History className="w-6 h-6 text-blue-400" />
                   Extrato de Depósitos
                 </h3>
-                <p className="text-sm text-gray-500">{viewingWalletHistory.user.name} ({viewingWalletHistory.user.email})</p>
+                <p className="text-xs text-gray-400 font-semibold">{viewingWalletHistory.user.name} ({viewingWalletHistory.user.email})</p>
               </div>
               <button 
                 onClick={() => setViewingWalletHistory(null)}
-                className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+                className="p-2 bg-[#1A2235] hover:bg-gray-800 text-white border border-[#2A3441] rounded-full transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -5017,40 +5135,40 @@ const AdminDashboard = () => {
 
             <div className="flex-grow overflow-y-auto pr-2">
               {viewingWalletHistory.deposits.length === 0 ? (
-                <div className="py-12 text-center text-gray-400 italic">
+                <div className="py-12 text-center text-gray-500 font-bold uppercase tracking-wider text-xs italic">
                   Nenhum depósito registrado para este usuário.
                 </div>
               ) : (
                 <div className="space-y-3">
                   {viewingWalletHistory.deposits.map((d: any) => (
-                    <div key={d.id} className="bg-gray-50 p-4 rounded-2xl border border-gray-100 flex justify-between items-center">
+                    <div key={d.id} className="bg-[#1A2235] p-4 rounded-2xl border border-[#2A3441] flex justify-between items-center">
                       <div className="flex items-center gap-4">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          d.status === 'approved' ? 'bg-green-100 text-green-600' :
-                          d.status === 'rejected' ? 'bg-red-100 text-red-600' :
-                          'bg-yellow-100 text-yellow-600'
+                          d.status === 'approved' ? 'bg-[#32CD32]/10 text-[#32CD32]' :
+                          d.status === 'rejected' ? 'bg-red-500/10 text-red-400' :
+                          'bg-yellow-500/10 text-yellow-400'
                         }`}>
                           {d.status === 'approved' ? <CheckCircle className="w-5 h-5" /> : 
                            d.status === 'rejected' ? <XCircle className="w-5 h-5" /> : 
                            <Clock className="w-5 h-5" />}
                         </div>
                         <div>
-                          <p className="font-bold text-gray-900">R$ {d.amount.toFixed(2)}</p>
-                          <p className="text-xs text-gray-500">{formatDate(d.created_at, "dd 'de' MMMM 'de' yyyy 'às' HH:mm")}</p>
+                          <p className="font-black text-white font-mono">R$ {d.amount.toFixed(2)}</p>
+                          <p className="text-[11px] text-gray-400 font-medium">{formatDate(d.created_at, "dd 'de' MMMM 'de' yyyy 'às' HH:mm")}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          d.status === 'approved' ? 'bg-green-100 text-green-700' :
-                          d.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                          'bg-yellow-100 text-yellow-700'
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase border ${
+                          d.status === 'approved' ? 'bg-[#32CD32]/10 text-[#32CD32] border-[#32CD32]/20' :
+                          d.status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                          'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
                         }`}>
                           {d.status === 'approved' ? 'Aprovado' : d.status === 'rejected' ? 'Rejeitado' : 'Pendente'}
                         </span>
                         {d.proof_url && (
                           <button 
                             onClick={() => setViewingProof(d.proof_url)}
-                            className="block mt-2 text-[10px] text-blue-500 hover:underline font-bold"
+                            className="block mt-2 text-[10px] text-blue-400 hover:text-blue-300 font-black uppercase tracking-wider cursor-pointer bg-none border-none outline-none text-right ml-auto"
                           >
                             Ver Comprovante
                           </button>
@@ -5062,10 +5180,10 @@ const AdminDashboard = () => {
               )}
             </div>
 
-            <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center">
+            <div className="mt-8 pt-6 border-t border-[#2A3441] flex justify-between items-center">
               <div>
-                <p className="text-xs text-gray-400 uppercase font-bold">Saldo Atual</p>
-                <p className="text-xl font-bold text-green-600">R$ {viewingWalletHistory.balance.toFixed(2)}</p>
+                <p className="text-[10px] text-gray-400 uppercase font-black tracking-wider">Saldo Atual</p>
+                <p className="text-xl font-bold text-[#32CD32] font-mono">R$ {viewingWalletHistory.balance.toFixed(2)}</p>
               </div>
               <button 
                 onClick={() => {
@@ -5073,7 +5191,7 @@ const AdminDashboard = () => {
                   setViewingWalletHistory(null);
                   setShowManualDepositModal(true);
                 }}
-                className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold hover:bg-secondary transition-all shadow-md flex items-center gap-2"
+                className="bg-[#32CD32] text-black px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider hover:bg-green-400 transition-all shadow-md flex items-center gap-2 cursor-pointer border-none"
               >
                 <PlusCircle className="w-5 h-5" />
                 Novo Depósito
@@ -5085,25 +5203,25 @@ const AdminDashboard = () => {
 
       <AnimatePresence>
         {viewingProof && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-[#02050A] bg-opacity-80 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
             <motion.div 
               key="proof-modal"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white p-4 rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-auto relative"
+              className="bg-[#12182B] border border-[#2A3441] p-6 rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-auto relative text-white"
             >
               <button 
                 onClick={() => setViewingProof(null)}
-                className="absolute top-4 right-4 bg-gray-100 p-2 rounded-full hover:bg-gray-200"
+                className="absolute top-4 right-4 bg-[#1A2235] hover:bg-gray-800 text-white p-2 rounded-full border border-[#2A3441] cursor-pointer"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5" />
               </button>
-              <h4 className="text-lg font-bold mb-4">Comprovante de Pagamento</h4>
+              <h4 className="text-lg font-black uppercase italic tracking-wider text-[#32CD32] mb-4">Comprovante de Pagamento</h4>
               {viewingProof.toLowerCase().endsWith('.pdf') ? (
-                <iframe src={`/${viewingProof}`} className="w-full h-[70vh] rounded-xl" />
+                <iframe src={`/${viewingProof}`} className="w-full h-[70vh] rounded-xl border border-[#2A3441]" />
               ) : (
-                <img src={`/${viewingProof}`} alt="Comprovante" className="w-full rounded-xl" />
+                <img src={`/${viewingProof}`} alt="Comprovante" className="w-full rounded-xl border border-[#2A3441]" />
               )}
             </motion.div>
           </div>

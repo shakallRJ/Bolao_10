@@ -3342,6 +3342,109 @@ app.post('/api/admin/rounds/:id/partial-results', authenticate, isAdmin, async (
   }
 });
 
+// Helper to credit partner wallets for administrative profit splits
+async function creditPromoPartner(userId: string | number, amount: number, roundInfo: string) {
+  const targetUserId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+  const { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', targetUserId).maybeSingle();
+  
+  if (wallet) {
+    const rawBal = wallet.balance !== undefined && wallet.balance !== null ? parseFloat(wallet.balance) : 0;
+    const newBalance = rawBal + amount;
+    
+    // Update balance
+    const { error: walletErr } = await supabase
+      .from('wallets')
+      .update({ balance: newBalance, updated_at: new Date().toISOString() })
+      .eq('id', wallet.id);
+      
+    if (walletErr) {
+      console.error(`Error updating wallet for user ${userId}:`, walletErr);
+      throw walletErr;
+    }
+    
+    // Insert ledger transaction
+    const { error: txErr } = await supabase.from('wallet_transactions').insert([{
+      wallet_id: wallet.id,
+      amount: amount,
+      type: 'profit_distribution',
+      balance_after: newBalance,
+      description: `Divisão de Lucros - ${roundInfo}`
+    }]);
+
+    if (txErr) {
+      console.error(`Error inserting transaction for user ${userId}:`, txErr);
+      throw txErr;
+    }
+
+    // Notify partner
+    try {
+      sendRealtimeNotification(targetUserId.toString(), {
+        type: 'notification',
+        data: {
+          id: `profit-dist-${Date.now()}-${userId}`,
+          type: 'admin_msg',
+          msgType: 'success',
+          title: '💸 Lucro Recebido!',
+          message: `Você recebeu R$ ${amount.toFixed(2)} (${roundInfo}) de Taxa de Administração.`,
+          created_at: new Date().toISOString()
+        }
+      });
+    } catch (notifErr) {
+      console.error(`Realtime notification failed for user ${userId}:`, notifErr);
+    }
+  } else {
+    console.error(`Wallet not found for partner userId: ${userId} (target: ${targetUserId})`);
+    throw new Error(`Carteira do parceiro (ID ${userId}) não foi encontrada no banco de dados.`);
+  }
+}
+
+// Helper to log profit distributions to DB and settings table backup
+async function logProfitDistribution(roundId: string | number, roundNumber: number, totalAdminFee: number, pmShare: number, jlShare: number, isShare: number) {
+  const logEntry = {
+    round_id: roundId,
+    round_number: roundNumber,
+    total_admin_fee: totalAdminFee,
+    paulo_share: pmShare,
+    jairo_share: jlShare,
+    igor_share: isShare,
+    created_at: new Date().toISOString()
+  };
+
+  // 1. Log to table if possible (Supabase Postgres)
+  try {
+    const { error: dbErr } = await supabase.from('profit_distributions').insert([{
+      round_id: typeof roundId === 'number' ? roundId : parseInt(roundId as string, 10) || 0,
+      total_admin_fee: totalAdminFee,
+      paulo_share: pmShare,
+      jairo_share: jlShare,
+      igor_share: isShare,
+      created_at: logEntry.created_at
+    }]);
+    if (dbErr) {
+      console.warn('profit_distributions table insert skipped:', dbErr.message);
+    }
+  } catch (err: any) {
+    console.warn('profit_distributions table insert exception skipped:', err.message);
+  }
+
+  // 2. Log to settings backup for perfect zero-dependency resilience
+  try {
+    const { data: setting } = await supabase.from('settings').select('value').eq('key', 'profit_distributions_history').maybeSingle();
+    let history: any[] = [];
+    if (setting?.value) {
+      try {
+        history = JSON.parse(setting.value);
+      } catch (e) {
+        history = [];
+      }
+    }
+    history.push(logEntry);
+    await supabase.from('settings').upsert({ key: 'profit_distributions_history', value: JSON.stringify(history) }, { onConflict: 'key' });
+  } catch (err: any) {
+    console.error('Backup log creation failed in settings table:', err);
+  }
+}
+
 app.post('/api/admin/rounds/:id/finish', authenticate, isAdmin, async (req, res) => {
   const { results, distributeJackpot } = req.body;
   
@@ -3437,6 +3540,26 @@ app.post('/api/admin/rounds/:id/finish', authenticate, isAdmin, async (req, res)
     if (updateErr) {
       console.error('Error updating round status:', updateErr);
       throw updateErr;
+    }
+
+    // --- AUTOMATED PARTNER PROFIT SPLIT (100% AUTOMATIC) ---
+    const pmShare = adminFee * 0.50; // Paulo Rezende: 50%
+    const jlShare = adminFee * 0.25; // Jairo Lourenço: 25%
+    const isShare = adminFee * 0.25; // Igor: 25%
+
+    try {
+      // Paulo Rezende User ID 70
+      await creditPromoPartner(70, pmShare, `Rodada #${round.number}`);
+      // Jairo Lourenço User ID 11
+      await creditPromoPartner(11, jlShare, `Rodada #${round.number}`);
+      // Igor User ID 17
+      await creditPromoPartner(17, isShare, `Rodada #${round.number}`);
+
+      // Log distribution details for historic bookkeeping
+      await logProfitDistribution(req.params.id, round.number, adminFee, pmShare, jlShare, isShare);
+    } catch (splitErr) {
+      console.error('Critical: Partner profit distribution failed:', splitErr);
+      throw splitErr; // Relies on try-catch to propagate error and fail API request
     }
 
     // Record prizes in history and credit wallets
@@ -3545,6 +3668,73 @@ app.post('/api/admin/rounds/:id/finish', authenticate, isAdmin, async (req, res)
   } catch (err) {
     console.error('Finish round error:', err);
     res.status(500).json({ error: 'Failed to finish round' });
+  }
+});
+
+// Admin: Get Historical Profit Distributions
+app.get('/api/admin/profit-distributions', authenticate, hasAdminAccess, async (req, res) => {
+  try {
+    // 1. Try to fetch from profit_distributions table in Supabase
+    const { data, error } = await supabase
+      .from('profit_distributions')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!error && data && data.length > 0) {
+      return res.json(data);
+    }
+
+    // 2. Fallback to settings backup
+    const { data: setting } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'profit_distributions_history')
+      .maybeSingle();
+
+    if (setting?.value) {
+      try {
+        const history = JSON.parse(setting.value);
+        history.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        return res.json(history);
+      } catch (jsonErr) {
+        console.error('Error parsing profit_distributions_history:', jsonErr);
+      }
+    }
+
+    // 3. Last Fallback: dynamically generate history from all finished rounds for retrospective accuracy
+    const { data: rounds } = await supabase
+      .from('rounds')
+      .select('*')
+      .eq('status', 'finished')
+      .order('number', { ascending: false });
+
+    const generatedHistory = await Promise.all((rounds || []).map(async (r: any) => {
+      const { count } = await supabase
+        .from('predictions')
+        .select('*', { count: 'exact', head: true })
+        .eq('round_id', r.id)
+        .eq('status', 'approved');
+
+      const entryValue = r.entry_value || 10;
+      const totalCollection = r.total_collected !== null ? r.total_collected : (count || 0) * entryValue;
+      const adminFee = r.admin_fee_collected !== null ? r.admin_fee_collected : totalCollection * 0.20;
+
+      return {
+        id: `gen-${r.id}`,
+        round_id: r.id,
+        round_number: r.number,
+        total_admin_fee: adminFee,
+        paulo_share: adminFee * 0.50,
+        jairo_share: adminFee * 0.25,
+        igor_share: adminFee * 0.25,
+        created_at: r.updated_at || r.start_time || new Date().toISOString()
+      };
+    }));
+
+    res.json(generatedHistory);
+  } catch (err) {
+    console.error('Error fetching profit distributions:', err);
+    res.status(500).json({ error: 'Failed to fetch profit distributions' });
   }
 });
 
