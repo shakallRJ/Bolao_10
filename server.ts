@@ -1597,6 +1597,10 @@ const getShortName = (name: string): string => {
     'INTERNACIONAL': 'INT',
     'ATHLETICO PARANAENSE': 'CAP',
     'ATHLETICO-PR': 'CAP',
+    'ATLHETICO-PR': 'CAP',
+    'ATLHETICO PARANAENSE': 'CAP',
+    'ATLÉTICO-PR': 'CAP',
+    'ATLETICO-PR': 'CAP',
     'BRAGANTINO': 'RBB',
     'CUIABA': 'CUI',
     'CRICIUMA': 'CRI',
@@ -1680,10 +1684,14 @@ app.get('/api/live-scores', async (req, res) => {
     } else {
       // FALLBACK / RECURSO DE SIMULAÇÃO DE EXCELÊNCIA COM BASE NA RODADA ATIVA DO BANCO DE DADOS
       // Aproveitando os jogos ao vivo de agora!
+      // Usamos a mesma lógica de busca de rodada atual do app para manter consistência absoluta
       const { data: activeRound } = await supabase
         .from('rounds')
         .select('*')
-        .eq('status', 'open')
+        .neq('status', 'draft')
+        .or('status.neq.finished,status.is.null')
+        .order('number', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (activeRound) {
@@ -1703,15 +1711,10 @@ app.get('/api/live-scores', async (req, res) => {
             let timeStr = "";
             let matchMinute = 0;
 
-            // Se a diferença for negativa (ou seja, round inicia no futuro), vamos simular
-            // para que o cliente consiga ver e testar a funcionalidade ao vivo com fluidez
-            if (elapsedMinutes < 0) {
-              // Simular jogo na metade da partida (ex: 2T com staggered offsets)
-              elapsed = 62 + (i % 4) * 5;
-            } else if (elapsedMinutes > 120) {
-              // Se já passou de 120 minutos, em vez de ficar zerado, para demonstrar ao vivo
-              // simulamos que ele está no fim do segundo tempo (ex: 85' a 90'+ 2T)
-              elapsed = 82 + (i % 3) * 4;
+            // Se a diferença for negativa (rodada no futuro) ou já passou muito do limite de um jogo (120 minutos),
+            // simulamos que as partidas estão ocorrendo ao vivo de forma orgânica e assíncrona.
+            if (elapsedMinutes < 0 || elapsedMinutes > 120) {
+              elapsed = 15 + ((Math.abs(elapsedMinutes) + i * 7) % 85); // Organicamente distribuído entre 15' e 100'
             }
 
             // Mapeia o progresso do cronômetro de forma limpa e real
@@ -1721,17 +1724,14 @@ app.get('/api/live-scores', async (req, res) => {
             } else if (elapsed <= 45) {
               timeStr = `${elapsed}' 1T`;
               matchMinute = elapsed;
-            } else if (elapsed > 45 && elapsed <= 60) {
+            } else if (elapsed > 45 && elapsed <= 55) {
               timeStr = "Intervalo";
               matchMinute = 45;
-            } else if (elapsed > 60 && elapsed <= 105) {
-              timeStr = `${elapsed - 15}' 2T`;
-              matchMinute = elapsed - 15;
-            } else if (elapsed > 105 && elapsed <= 112) {
-              timeStr = "90'+ 2T";
-              matchMinute = 90;
+            } else if (elapsed > 55 && elapsed <= 95) {
+              timeStr = `${elapsed - 10}' 2T`;
+              matchMinute = elapsed - 10;
             } else {
-              timeStr = "Fim de Jogo";
+              timeStr = "90'+ 2T";
               matchMinute = 90;
             }
 
@@ -1746,8 +1746,8 @@ app.get('/api/live-scores', async (req, res) => {
             const finalHomeGoals = Math.floor(r(1) * 3 + (r(5) > 0.7 ? 1 : 0)); // 0 a 4 gols
             const finalAwayGoals = Math.floor(r(2) * 2 + (r(6) > 0.8 ? 1 : 0)); // 0 a 3 gols
 
-            const homeGoalTimes = Array.from({ length: finalHomeGoals }, (_, idx) => 5 + Math.floor(r(10 + idx) * 82));
-            const awayGoalTimes = Array.from({ length: finalAwayGoals }, (_, idx) => 5 + Math.floor(r(20 + idx) * 82));
+            const homeGoalTimes = Array.from({ length: finalHomeGoals }, (_, idx) => 5 + Math.floor(r(10 + idx) * 80));
+            const awayGoalTimes = Array.from({ length: finalAwayGoals }, (_, idx) => 5 + Math.floor(r(20 + idx) * 80));
 
             const homeScore = homeGoalTimes.filter(t => t <= matchMinute).length;
             const awayScore = awayGoalTimes.filter(t => t <= matchMinute).length;

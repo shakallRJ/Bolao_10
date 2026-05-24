@@ -1833,7 +1833,7 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedPrediction, setExpandedPrediction] = useState<string | null>(null);
-  const [engagementTab, setEngagementTab] = useState<'lideres' | 'aovivo' | 'tendencia'>('aovivo');
+  const [engagementTab, setEngagementTab] = useState<'lideres' | 'aovivo' | 'tendencia'>('tendencia');
   const [annualRanking, setAnnualRanking] = useState<any[]>([]);
   const [liveScores, setLiveScores] = useState<any[]>([]);
   const [roundTrends, setRoundTrends] = useState<any[]>([]);
@@ -5258,10 +5258,11 @@ const TransparencyPage = () => {
     
     // Logic for transparency access
     // 1. Admin always has access
-    // 2. If round is open, block for non-admins
+    // 2. If round betting is still open (status is open and start_time not passed), block for non-admins
     // 3. Otherwise, check if user has a validated prediction
+    const isBettingClosed = roundData && (roundData.status !== 'open' || (roundData.start_time && new Date() > (parseDate(roundData.start_time) || new Date(0))));
     let userHasAccess = accessData?.hasPrediction || isAdmin;
-    if (roundData?.status === 'open' && !isAdmin) {
+    if (!isBettingClosed && !isAdmin) {
       userHasAccess = false;
     }
     
@@ -5433,7 +5434,7 @@ const TransparencyPage = () => {
           </div>
           <h3 className="text-2xl font-black text-white mb-2 uppercase italic tracking-wider">Acesso Restrito</h3>
           <p className="text-gray-400 font-bold uppercase tracking-wider max-w-md mx-auto text-sm leading-relaxed">
-            {round?.status === 'open' && !isAdmin
+            {(!round || (round.status === 'open' && round.start_time && new Date() <= (parseDate(round.start_time) || new Date(0)))) && !isAdmin
               ? "A transparência só será liberada após o fechamento da rodada (fim das apostas)."
               : "Você só pode visualizar a transparência de rodadas em que possui palpites validados."}
           </p>
