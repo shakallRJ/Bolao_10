@@ -5531,28 +5531,30 @@ const TransparencyPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {(() => {
-              const sorted = [...predictions].sort((a, b) => (b.score || 0) - (a.score || 0));
-              const maxScore = sorted[0]?.score || 0;
+              const sorted = [...predictions].sort((a, b) => Number(b.score || 0) - Number(a.score || 0));
+              const maxScore = Number(sorted[0]?.score || 0);
               const totalGames = round?.games?.length || 10;
               const finishedGames = round?.games?.filter((g: any) => g.result).length || 0;
               const remainingGames = totalGames - finishedGames;
 
               return sorted.map((p, index) => {
-                const scoreVal = p.score || 0;
+                const scoreVal = Number(p.score || 0);
                 let badgeColor = 'bg-[#1A2235] text-gray-400 border border-[#2A3441]';
+                let iconColor = 'text-gray-400';
                 
-                if (round?.status !== 'open') {
-                  if (scoreVal === maxScore && maxScore > 0) {
-                    badgeColor = 'bg-yellow-500 text-black shadow-[0_0_15px_rgba(234,179,8,0.4)]';
-                  } else if (scoreVal + remainingGames >= maxScore) {
-                    badgeColor = 'bg-[#1A2235] text-gray-300 border border-[#2A3441]';
-                  } else {
-                    badgeColor = 'bg-red-500/10 text-red-500 border border-red-500/20';
-                  }
+                if (scoreVal === maxScore && maxScore > 0) {
+                  badgeColor = 'bg-[#1A2235] text-yellow-500 border border-[#2A3441] shadow-[0_0_10px_rgba(234,179,8,0.1)]';
+                  iconColor = 'text-yellow-500';
+                } else if (scoreVal + remainingGames >= maxScore) {
+                  badgeColor = 'bg-[#1A2235] text-slate-400 border border-[#2A3441]';
+                  iconColor = 'text-slate-400';
+                } else {
+                  badgeColor = 'bg-[#1A2235] text-red-500 border border-[#2A3441] shadow-[0_0_10px_rgba(239,68,68,0.1)]';
+                  iconColor = 'text-red-500';
                 }
 
                 return (
-                  <div key={p.id} className={`bg-[#12182B] p-6 rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-all hover:shadow-[0_0_20px_rgba(0,0,0,0.8)] ${scoreVal === maxScore && maxScore > 0 ? 'ring-2 ring-yellow-400 ring-offset-2' : ''}`}>
+                  <div key={p.id} className={`bg-[#12182B] p-6 rounded-3xl border border-[#2A3441] shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-all hover:shadow-[0_0_20px_rgba(0,0,0,0.8)] ${scoreVal === maxScore && maxScore > 0 ? 'ring-2 ring-yellow-500/50' : ''}`}>
                     <div className="flex justify-between items-center mb-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-[#1A2235] border border-[#2A3441] flex items-center justify-center font-black text-white text-xs shrink-0">
@@ -5565,7 +5567,7 @@ const TransparencyPage = () => {
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span className={`${badgeColor} px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5`}>
-                          {scoreVal === maxScore && maxScore > 0 && <Trophy className="w-3 h-3 text-black" />}
+                          <Trophy className={`w-3 h-3 ${iconColor}`} />
                           {scoreVal} Pontos
                         </span>
                         {isAdmin && (
