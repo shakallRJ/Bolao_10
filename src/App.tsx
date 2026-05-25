@@ -1833,9 +1833,9 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedPrediction, setExpandedPrediction] = useState<string | null>(null);
-  const [engagementTab, setEngagementTab] = useState<'lideres' | 'aovivo' | 'tendencia'>('tendencia');
+  const [engagementTab, setEngagementTab] = useState<'lideres' | 'tabela' | 'tendencia'>('tendencia');
   const [annualRanking, setAnnualRanking] = useState<any[]>([]);
-  const [liveScores, setLiveScores] = useState<any[]>([]);
+  const [standings, setStandings] = useState<any[]>([]);
   const [roundTrends, setRoundTrends] = useState<any[]>([]);
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [isUrgent, setIsUrgent] = useState(false);
@@ -1869,27 +1869,25 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   }, [currentRound]);
 
   useEffect(() => {
-    if (engagementTab !== 'aovivo') return;
+    if (engagementTab !== 'tabela') return;
 
-    const fetchLiveScores = async () => {
+    const fetchStandings = async () => {
       try {
         const headers: Record<string, string> = {};
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
-        const res = await fetch('/api/live-scores', { headers });
+        const res = await fetch('/api/standings', { headers });
         if (res.ok) {
           const data = await res.json();
-          setLiveScores(Array.isArray(data) ? data : []);
+          setStandings(Array.isArray(data) ? data : []);
         }
       } catch (err) {
-        console.error('Error fetching live scores:', err);
+        console.error('Error fetching standings:', err);
       }
     };
 
-    fetchLiveScores();
-    const interval = setInterval(fetchLiveScores, 60000);
-    return () => clearInterval(interval);
+    fetchStandings();
   }, [engagementTab, token]);
 
   useEffect(() => {
@@ -2134,10 +2132,10 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
               Líderes
             </button>
             <button 
-              onClick={() => setEngagementTab('aovivo')}
-              className={`flex-1 py-1.5 rounded text-[10px] sm:text-xs font-black uppercase transition-all ${engagementTab === 'aovivo' ? 'bg-[#1A2235] text-[#32CD32] shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
+              onClick={() => setEngagementTab('tabela')}
+              className={`flex-1 py-1.5 rounded text-[10px] sm:text-xs font-black uppercase transition-all ${engagementTab === 'tabela' ? 'bg-[#1A2235] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
             >
-              Ao Vivo
+              Tabela
             </button>
             <button 
               onClick={() => setEngagementTab('tendencia')}
@@ -2171,26 +2169,32 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
               </div>
             )}
             
-            {engagementTab === 'aovivo' && (
-              <div className="space-y-3">
-                {liveScores.length > 0 ? (
-                  liveScores.map((game) => (
-                    <div key={game.id} className="bg-[#0A0F1E] border border-[#2A3441] rounded-xl p-4">
-                      <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4">
-                        <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div> {game.league || 'Brasileirão'}</span>
-                        <span className="text-[#32CD32] bg-[#32CD32]/10 px-2 py-0.5 rounded">{game.time}</span>
+            {engagementTab === 'tabela' && (
+              <div className="space-y-1">
+                <div className="flex text-[10px] text-gray-500 font-black uppercase tracking-wider mb-2 px-2 border-b border-[#2A3441] pb-2">
+                  <span className="w-6 text-center">#</span>
+                  <span className="flex-1 ml-2">Time</span>
+                  <span className="w-10 text-center">PTS</span>
+                  <span className="w-8 text-center">J</span>
+                </div>
+                {standings.length > 0 ? (
+                  standings.map((team: any) => {
+                    const isG4 = team.rank <= 4;
+                    const isZ4 = team.rank >= 17;
+                    return (
+                      <div key={team.name} className="flex items-center text-xs bg-transparent py-2 px-1 relative border-b border-[#1A2235] last:border-0">
+                        {isG4 && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-3/4 bg-[#32CD32] rounded-r-sm shadow-[0_0_5px_rgba(50,205,50,0.5)]"></div>}
+                        {isZ4 && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-3/4 bg-red-500 rounded-r-sm shadow-[0_0_5px_rgba(239,68,68,0.5)]"></div>}
+                        
+                        <span className="w-6 text-center font-black text-gray-500">{team.rank}º</span>
+                        <span className="flex-1 ml-2 font-bold text-white truncate">{team.name}</span>
+                        <span className="w-10 text-center font-black text-[#32CD32]">{team.points}</span>
+                        <span className="w-8 text-center font-bold text-gray-600">{team.matches}</span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="font-black text-white text-base md:text-lg w-16 text-right">{game.home.short}</span>
-                        <div className="flex-1 flex justify-center">
-                          <span className="font-mono font-black text-2xl text-white bg-[#12182B] border border-[#2A3441] px-4 py-1.5 rounded shadow-inner tracking-widest">{game.home.score} - {game.away.score}</span>
-                        </div>
-                        <span className="font-black text-white text-base md:text-lg w-16 text-left">{game.away.short}</span>
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
-                  <p className="text-gray-500 text-center py-12 italic text-sm">Nenhum jogo do Brasileirão ao vivo no momento.</p>
+                  <p className="text-gray-500 text-center py-12 italic text-sm">Carregando tabela...</p>
                 )}
               </div>
             )}

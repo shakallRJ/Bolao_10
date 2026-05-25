@@ -1618,6 +1618,57 @@ const getShortName = (name: string): string => {
   return clean.replace(/\s+/g, '').substring(0, 3);
 };
 
+
+// --- CACHE PARA CLASSIFICAÇÃO (TABELA) ---
+let standingsCache: any = null;
+let lastStandingsFetch = 0;
+const STANDINGS_CACHE_TTL = 3600000; // 1 hora de cache (a tabela não muda toda hora)
+
+app.get('/api/standings', async (req, res) => {
+  try {
+    const now = Date.now();
+    
+    if (standingsCache && (now - lastStandingsFetch < STANDINGS_CACHE_TTL)) {
+      return res.json(standingsCache);
+    }
+
+    const API_KEY = process.env.API_FOOTBALL_KEY; // Sua chave da API-Football
+    
+    // Liga 71 = Brasileirão Série A. Ano = 2026
+    const response = await fetch('https://v3.football.api-sports.io/standings?league=71&season=2026', {
+      method: 'GET',
+      headers: {
+        'x-apisports-key': API_KEY,
+        'x-rapidapi-host': 'v3.football.api-sports.io'
+      }
+    });
+
+    if (!response.ok) throw new Error('Falha ao buscar classificação');
+
+    const apiData = await response.json();
+    
+    // Pega apenas a array de classificação
+    const standings = apiData.response[0]?.league?.standings[0] || [];
+
+    // Formata para o frontend (Top 10 ou todos, você decide)
+    const formattedStandings = standings.map((team: any) => ({
+      rank: team.rank,
+      name: team.team.name,
+      points: team.points,
+      matches: team.all.played,
+      wins: team.all.win
+    }));
+
+    standingsCache = formattedStandings;
+    lastStandingsFetch = now;
+
+    res.json(formattedStandings);
+  } catch (err: any) {
+    console.error('Erro na rota de Classificação:', err.message);
+    res.json(standingsCache || []);
+  }
+});
+
 // --- CACHE PARA PLACAR AO VIVO (Proteção do Plano Gratuito) ---
 let liveScoresCache: any = null;
 let lastLiveScoresFetch = 0;
