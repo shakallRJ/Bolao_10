@@ -2899,17 +2899,17 @@ const PredictionsPage = ({ onNavigate }: { onNavigate: (page: string) => void })
       )}
 
       {showDeadlinePopup && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }} 
             animate={{ opacity: 1, scale: 1 }} 
-            className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl text-center"
+            className="bg-[#12182B] border border-[#2A3441] rounded-[32px] p-8 max-w-md w-full shadow-2xl text-center"
           >
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <AlertCircle className="w-8 h-8 text-red-600" />
+            <div className="w-20 h-20 bg-red-500/10 border border-red-500/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertCircle className="w-10 h-10" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Prazo Encerrado</h3>
-            <p className="text-gray-600 mb-8">
+            <h3 className="text-2xl font-black text-white uppercase italic tracking-wider mb-2">Prazo Encerrado</h3>
+            <p className="text-gray-400 font-bold uppercase tracking-wide text-xs mb-8 leading-relaxed">
               O prazo para enviar palpites nesta rodada já encerrou.
             </p>
             <button
@@ -2917,7 +2917,7 @@ const PredictionsPage = ({ onNavigate }: { onNavigate: (page: string) => void })
                 setShowDeadlinePopup(false);
                 onNavigate('dashboard');
               }}
-              className="w-full bg-primary text-white py-4 rounded-2xl font-bold hover:shadow-lg transition-all"
+              className="w-full bg-[#32CD32] text-black py-4 rounded-xl font-black uppercase italic tracking-wider hover:scale-[1.02] transition-transform shadow-[0_0_20px_rgba(50,205,50,0.4)] hover:shadow-[0_0_30px_rgba(50,205,50,0.6)]"
             >
               Voltar ao Início
             </button>
@@ -6123,8 +6123,9 @@ const RankingPage = () => {
       const accessData = await safeJson(accessRes);
       
       const roundToCheck = rounds.find(r => r.id.toString() === selectedRoundId);
+      const isBettingClosed = roundToCheck && (roundToCheck.status !== 'open' || (roundToCheck.start_time && new Date() > (parseDate(roundToCheck.start_time) || new Date(0))));
       let userHasAccess = accessData?.hasPrediction || isAdmin;
-      if (roundToCheck?.status === 'open' && !isAdmin) {
+      if (!isBettingClosed && !isAdmin) {
         userHasAccess = false;
       }
 
@@ -6199,7 +6200,7 @@ const RankingPage = () => {
           </div>
           <h3 className="text-2xl font-black text-white italic uppercase tracking-wider mb-2">Acesso Restrito</h3>
           <p className="text-gray-400 font-bold uppercase tracking-wider max-w-md mx-auto text-sm md:text-base leading-relaxed">
-            {selectedRound?.status === 'open' && !isAdmin
+            {(!selectedRound || (selectedRound.status === 'open' && selectedRound.start_time && new Date() <= (parseDate(selectedRound.start_time) || new Date(0)))) && !isAdmin
               ? "O ranking só será liberado após o fechamento da rodada (fim das apostas)."
               : "Você só pode visualizar o ranking de rodadas em que possui palpites validados."}
           </p>
