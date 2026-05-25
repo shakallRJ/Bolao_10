@@ -449,7 +449,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/promo01.png" alt="Promoção" className="w-full max-w-4xl mx-auto rounded-2xl shadow-[0_0_20px_rgba(255,107,0,0.2)] border border-[#2A3441]" />
+            <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/promo01.png" alt="Promoção" className="w-full max-w-4xl mx-auto rounded-2xl" />
           </motion.div>
           
           <motion.h1 
@@ -2013,7 +2013,7 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full mt-6">
       <div className="mb-8">
-         <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/promo01.png" alt="Promoção" className="w-full max-w-4xl mx-auto rounded-2xl shadow-[0_0_20px_rgba(255,107,0,0.2)] border border-[#2A3441]" />
+         <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/promo01.png" alt="Promoção" className="w-full max-w-4xl mx-auto rounded-2xl" />
       </div>
 
       <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
