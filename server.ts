@@ -3635,7 +3635,7 @@ async function creditPromoPartner(userId: string | number, amount: number, round
     const { error: txErr } = await supabase.from('wallet_transactions').insert([{
       wallet_id: wallet.id,
       amount: amount,
-      type: 'profit_distribution',
+      type: 'admin_adjustment',
       balance_after: newBalance,
       description: `Divisão de Lucros - ${roundInfo}`
     }]);
