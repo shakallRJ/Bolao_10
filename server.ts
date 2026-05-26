@@ -3246,7 +3246,7 @@ app.get('/api/admin/rounds', authenticate, hasAdminAccess, async (req, res) => {
   }
 });
 
-app.post('/api/admin/rounds/:id/activate', authenticate, isAdmin, async (req, res) => {
+app.post('/api/admin/rounds/:id/activate', authenticate, hasAdminAccess, async (req, res) => {
   try {
     const { error: updateErr } = await supabase
       .from('rounds')
@@ -3261,7 +3261,7 @@ app.post('/api/admin/rounds/:id/activate', authenticate, isAdmin, async (req, re
   }
 });
 
-app.post('/api/admin/rounds', authenticate, isAdmin, async (req, res) => {
+app.post('/api/admin/rounds', authenticate, hasAdminAccess, async (req, res) => {
   const { number, startTime, games, entryValue, isActive } = req.body;
   
   try {
@@ -3552,7 +3552,7 @@ app.delete('/api/admin/predictions/:id', authenticate, isAdmin, async (req, res)
   }
 });
 
-app.post('/api/admin/rounds/:id/partial-results', authenticate, isAdmin, async (req, res) => {
+app.post('/api/admin/rounds/:id/partial-results', authenticate, hasAdminAccess, async (req, res) => {
   const { results } = req.body;
   
   try {
@@ -3591,8 +3591,31 @@ app.post('/api/admin/rounds/:id/partial-results', authenticate, isAdmin, async (
 // Helper to credit partner wallets for administrative profit splits
 async function creditPromoPartner(userId: string | number, amount: number, roundInfo: string) {
   const targetUserId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
-  const { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', targetUserId).maybeSingle();
+  let { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', targetUserId).maybeSingle();
   
+  if (!wallet) {
+    // Check if the user exists
+    const { data: user } = await supabase.from('users').select('*').eq('id', targetUserId).maybeSingle();
+    if (user) {
+      console.log(`Creating wallet for partner user ${targetUserId} as it was not found.`);
+      const { data: newWallet, error: createErr } = await supabase
+        .from('wallets')
+        .insert([{ user_id: targetUserId, balance: 0, updated_at: new Date().toISOString() }])
+        .select('*')
+        .maybeSingle();
+      
+      if (createErr) {
+        console.error(`Error creating wallet for partner user ${targetUserId}:`, createErr);
+        // Do not throw to keep everything resilient, just skip or let it throw if critical.
+      } else if (newWallet) {
+        wallet = newWallet;
+      }
+    } else {
+      console.warn(`Partner user ${userId} (target: ${targetUserId}) does not exist in the database. Round: ${roundInfo}. skipping wallet credit.`);
+      return; // Return gracefully!
+    }
+  }
+
   if (wallet) {
     const rawBal = wallet.balance !== undefined && wallet.balance !== null ? parseFloat(wallet.balance) : 0;
     const newBalance = rawBal + amount;
@@ -3639,8 +3662,7 @@ async function creditPromoPartner(userId: string | number, amount: number, round
       console.error(`Realtime notification failed for user ${userId}:`, notifErr);
     }
   } else {
-    console.error(`Wallet not found for partner userId: ${userId} (target: ${targetUserId})`);
-    throw new Error(`Carteira do parceiro (ID ${userId}) não foi encontrada no banco de dados.`);
+    console.warn(`Could not process partner credit for user ${userId} since wallet is unavailable.`);
   }
 }
 
@@ -3691,7 +3713,7 @@ async function logProfitDistribution(roundId: string | number, roundNumber: numb
   }
 }
 
-app.post('/api/admin/rounds/:id/finish', authenticate, isAdmin, async (req, res) => {
+app.post('/api/admin/rounds/:id/finish', authenticate, hasAdminAccess, async (req, res) => {
   const { results, distributeJackpot } = req.body;
   
   try {

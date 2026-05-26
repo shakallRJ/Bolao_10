@@ -5624,7 +5624,7 @@ const TransparencyPage = () => {
 };
 
 const AdminRoundsPage = () => {
-  const { token, isAdmin } = useAuth();
+  const { token, isAdmin, hasAdminAccess } = useAuth();
   const [rounds, setRounds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -5780,7 +5780,7 @@ const AdminRoundsPage = () => {
           <h1 className="text-3xl font-black uppercase italic tracking-wider text-white">Gerenciar Rodadas</h1>
           <p className="text-gray-400 font-bold uppercase tracking-wider text-xs">Crie, edite e finalize as rodadas do bolão.</p>
         </div>
-        {isAdmin && (
+        {hasAdminAccess && (
           <button 
             onClick={() => setShowCreateForm(!showCreateForm)}
             className="bg-[#32CD32] text-black px-6 py-3 rounded-xl font-black uppercase italic tracking-wider hover:scale-105 transition-all flex items-center shadow-[0_0_15px_rgba(50,205,50,0.4)]"
@@ -5910,7 +5910,7 @@ const AdminRoundsPage = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                {isAdmin && (
+                {hasAdminAccess && (
                   <button 
                     onClick={async () => {
                       if (editingRound?.id === round.id) {
@@ -5974,7 +5974,7 @@ const AdminRoundsPage = () => {
                   </div>
 
                   <div className="flex flex-col justify-between">
-                    {isAdmin && (
+                    {hasAdminAccess && (
                       <div>
                         <h4 className="font-black uppercase italic tracking-wider text-white mb-4 text-sm md:text-base">Ações da Rodada</h4>
                         <div className="space-y-4">
@@ -6004,7 +6004,7 @@ const AdminRoundsPage = () => {
                           </div>
                         )}
 
-                        {round.status !== 'finished' && (
+                        {round.status !== 'draft' && (
                           <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
                             <p className="text-sm text-red-300 font-bold uppercase tracking-wider mb-2">Finalizar Rodada</p>
                             <p className="text-xs text-gray-400 mb-4 font-semibold">Encerra a rodada definitivamente, calcula os prêmios e distribui os saldos para os vencedores.</p>
