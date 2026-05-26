@@ -3718,60 +3718,83 @@ app.post('/api/admin/rounds/:id/finish', authenticate, hasAdminAccess, async (re
   
   try {
     // 1. Get round info
-    const { data: round } = await supabase.from('rounds').select('*').eq('id', req.params.id).single();
+    const { data: round, error: roundFetchErr } = await supabase.from('rounds').select('*').eq('id', req.params.id).maybeSingle();
+    if (roundFetchErr) {
+      throw new Error(`Erro ao buscar rodada: ${roundFetchErr.message}`);
+    }
+    if (!round) {
+      throw new Error(`Rodada ID ${req.params.id} não encontrada.`);
+    }
     const entryValue = round?.entry_value || 10;
 
     // 2. Update game results
-    for (const gameId in results) {
-      await supabase.from('games').update({ result: results[gameId] }).eq('id', gameId);
+    if (results) {
+      for (const gameId in results) {
+        await supabase.from('games').update({ result: results[gameId] }).eq('id', gameId);
+      }
     }
 
     // 3. Calculate scores
-    const { data: predictions } = await supabase
+    const { data: predictions, error: predFetchErr } = await supabase
       .from('predictions')
       .select('id, user_id, users(name, nickname)')
       .eq('round_id', req.params.id)
       .eq('status', 'approved');
+
+    if (predFetchErr) {
+      throw new Error(`Erro ao faturar palpites aprovados: ${predFetchErr.message}`);
+    }
 
     if (predictions) {
       for (const p of predictions) {
         const { data: items } = await supabase.from('prediction_items').select('game_id, guess').eq('prediction_id', p.id);
         let score = 0;
         items?.forEach((item: any) => {
-          if (results[item.game_id] === item.guess) score++;
+          if (results && results[item.game_id] === item.guess) score++;
         });
         await supabase.from('predictions').update({ score }).eq('id', p.id);
       }
     }
 
     // 4. Calculate prizes
-    const { count: approvedCount } = await supabase
+    const { count: approvedCount, error: countErr } = await supabase
       .from('predictions')
       .select('*', { count: 'exact', head: true })
       .eq('round_id', req.params.id)
       .eq('status', 'approved');
+
+    if (countErr) {
+      throw new Error(`Erro ao contar palpites: ${countErr.message}`);
+    }
 
     const totalCollection = (approvedCount || 0) * entryValue;
     let winnersPool = totalCollection * 0.75;
     const adminFee = totalCollection * 0.20;
     const jackpotContribution = totalCollection * 0.05;
 
-    const { data: jackpotSetting } = await supabase.from('settings').select('value').eq('key', 'jackpot_pool').single();
+    const { data: jackpotSetting, error: jackErr } = await supabase.from('settings').select('value').eq('key', 'jackpot_pool').maybeSingle();
+    if (jackErr) {
+      throw new Error(`Erro ao buscar jackpot_pool em settings: ${jackErr.message}`);
+    }
     let newJackpot = parseFloat(jackpotSetting?.value || '0') + jackpotContribution;
 
     // Find winners (highest score)
-    const { data: scoredPredictions } = await supabase
+    const { data: scoredPredictions, error: scoreErr } = await supabase
       .from('predictions')
       .select('score, user_id, users(name, nickname)')
       .eq('round_id', req.params.id)
       .eq('status', 'approved')
       .order('score', { ascending: false });
 
+    if (scoreErr) {
+      throw new Error(`Erro ao buscar ranking de pontuações: ${scoreErr.message}`);
+    }
+
     const maxScore = scoredPredictions?.[0]?.score || 0;
     const winnersData = scoredPredictions?.filter(p => p.score === maxScore) || [];
     const winners = winnersData.map(p => {
       const u = Array.isArray(p.users) ? p.users[0] : p.users;
-      return u?.nickname || u?.name;
+      return u?.nickname || u?.name || 'Sem nome';
     });
     
     // Check if anyone got 10/10 for jackpot, or if admin forced jackpot distribution
@@ -3786,7 +3809,7 @@ app.post('/api/admin/rounds/:id/finish', authenticate, hasAdminAccess, async (re
     if (tenCorrect && tenCorrect.length > 0) {
       jackpotWinnerNames = tenCorrect.map(p => {
         const u = Array.isArray(p.users) ? p.users[0] : p.users;
-        return u?.nickname || u?.name;
+        return u?.nickname || u?.name || 'Sem nome';
       }).join(', ');
       jackpotPrizePaid = jackpotValue;
       winnersPool += jackpotValue; // Add accumulated bonus to the prize
@@ -3807,7 +3830,7 @@ app.post('/api/admin/rounds/:id/finish', authenticate, hasAdminAccess, async (re
 
     if (updateErr) {
       console.error('Error updating round status:', updateErr);
-      throw updateErr;
+      throw new Error(`Erro ao atualizar status da rodada: ${updateErr.message}`);
     }
 
     // --- AUTOMATED PARTNER PROFIT SPLIT (100% AUTOMATIC) ---
@@ -3825,9 +3848,9 @@ app.post('/api/admin/rounds/:id/finish', authenticate, hasAdminAccess, async (re
 
       // Log distribution details for historic bookkeeping
       await logProfitDistribution(req.params.id, round.number, adminFee, pmShare, jlShare, isShare);
-    } catch (splitErr) {
+    } catch (splitErr: any) {
       console.error('Critical: Partner profit distribution failed:', splitErr);
-      throw splitErr; // Relies on try-catch to propagate error and fail API request
+      throw new Error(`Erro na divisão de lucros de parceiros: ${splitErr.message || splitErr}`);
     }
 
     // Record prizes in history and credit wallets
@@ -3842,7 +3865,7 @@ app.post('/api/admin/rounds/:id/finish', authenticate, hasAdminAccess, async (re
       
       for (const winner of winnersData) {
         const u = Array.isArray(winner.users) ? winner.users[0] : winner.users;
-        const name = u?.nickname || u?.name;
+        const name = u?.nickname || u?.name || 'Sem nome';
         
         prizesHistory.push({
           round_id: req.params.id,
@@ -3854,66 +3877,104 @@ app.post('/api/admin/rounds/:id/finish', authenticate, hasAdminAccess, async (re
         });
 
         // Credit Wallet
-        const { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', winner.user_id).single();
+        let { data: wallet, error: walletQueryErr } = await supabase.from('wallets').select('*').eq('user_id', winner.user_id).maybeSingle();
+        if (walletQueryErr) {
+          console.error(`Erro ao buscar carteira do ganhador ${winner.user_id}:`, walletQueryErr);
+        }
+        
+        if (!wallet) {
+          console.log(`Criando carteira faltante para ganhador ${winner.user_id}`);
+          const { data: newWallet, error: createWalletErr } = await supabase
+            .from('wallets')
+            .insert([{ user_id: winner.user_id, balance: 0, updated_at: new Date().toISOString() }])
+            .select('*')
+            .maybeSingle();
+          if (createWalletErr) {
+            console.error(`Erro ao criar carteira para ganhador ${winner.user_id}:`, createWalletErr);
+          } else if (newWallet) {
+            wallet = newWallet;
+          }
+        }
+
         if (wallet) {
           const newBalance = wallet.balance + prizePerWinner;
-          await supabase.from('wallets').update({ balance: newBalance, updated_at: new Date().toISOString() }).eq('id', wallet.id);
+          const { error: walletUpdateErr } = await supabase.from('wallets').update({ balance: newBalance, updated_at: new Date().toISOString() }).eq('id', wallet.id);
+          if (walletUpdateErr) {
+            throw new Error(`Erro ao creditar saldo de prêmio para ${name}: ${walletUpdateErr.message}`);
+          }
           
-          await supabase.from('wallet_transactions').insert([{
+          const { error: transErr } = await supabase.from('wallet_transactions').insert([{
             wallet_id: wallet.id,
             amount: prizePerWinner,
             type: 'prize_credit',
             balance_after: newBalance,
             description: `Prêmio da Rodada #${round.number}`
           }]);
+          if (transErr) {
+            console.error(`Erro ao inserir transação do prêmio para ${name}:`, transErr);
+          }
           
           // Notify individual winner
-          sendRealtimeNotification(winner.user_id, {
-            type: 'notification',
-            data: {
-              id: `win-personal-${req.params.id}-${Date.now()}`,
-              type: 'admin_msg',
-              msgType: 'success',
-              title: '💰 Prêmio Recebido!',
-              message: `Você ganhou R$ ${prizePerWinner.toFixed(2)} na Rodada #${round.number}. O valor já está na sua carteira!`,
-              created_at: new Date().toISOString()
-            }
-          });
+          try {
+            sendRealtimeNotification(winner.user_id, {
+              type: 'notification',
+              data: {
+                id: `win-personal-${req.params.id}-${Date.now()}`,
+                type: 'admin_msg',
+                msgType: 'success',
+                title: '💰 Prêmio Recebido!',
+                message: `Você ganhou R$ ${prizePerWinner.toFixed(2)} na Rodada #${round.number}. O valor já está na sua carteira!`,
+                created_at: new Date().toISOString()
+              }
+            });
+          } catch (notifErr) {
+            console.error('Realtime personal win notification failed:', notifErr);
+          }
+        } else {
+          console.error(`Impossível creditar prêmio para o ganhador ${winner.user_id} pois a carteira não pôde ser criada.`);
         }
       }
       
       await supabase.from('settings').upsert({ key: 'prizes_history', value: JSON.stringify(prizesHistory) }, { onConflict: 'key' });
 
       // Broadcast real-time notification
-      sendRealtimeNotification('all', {
-        type: 'notification',
-        data: {
-          id: `win-${Date.now()}`,
-          type: 'admin_msg', // Use admin_msg to reuse frontend UI
-          msgType: 'success',
-          title: '🎉 Temos Ganhadores!',
-          message: `A Rodada #${round.number} foi finalizada. Ganhadores: ${winners.join(', ')}`,
-          created_at: new Date().toISOString()
-        }
-      });
+      try {
+        sendRealtimeNotification('all', {
+          type: 'notification',
+          data: {
+            id: `win-${Date.now()}`,
+            type: 'admin_msg', // Use admin_msg to reuse frontend UI
+            msgType: 'success',
+            title: '🎉 Temos Ganhadores!',
+            message: `A Rodada #${round.number} foi finalizada. Ganhadores: ${winners.join(', ')}`,
+            created_at: new Date().toISOString()
+          }
+        });
+      } catch (brNotifErr) {
+        console.error('Realtime broadcast notification failed:', brNotifErr);
+      }
     }
 
     // 5. Send Push Notifications to all participants
-    if (scoredPredictions && scoredPredictions.length > 0) {
-      for (const p of scoredPredictions) {
-        const isWinner = winnersData.some(w => w.user_id === p.user_id);
-        const title = isWinner ? '🏆 Você Ganhou!' : '🏁 Rodada Finalizada';
-        const message = isWinner 
-          ? `Parabéns! Você venceu a Rodada #${round.number} com ${p.score} pontos!` 
-          : `A Rodada #${round.number} terminou. Você fez ${p.score} pontos. Confira o ranking!`;
+    try {
+      if (scoredPredictions && scoredPredictions.length > 0) {
+        for (const p of scoredPredictions) {
+          const isWinner = winnersData.some(w => w.user_id === p.user_id);
+          const title = isWinner ? '🏆 Você Ganhou!' : '🏁 Rodada Finalizada';
+          const message = isWinner 
+            ? `Parabéns! Você venceu a Rodada #${round.number} com ${p.score} pontos!` 
+            : `A Rodada #${round.number} terminou. Você fez ${p.score} pontos. Confira o ranking!`;
 
-        sendPushNotification(p.user_id, {
-          title,
-          body: message,
-          icon: '/logo.png', // Assuming a logo exists
-          data: { url: '/ranking' }
-        });
+          sendPushNotification(p.user_id, {
+            title,
+            body: message,
+            icon: '/logo.png', // Assuming a logo exists
+            data: { url: '/ranking' }
+          });
+        }
       }
+    } catch (pushErr) {
+      console.error('Push notification sending skipped/failed:', pushErr);
     }
 
     if (jackpotWinnerNames) {
@@ -3933,9 +3994,9 @@ app.post('/api/admin/rounds/:id/finish', authenticate, hasAdminAccess, async (re
     }
 
     res.json({ success: true, summary: { winnersPool, adminFee, jackpotContribution, winners, jackpotWinnerNames, jackpotPrizePaid } });
-  } catch (err) {
+  } catch (err: any) {
     console.error('Finish round error:', err);
-    res.status(500).json({ error: 'Failed to finish round' });
+    res.status(500).json({ error: err.message || 'Failed to finish round' });
   }
 });
 
