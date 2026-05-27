@@ -1835,7 +1835,7 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   const [expandedPrediction, setExpandedPrediction] = useState<string | null>(null);
   const [engagementTab, setEngagementTab] = useState<'lideres' | 'tabela' | 'tendencia'>('tendencia');
   const [annualRanking, setAnnualRanking] = useState<any[]>([]);
-  const [standings, setStandings] = useState<any[]>([]);
+
   const [roundTrends, setRoundTrends] = useState<any[]>([]);
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [isUrgent, setIsUrgent] = useState(false);
@@ -1868,27 +1868,7 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
     return () => clearInterval(timer);
   }, [currentRound]);
 
-  useEffect(() => {
-    if (engagementTab !== 'tabela') return;
 
-    const fetchStandings = async () => {
-      try {
-        const headers: Record<string, string> = {};
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-        const res = await fetch('/api/standings', { headers });
-        if (res.ok) {
-          const data = await res.json();
-          setStandings(Array.isArray(data) ? data : []);
-        }
-      } catch (err) {
-        console.error('Error fetching standings:', err);
-      }
-    };
-
-    fetchStandings();
-  }, [engagementTab, token]);
 
   useEffect(() => {
     if (engagementTab !== 'tendencia' || !currentRound?.id) return;
@@ -2170,32 +2150,28 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
             )}
             
             {engagementTab === 'tabela' && (
-              <div className="space-y-1">
-                <div className="flex text-[10px] text-gray-500 font-black uppercase tracking-wider mb-2 px-2 border-b border-[#2A3441] pb-2">
-                  <span className="w-6 text-center">#</span>
-                  <span className="flex-1 ml-2">Time</span>
-                  <span className="w-10 text-center">PTS</span>
-                  <span className="w-8 text-center">J</span>
+              <div className="w-full flex flex-col items-center bg-transparent rounded-lg">
+                {/* Container principal que funciona como a "máscara" cortando o que vazar */}
+                <div className="w-full overflow-hidden rounded-lg border border-gray-800" style={{ height: '480px' }}>
+                  
+                  {/* Container interno que permite rolar a tabela, mas aplica a margem negativa na base */}
+                  <div className="w-full h-full overflow-y-auto custom-scrollbar">
+                    <iframe 
+                      id="sofa-standings-embed-83-87678" 
+                      src="https://widgets.sofascore.com/pt-BR/embed/tournament/83/season/87678/standings/Brasileiro%20Serie%20A%202026?widgetTitle=Brasileiro%20Serie%20A%202026&showCompetitionLogo=true&theme=dark" 
+                      style={{ height: '900px', maxWidth: '100%', width: '100%', marginBottom: '-180px' }} 
+                      frameBorder="0" 
+                      scrolling="no"
+                      title="Classificação do Brasileirão"
+                    />
+                  </div>
+                  
                 </div>
-                {standings.length > 0 ? (
-                  standings.map((team: any) => {
-                    const isG4 = team.rank <= 4;
-                    const isZ4 = team.rank >= 17;
-                    return (
-                      <div key={team.name} className="flex items-center text-xs bg-transparent py-2 px-1 relative border-b border-[#1A2235] last:border-0">
-                        {isG4 && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-3/4 bg-[#32CD32] rounded-r-sm shadow-[0_0_5px_rgba(50,205,50,0.5)]"></div>}
-                        {isZ4 && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-3/4 bg-red-500 rounded-r-sm shadow-[0_0_5px_rgba(239,68,68,0.5)]"></div>}
-                        
-                        <span className="w-6 text-center font-black text-gray-500">{team.rank}º</span>
-                        <span className="flex-1 ml-2 font-bold text-white truncate">{team.name}</span>
-                        <span className="w-10 text-center font-black text-[#32CD32]">{team.points}</span>
-                        <span className="w-8 text-center font-bold text-gray-600">{team.matches}</span>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-gray-500 text-center py-12 italic text-sm">Carregando tabela...</p>
-                )}
+                
+                {/* Seus próprios créditos limpos e minimalistas */}
+                <div className="text-[10px] font-sans text-center text-gray-500 mt-3 pb-2">
+                  Classificação fornecida por <span className="text-[#32CD32]">Bolão10</span>
+                </div>
               </div>
             )}
             
