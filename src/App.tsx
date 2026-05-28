@@ -313,122 +313,220 @@ const NotificationsDropdown = () => {
 };
 
 const Navbar = ({ onNavigate, currentPage }: { onNavigate: (page: string) => void, currentPage: string }) => {
-  const { user, logout, isAdmin, hasAdminAccess, isAuditor } = useAuth();
+  const { user, logout, isAdmin, hasAdminAccess, isAuditor, token } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [walletBalance, setWalletBalance] = useState<number>(0);
+  const profileRef = React.useRef<HTMLDivElement>(null);
 
   // Consider isAuditor as admin for menu hiding purposes (so they don't see normal user menus)
   const hideFromAdmin = isAdmin || isAuditor;
 
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, show: !!user },
-    { id: 'predictions', label: 'Fazer Palpite', icon: Trophy, show: !!user && !hideFromAdmin },
-    { id: 'wallet', label: 'Minha Carteira', icon: Wallet, show: !!user && !hideFromAdmin },
+  const handleLogout = () => {
+    logout();
+    setIsProfileOpen(false);
+    setIsMenuOpen(false);
+  };
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  React.useEffect(() => {
+    if (user && token) {
+      const fetchBalance = async () => {
+        try {
+          const res = await fetch('/api/wallet/balance', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setWalletBalance(data.balance || 0);
+          }
+        } catch (err) {
+          console.error("Error fetching balance for navbar:", err);
+        }
+      };
+      
+      fetchBalance();
+      // Optional: Polling every 10s to keep balance updated
+      const interval = setInterval(fetchBalance, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [user, token]);
+
+  const dropdownItems = [
+    { id: 'ranking', label: 'Ranking', icon: Trophy, show: !!user },
     { id: 'referral', label: 'Indique e Ganhe', icon: Users, show: !!user && !hideFromAdmin },
     { id: 'transparency', label: 'Transparência', icon: ShieldCheck, show: !!user },
-    { id: 'ranking', label: 'Ranking', icon: BarChart2, show: !!user },
+    { id: 'profile', label: 'Minha Conta', icon: UserIcon, show: !!user },
     { id: 'admin', label: 'Admin', icon: ShieldCheck, show: hasAdminAccess },
     { id: 'admin-rounds', label: 'Gerenciar Rodadas', icon: ListOrdered, show: hasAdminAccess },
   ];
 
   return (
-    <nav className="bg-[#0A0F1E] border-b border-[#2A3441] sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+    <nav className="bg-[#0A0F1E] border-b border-gray-800 sticky top-0 z-50 shadow-md">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => onNavigate('landing')}>
-              <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/logo01.png" alt="Bolão 10" className="h-12 object-contain" />
-            </div>
-            <div className="hidden sm:ml-8 sm:flex sm:space-x-8">
-              {navItems.filter(i => i.show).map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => onNavigate(item.id)}
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-bold uppercase transition-colors ${
-                    currentPage === item.id 
-                      ? 'border-[#32CD32] text-white' 
-                      : 'border-transparent text-gray-400 hover:text-white hover:border-gray-500'
-                  }`}
-                >
-                  <item.icon className="w-4 h-4 mr-2" />
-                  {item.label}
-                </button>
-              ))}
+            {/* Logo Otimizado */}
+            <div className="flex-shrink-0 flex items-center cursor-pointer hover:opacity-80 transition-opacity" onClick={() => onNavigate(user ? 'dashboard' : 'landing')}>
+              <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/logo01.png" alt="Bolão 10" className="h-[36px] sm:h-[44px] object-contain" />
             </div>
           </div>
-          <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
+          
+          {/* Lado Direito (Ações Rápidas) */}
+          <div className="flex items-center space-x-2 sm:space-x-4">
             {user ? (
-              <div className="flex items-center space-x-4">
+              <>
+                {/* 1. Botão Palpitar (Menor no celular, destaque desktop) */}
+                {!hideFromAdmin && (
+                  <button
+                    onClick={() => onNavigate('predictions')}
+                    className="hidden sm:flex items-center bg-[#32CD32] text-black px-5 py-2 rounded font-black uppercase text-xs hover:bg-[#28a728] transition-colors shadow-[0_0_15px_rgba(50,205,50,0.2)]"
+                  >
+                    Fazer Palpite
+                  </button>
+                )}
+                {!hideFromAdmin && (
+                  <button
+                    onClick={() => onNavigate('predictions')}
+                    className="sm:hidden bg-[#32CD32] text-black px-3 py-1.5 rounded font-black uppercase text-[10px] hover:bg-[#28a728] shadow-[0_0_10px_rgba(50,205,50,0.2)]"
+                  >
+                    Palpitar
+                  </button>
+                )}
+
+                {/* 2. Minha Carteira (Saldo Display) */}
+                {!hideFromAdmin && (
+                  <button 
+                    onClick={() => onNavigate('wallet')}
+                    className="flex items-center justify-center bg-[#12182B] border border-[#2A3441] rounded px-2.5 py-1.5 hover:border-[#32CD32] transition-colors"
+                    title="Minha Carteira"
+                  >
+                    <Wallet className="w-4 h-4 text-[#32CD32] sm:mr-1.5" />
+                    <span className="text-xs font-black text-[#32CD32] hidden sm:block">R$ {walletBalance.toFixed(2)}</span>
+                    <span className="text-[10px] font-black text-[#32CD32] sm:hidden ml-1.5">{walletBalance.toFixed(2)}</span>
+                  </button>
+                )}
+
+                {/* Notificações (Sino) */}
                 <NotificationsDropdown />
-                <button 
-                  onClick={() => onNavigate('profile')}
-                  className="flex items-center text-sm font-bold text-gray-400 hover:text-white transition-colors uppercase"
-                >
-                  <UserIcon className="w-4 h-4 mr-2" />
-                  {user.name}
-                </button>
+
+                {/* 3. Avatar / Menu do Perfil (Desktop)  */}
+                
+                {/* Desktop Profile Dropdown */}
+                <div className="hidden sm:block relative" ref={profileRef}>
+                  <button
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className="flex items-center justify-center w-9 h-9 rounded-full bg-[#1A2235] border border-[#2A3441] text-gray-400 hover:text-white hover:border-gray-500 transition-colors focus:outline-none"
+                  >
+                    <UserIcon className="w-5 h-5" />
+                  </button>
+
+                  <AnimatePresence>
+                    {isProfileOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute right-0 mt-2 w-56 bg-[#12182B] border border-[#2A3441] rounded-lg shadow-xl overflow-hidden py-1"
+                      >
+                        <div className="px-4 py-3 border-b border-[#2A3441] bg-[#0A0F1E]">
+                          <p className="text-sm font-bold text-white truncate">{user.name}</p>
+                          <p className="text-[10px] text-[#32CD32] uppercase tracking-widest">{isAdmin ? 'Administrador' : isAuditor ? 'Auditor' : 'Jogador'}</p>
+                        </div>
+                        <div className="py-1">
+                          {dropdownItems.filter(i => i.show).map((item) => (
+                            <button
+                              key={item.id}
+                              onClick={() => { onNavigate(item.id); setIsProfileOpen(false); }}
+                              className="w-full flex items-center px-4 py-2.5 text-xs font-bold uppercase text-gray-400 hover:text-white hover:bg-[#1A2235] transition-colors"
+                            >
+                              <item.icon className="w-4 h-4 mr-3" />
+                              {item.label}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="border-t border-[#2A3441] pt-1 mt-1">
+                          <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center px-4 py-2.5 text-xs font-bold uppercase text-red-500 hover:text-red-400 hover:bg-[#1A2235] transition-colors"
+                          >
+                            <LogOut className="w-4 h-4 mr-3" />
+                            Sair
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Mobile Hamburger Menu icon */}
                 <button
-                  onClick={logout}
-                  className="text-gray-500 hover:text-[#FF6B00] transition-colors"
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="sm:hidden flex items-center justify-center w-8 h-8 rounded bg-[#1A2235] border border-[#2A3441] text-gray-400 hover:text-white transition-colors"
                 >
-                  <LogOut className="w-5 h-5" />
+                  {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
-              </div>
+              </>
             ) : (
               <button
                 onClick={() => onNavigate('login')}
-                className="bg-[#32CD32] text-black px-6 py-2 rounded-lg text-sm font-black uppercase hover:scale-105 transition-all shadow-[0_0_15px_rgba(50,205,50,0.4)]"
+                className="bg-[#32CD32] text-black px-5 py-1.5 rounded text-xs font-black uppercase hover:scale-105 transition-all shadow-[0_0_15px_rgba(50,205,50,0.4)]"
               >
-                Entrar / Depositar
+                Entrar
               </button>
             )}
-          </div>
-          <div className="flex items-center sm:hidden space-x-2">
-            {user && <NotificationsDropdown />}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-400 hover:text-white"
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
           </div>
         </div>
       </div>
       
+      {/* Mobile Menu (Sandwich) Dropdown */}
       <AnimatePresence>
-        {isMenuOpen && (
+        {isMenuOpen && user && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="sm:hidden bg-[#0A0F1E] border-b border-[#2A3441]"
+            className="sm:hidden bg-[#0A0F1E] border-b border-gray-800 absolute w-full left-0 origin-top overflow-hidden"
           >
-            <div className="pt-2 pb-3 space-y-1">
-              {navItems.filter(i => i.show).map((item) => (
+            <div className="px-5 py-4 bg-[#12182B] border-b border-[#2A3441] flex items-center">
+               <div className="w-10 h-10 rounded-full bg-[#1A2235] flex items-center justify-center mr-3">
+                 <UserIcon className="w-5 h-5 text-gray-400" />
+               </div>
+               <div>
+                  <p className="text-sm font-bold text-white leading-tight">{user.name}</p>
+                  <p className="text-[10px] text-[#32CD32] uppercase tracking-widest">{isAdmin ? 'Administrador' : isAuditor ? 'Auditor' : 'Jogador'}</p>
+               </div>
+            </div>
+            <div className="pt-2 pb-4 space-y-1">
+              {dropdownItems.filter(i => i.show).map((item) => (
                 <button
                   key={item.id}
                   onClick={() => { onNavigate(item.id); setIsMenuOpen(false); }}
-                  className="flex items-center w-full px-4 py-3 text-base font-bold uppercase text-gray-400 hover:text-white hover:bg-[#12182B]"
+                  className="flex items-center w-full px-6 py-3.5 text-sm font-bold uppercase text-gray-400 hover:text-white hover:bg-[#12182B]"
                 >
-                  <item.icon className="w-5 h-5 mr-3" />
+                  <item.icon className="w-5 h-5 mr-4" />
                   {item.label}
                 </button>
               ))}
-              {user ? (
+              <div className="mt-2 pt-2 border-t border-[#2A3441]">
                 <button
-                  onClick={logout}
-                  className="flex items-center w-full px-4 py-3 text-base font-bold uppercase text-[#FF6B00] hover:bg-[#12182B]"
+                  onClick={handleLogout}
+                  className="flex items-center w-full px-6 py-3.5 text-sm font-bold uppercase text-red-500 hover:text-red-400 hover:bg-[#12182B]"
                 >
-                  <LogOut className="w-5 h-5 mr-3" />
+                  <LogOut className="w-5 h-5 mr-4" />
                   Sair
                 </button>
-              ) : (
-                <button
-                  onClick={() => onNavigate('login')}
-                  className="flex items-center w-full px-4 py-3 text-base font-black uppercase text-[#32CD32] hover:bg-[#12182B]"
-                >
-                  Entrar / Depositar
-                </button>
-              )}
+              </div>
             </div>
           </motion.div>
         )}
