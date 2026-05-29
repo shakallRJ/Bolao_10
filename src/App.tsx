@@ -2092,11 +2092,9 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full mt-6">
       <DashboardCarousel onNavigate={onNavigate} />
 
-      <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-white italic uppercase">Olá, {user?.nickname || user?.name}! DOMINE A RODADA 👋</h1>
-          <p className="text-gray-400">Bem-vindo de volta ao Bolão10.</p>
-        </div>
+      <div className="max-w-4xl mx-auto mb-8 flex flex-col justify-center gap-1">
+        <h1 className="text-3xl sm:text-4xl font-black text-white italic uppercase">OLÁ, {user?.nickname || user?.name}! O TRONO TE ESPERA 👑</h1>
+        <p className="text-sm sm:text-base text-gray-400">Bem-vindo de volta ao Bolão10. Pronto para cravar os 10 jogos da rodada?</p>
       </div>
       <div className="max-w-4xl mx-auto flex flex-col gap-6 w-full pb-12">
         {/* Wallet Summary Consolidated - 1 */}
