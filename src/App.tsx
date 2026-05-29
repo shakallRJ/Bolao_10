@@ -1933,7 +1933,7 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedPrediction, setExpandedPrediction] = useState<string | null>(null);
-  const [engagementTab, setEngagementTab] = useState<'lideres' | 'tabela' | 'tendencia'>('tendencia');
+  const [engagementTab, setEngagementTab] = useState<'lideres' | 'tabela' | 'tendencia'>('lideres');
   const [annualRanking, setAnnualRanking] = useState<any[]>([]);
 
   const [roundTrends, setRoundTrends] = useState<any[]>([]);
@@ -2205,7 +2205,7 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
               onClick={() => setEngagementTab('lideres')}
               className={`flex-1 py-1.5 rounded text-[10px] sm:text-xs font-black uppercase transition-all ${engagementTab === 'lideres' ? 'bg-[#1A2235] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
             >
-              Líderes
+              Ranking Anual
             </button>
             <button 
               onClick={() => setEngagementTab('tabela')}
