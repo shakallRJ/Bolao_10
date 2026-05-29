@@ -537,6 +537,8 @@ const Navbar = ({ onNavigate, currentPage }: { onNavigate: (page: string) => voi
 
 // --- PAGES ---
 
+import { DashboardCarousel } from './components/DashboardCarousel';
+
 const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   return (
     <div className="min-h-screen bg-transparent">
@@ -547,7 +549,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/promo01.png" alt="Promoção" className="w-full max-w-4xl mx-auto rounded-2xl" />
+            <DashboardCarousel onNavigate={onNavigate} />
           </motion.div>
           
           <motion.h1 
@@ -2088,9 +2090,7 @@ const Dashboard = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full mt-6">
-      <div className="mb-8">
-         <img src="https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/promo01.png" alt="Promoção" className="w-full max-w-4xl mx-auto rounded-2xl" />
-      </div>
+      <DashboardCarousel onNavigate={onNavigate} />
 
       <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
