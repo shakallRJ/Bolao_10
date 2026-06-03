@@ -2528,18 +2528,6 @@ export const getTeamCrestUrl = (teamName: string) => {
   if (!teamName) return null;
   const name = teamName.toLowerCase().trim();
   
-  const countryCodes: Record<string, string> = {
-    'brasil': 'br', 'argentina': 'ar', 'méxico': 'mx', 'mexico': 'mx', 'coreia do sul': 'kr',
-    'rep. checa': 'cz', 'áfrica do sul': 'za', 'africa do sul': 'za', 'frança': 'fr',
-    'alemanha': 'de', 'espanha': 'es', 'inglaterra': 'gb-eng', 'itália': 'it', 'italia': 'it',
-    'portugal': 'pt', 'colômbia': 'co', 'colombia': 'co', 'uruguai': 'uy', 'chile': 'cl',
-    'estados unidos': 'us', 'eua': 'us', 'japão': 'jp', 'japao': 'jp'
-  };
-  
-  if (countryCodes[name]) {
-    return `https://flagcdn.com/${countryCodes[name]}.svg`;
-  }
-
   const clubLogos: Record<string, string> = {
     'flamengo': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Flamengo.png',
     'palmeiras': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Palmeiras.png',
@@ -2572,7 +2560,10 @@ export const getTeamCrestUrl = (teamName: string) => {
     'juventude': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Esporte_Clube_Juventude_logo.svg/1000px-Esporte_Clube_Juventude_logo.svg.png',
     'cuiabá': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Cuiab%C3%A1_Esporte_Clube_logo.svg/1000px-Cuiab%C3%A1_Esporte_Clube_logo.svg.png',
     'cuiaba': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Cuiab%C3%A1_Esporte_Clube_logo.svg/1000px-Cuiab%C3%A1_Esporte_Clube_logo.svg.png',
-    'atlético-go': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Atl%C3%A9tico_Clube_Goianiense_logo.svg/1000px-Atl%C3%A9tico_Clube_Goianiense_logo.svg.png',
+    'atlético-go': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/atletico-go.png',
+    'atletico-go': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/atletico-go.png',
+    'atlético go': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/atletico-go.png',
+    'atletico go': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/atletico-go.png',
     'bragantino': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Bragantino.png',
     'red bull bragantino': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Bragantino.png',
     'chapecoense': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/Chapecoense.png',
@@ -2582,9 +2573,57 @@ export const getTeamCrestUrl = (teamName: string) => {
     'sport': 'https://upload.wikimedia.org/wikipedia/pt/1/16/Sport_Club_do_Recife.png',
     'goiás': 'https://upload.wikimedia.org/wikipedia/commons/4/41/Goi%C3%A1s_Esporte_Clube_logo.svg',
     'goias': 'https://upload.wikimedia.org/wikipedia/commons/4/41/Goi%C3%A1s_Esporte_Clube_logo.svg',
+    // New Teams / Countries from user
+    'panamá': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/panama.png',
+    'panama': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/panama.png',
+    'bósnia': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/bosnia.png',
+    'bosnia': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/bosnia.png',
+    'bósnia e herzegovina': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/bosnia.png',
+    'bosnia e herzegovina': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/bosnia.png',
+    'cabo verde': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/caboverde.png',
+    'bermuda': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/bermuda.png',
+    'bermudas': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/bermuda.png',
+    'venezuela': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/venezuela.png',
+    'turquia': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/turquia.png',
+    'türkiye': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/turquia.png',
+    'crb': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/crb.webp',
+    'são bernardo': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/saobernardo.png',
+    'sao bernardo': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/saobernardo.png',
+    'afeganistão': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/afeganistao.png',
+    'afeganistao': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/afeganistao.png',
+    'paquistão': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/paquistao.png',
+    'paquistao': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/paquistao.png',
+    'dinamarca': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/dinamarca.png',
+    'ucrânia': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/ucrania.png',
+    'ucrania': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/ucrania.png',
+    'kosovo': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/kosovo.png',
+    'andorra': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/andorra.png',
+    'grécia': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/grecia.png',
+    'grecia': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/grecia.png',
+    'itália': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/italia.png',
+    'italia': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/italia.png',
+    'américa-mg': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/america-mg.png',
+    'america-mg': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/america-mg.png',
+    'américa mg': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/america-mg.png',
+    'america mg': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/america-mg.png',
+    'vila nova': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/vilanova.png',
+    'botafogo-sp': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/botafogo-sp.png',
+    'botafogo sp': 'https://zxnsubmxqoplohcngntu.supabase.co/storage/v1/object/public/imagem/escudos/botafogo-sp.png'
   };
 
   if (clubLogos[name]) return clubLogos[name];
+
+  const countryCodes: Record<string, string> = {
+    'brasil': 'br', 'argentina': 'ar', 'méxico': 'mx', 'mexico': 'mx', 'coreia do sul': 'kr',
+    'rep. checa': 'cz', 'áfrica do sul': 'za', 'africa do sul': 'za', 'frança': 'fr',
+    'alemanha': 'de', 'espanha': 'es', 'inglaterra': 'gb-eng', 'itália': 'it', 'italia': 'it',
+    'portugal': 'pt', 'colômbia': 'co', 'colombia': 'co', 'uruguai': 'uy', 'chile': 'cl',
+    'estados unidos': 'us', 'eua': 'us', 'japão': 'jp', 'japao': 'jp'
+  };
+  
+  if (countryCodes[name]) {
+    return `https://flagcdn.com/${countryCodes[name]}.svg`;
+  }
 
   return null;
 };
