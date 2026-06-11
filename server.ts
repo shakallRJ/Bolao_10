@@ -149,13 +149,24 @@ if (!process.env.VERCEL) {
       try {
         const data = JSON.parse(message.toString());
         if (data.type === 'auth' && data.token) {
-          const decoded = jwt.verify(data.token, JWT_SECRET) as any;
-          userId = decoded.id.toString();
-          clients.set(userId, ws);
-          console.log(`User ${userId} connected via WebSocket`);
+          try {
+            const decoded = jwt.verify(data.token, JWT_SECRET) as any;
+            userId = decoded.id.toString();
+            clients.set(userId, ws);
+            console.log(`User ${userId} connected via WebSocket`);
+          } catch (err: any) {
+            if (err.name === 'TokenExpiredError') {
+              console.warn(`WS Auth: Token expired for user connection attempt`);
+              ws.send(JSON.stringify({ type: 'auth_error', code: 'TOKEN_EXPIRED', error: 'jwt expired' }));
+            } else {
+              console.error('WS Auth error:', err);
+              ws.send(JSON.stringify({ type: 'auth_error', code: 'INVALID_TOKEN', error: err.message }));
+            }
+            ws.close();
+          }
         }
       } catch (err) {
-        console.error('WS Auth error:', err);
+        console.error('WS Message parsing/processing error:', err);
       }
     });
 

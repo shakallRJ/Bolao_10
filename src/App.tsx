@@ -91,7 +91,7 @@ export const safeJson = async (res: Response) => {
 };
 
 const NotificationsDropdown = () => {
-  const { token } = useAuth();
+  const { token, logout } = useAuth();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -114,6 +114,10 @@ const NotificationsDropdown = () => {
         const res = await fetch('/api/my-notifications', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
+        if (res.status === 401) {
+          logout();
+          return;
+        }
         if (res.ok) {
           const data = await res.json();
           setNotifications(data);
@@ -154,7 +158,11 @@ const NotificationsDropdown = () => {
       ws.onmessage = (event) => {
         try {
           const message = JSON.parse(event.data);
-          if (message.type === 'notification') {
+          if (message.type === 'auth_error') {
+            if (message.code === 'TOKEN_EXPIRED' || message.code === 'INVALID_TOKEN') {
+              logout();
+            }
+          } else if (message.type === 'notification') {
             const newNotif = message.data;
             
             setNotifications(prev => {
